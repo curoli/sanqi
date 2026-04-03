@@ -1,2 +1,2 @@
-# sanqi
-Sanqi board game engine
+# Sanqi (三棋)
+Sanqi (三棋) board game engine
