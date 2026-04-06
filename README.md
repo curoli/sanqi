@@ -1,6 +1,6 @@
 # Sanqi (三棋)
 
-Sanqi (三棋, Sān qí) board game engine.
+Sanqi (三棋, Sānqí) board game engine.
 
 Here are the rules of Sanqi in 
 [English 🇬🇧](docs/rules/sanqi-en.md),
