@@ -131,6 +131,58 @@ impl PyPosition {
         sanqi_engine::best_move(&self.inner, depth).map(|result| result.best_move.to_string())
     }
 
+    fn analyze<'py>(&self, py: Python<'py>, depth: u8) -> PyResult<Option<Bound<'py, PyAny>>> {
+        let Some(result) = sanqi_engine::best_move(&self.inner, depth) else {
+            return Ok(None);
+        };
+        let dict = PyDict::new_bound(py);
+        dict.set_item("best_move", result.best_move.to_string())?;
+        dict.set_item("score", result.score)?;
+        dict.set_item("depth", result.depth)?;
+        dict.set_item(
+            "principal_variation",
+            result
+                .principal_variation
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>(),
+        )?;
+        Ok(Some(dict.into_any()))
+    }
+
+    fn analyze_timed<'py>(
+        &self,
+        py: Python<'py>,
+        depth: u8,
+        budget_ms: u64,
+    ) -> PyResult<Bound<'py, PyAny>> {
+        let analysis =
+            sanqi_engine::analyze_iterative(&self.inner, depth, std::time::Duration::from_millis(budget_ms));
+        let dict = PyDict::new_bound(py);
+        dict.set_item("root_legal_moves", analysis.stats.root_legal_moves)?;
+        dict.set_item("completed_depth", analysis.stats.completed_depth)?;
+        dict.set_item("nodes", analysis.stats.nodes)?;
+        dict.set_item("quiescence_nodes", analysis.stats.quiescence_nodes)?;
+        dict.set_item("timed_out", analysis.stats.timed_out)?;
+        if let Some(result) = analysis.best {
+            dict.set_item("best_move", result.best_move.to_string())?;
+            dict.set_item("score", result.score)?;
+            dict.set_item(
+                "principal_variation",
+                result
+                    .principal_variation
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>(),
+            )?;
+        } else {
+            dict.set_item("best_move", py.None())?;
+            dict.set_item("score", py.None())?;
+            dict.set_item("principal_variation", Vec::<String>::new())?;
+        }
+        Ok(dict.into_any())
+    }
+
     fn evaluate(&self) -> i32 {
         sanqi_engine::evaluate(&self.inner)
     }

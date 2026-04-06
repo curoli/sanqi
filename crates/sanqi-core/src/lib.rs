@@ -3,6 +3,7 @@ use std::str::FromStr;
 
 pub const BOARD_SIZE: i8 = 8;
 pub const BOARD_SQUARES: usize = 64;
+const SIDE_TO_MOVE_KEY: u64 = 0x9e37_79b9_7f4a_7c15;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Color {
@@ -251,6 +252,7 @@ pub struct Position {
     white: u64,
     black: u64,
     side_to_move: Color,
+    zobrist_key: u64,
 }
 
 impl fmt::Debug for Position {
@@ -261,6 +263,39 @@ impl fmt::Debug for Position {
             .field("side_to_move", &self.side_to_move)
             .finish()
     }
+}
+
+const fn compute_zobrist_key(white: u64, black: u64, side_to_move: Color) -> u64 {
+    let mut key = 0_u64;
+    let mut index = 0_usize;
+    while index < BOARD_SQUARES {
+        let mask = 1_u64 << index;
+        if white & mask != 0 {
+            key ^= zobrist_piece(Color::White, index);
+        } else if black & mask != 0 {
+            key ^= zobrist_piece(Color::Black, index);
+        }
+        index += 1;
+    }
+    if matches!(side_to_move, Color::White) {
+        key ^= SIDE_TO_MOVE_KEY;
+    }
+    key
+}
+
+const fn zobrist_piece(color: Color, square: usize) -> u64 {
+    let color_offset = match color {
+        Color::White => 0_u64,
+        Color::Black => 0x94d0_49bb_1331_11eb,
+    };
+    splitmix64(square as u64 ^ color_offset ^ 0x243f_6a88_85a3_08d3)
+}
+
+const fn splitmix64(mut value: u64) -> u64 {
+    value = value.wrapping_add(0x9e37_79b9_7f4a_7c15);
+    value = (value ^ (value >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
+    value = (value ^ (value >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
+    value ^ (value >> 31)
 }
 
 impl Default for Position {
@@ -289,6 +324,7 @@ impl Position {
             white,
             black,
             side_to_move: Color::White,
+            zobrist_key: compute_zobrist_key(white, black, Color::White),
         }
     }
 
@@ -297,6 +333,7 @@ impl Position {
             white: 0,
             black: 0,
             side_to_move,
+            zobrist_key: compute_zobrist_key(0, 0, side_to_move),
         }
     }
 
@@ -305,7 +342,15 @@ impl Position {
     }
 
     pub fn set_side_to_move(&mut self, color: Color) {
+        if self.side_to_move == color {
+            return;
+        }
+        self.zobrist_key ^= SIDE_TO_MOVE_KEY;
         self.side_to_move = color;
+    }
+
+    pub fn zobrist_key(&self) -> u64 {
+        self.zobrist_key
     }
 
     pub fn occupancy(&self) -> u64 {
@@ -345,25 +390,42 @@ impl Position {
             Color::White => self.white |= mask,
             Color::Black => self.black |= mask,
         }
+        self.zobrist_key ^= zobrist_piece(color, square.index() as usize);
     }
 
     pub fn clear_square(&mut self, square: Square) {
-        let mask = !(1_u64 << square.index());
-        self.white &= mask;
-        self.black &= mask;
+        let mask = 1_u64 << square.index();
+        if self.white & mask != 0 {
+            self.white &= !mask;
+            self.zobrist_key ^= zobrist_piece(Color::White, square.index() as usize);
+        } else if self.black & mask != 0 {
+            self.black &= !mask;
+            self.zobrist_key ^= zobrist_piece(Color::Black, square.index() as usize);
+        }
     }
 
     pub fn legal_moves(&self) -> Vec<Move> {
         let color = self.side_to_move;
+        let pieces = self.squares_of(color);
+        let own_occupancy = self.occupancy_of(color);
         let mut seen = [false; BOARD_SQUARES * BOARD_SQUARES];
         let mut moves = Vec::new();
 
-        for pivot_entry in self.pivots_for(color) {
-            for mv in self.moves_from_pivot(color, pivot_entry.pivot) {
-                let slot = mv.from.index() as usize * BOARD_SQUARES + mv.to.index() as usize;
-                if !seen[slot] {
-                    seen[slot] = true;
-                    moves.push(mv);
+        for i in 0..pieces.len() {
+            for j in (i + 1)..pieces.len() {
+                let pivot = SupportPair::new(pieces[i], pieces[j]).pivot();
+                for attacker in &pieces {
+                    if let Some(to) = pivot.reflect(*attacker) {
+                        if to == *attacker || own_occupancy & (1_u64 << to.index()) != 0 {
+                            continue;
+                        }
+                        let mv = Move::new(*attacker, to);
+                        let slot = mv.from.index() as usize * BOARD_SQUARES + mv.to.index() as usize;
+                        if !seen[slot] {
+                            seen[slot] = true;
+                            moves.push(mv);
+                        }
+                    }
                 }
             }
         }
@@ -426,14 +488,7 @@ impl Position {
     }
 
     pub fn squares_of(&self, color: Color) -> Vec<Square> {
-        let mut bits = self.occupancy_of(color);
-        let mut squares = Vec::with_capacity(bits.count_ones() as usize);
-        while bits != 0 {
-            let index = bits.trailing_zeros() as u8;
-            squares.push(Square(index));
-            bits &= bits - 1;
-        }
-        squares
+        squares_from_bits(self.occupancy_of(color))
     }
 
     pub fn pivots(&self) -> Vec<PivotEntry> {
@@ -503,9 +558,40 @@ impl Position {
     }
 
     fn has_supporting_pivot(&self, color: Color, mv: Move) -> bool {
-        !self.supporting_pivots(color, mv).is_empty()
+        let pieces = self.squares_of(color);
+        let pivot = Pivot {
+            file_twice: mv.from.file() + mv.to.file(),
+            rank_twice: mv.from.rank() + mv.to.rank(),
+        };
+
+        for i in 0..pieces.len() {
+            let support_a = pieces[i];
+            if support_a == mv.from {
+                continue;
+            }
+            for &support_b in &pieces[(i + 1)..] {
+                if support_b == mv.from {
+                    continue;
+                }
+                if SupportPair::new(support_a, support_b).pivot() == pivot {
+                    return true;
+                }
+            }
+        }
+
+        false
     }
 }
+
+fn squares_from_bits(mut bits: u64) -> Vec<Square> {
+        let mut squares = Vec::with_capacity(bits.count_ones() as usize);
+        while bits != 0 {
+            let index = bits.trailing_zeros() as u8;
+            squares.push(Square(index));
+            bits &= bits - 1;
+        }
+        squares
+    }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct PivotEntry {
@@ -659,6 +745,17 @@ mod tests {
             .filter(|mv| *mv == target)
             .count();
         assert_eq!(matching, 1);
+    }
+
+    #[test]
+    fn zobrist_key_is_restored_after_undo() {
+        let mut position = Position::initial();
+        let original_key = position.zobrist_key();
+        let mv: Move = "a1-b3".parse().expect("move");
+        let undo = position.apply_move(mv).expect("apply");
+        assert_ne!(position.zobrist_key(), original_key);
+        position.undo_move(mv, undo).expect("undo");
+        assert_eq!(position.zobrist_key(), original_key);
     }
 
     #[test]
