@@ -13,6 +13,13 @@ enum PlayerKind {
     Machine,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct SearchPreset {
+    name: &'static str,
+    depth: u8,
+    budget_ms: u64,
+}
+
 struct BenchmarkCase {
     name: &'static str,
     moves: &'static [&'static str],
@@ -49,6 +56,29 @@ const BENCHMARK_CASES: &[BenchmarkCase] = &[
     BenchmarkCase {
         name: "sparse-center",
         moves: &["h1-d3", "h8-d6", "a1-d4"],
+    },
+];
+
+const SEARCH_PRESETS: &[SearchPreset] = &[
+    SearchPreset {
+        name: "fast",
+        depth: 4,
+        budget_ms: 250,
+    },
+    SearchPreset {
+        name: "normal",
+        depth: 5,
+        budget_ms: 1000,
+    },
+    SearchPreset {
+        name: "think",
+        depth: 6,
+        budget_ms: 2000,
+    },
+    SearchPreset {
+        name: "analysis",
+        depth: 7,
+        budget_ms: 3000,
     },
 ];
 
@@ -218,23 +248,14 @@ fn run() -> Result<(), String> {
             print!("{}", sanqi_render::svg_for_move(&position, mv));
         }
         "play" => {
-            let depth = match args.next() {
-                Some(value) => value
-                    .parse::<u8>()
-                    .map_err(|_| "depth must be an integer between 0 and 255".to_string())?,
-                None => 2,
-            };
-            let budget_ms = match args.next() {
-                Some(value) => value
-                    .parse::<u64>()
-                    .map_err(|_| "time budget must be an integer number of milliseconds".to_string())?,
-                None => 250,
-            };
-            let white_player = match args.next() {
+            let rest = args.collect::<Vec<_>>();
+            let (depth, budget_ms, player_args) = parse_play_options(rest)?;
+            let mut player_args = player_args.into_iter();
+            let white_player = match player_args.next() {
                 Some(kind) => parse_player_kind(&kind)?,
                 None => PlayerKind::Human,
             };
-            let black_player = match args.next() {
+            let black_player = match player_args.next() {
                 Some(kind) => parse_player_kind(&kind)?,
                 None => PlayerKind::Machine,
             };
@@ -245,6 +266,7 @@ fn run() -> Result<(), String> {
                 black_player,
             )?;
         }
+        "presets" => print_presets(),
         "help" | "--help" | "-h" => print_usage(),
         other => {
             return Err(format!("unknown command: {other}"));
@@ -270,6 +292,45 @@ fn parse_player_kind(value: &str) -> Result<PlayerKind, String> {
         "human" | "h" | "person" => Ok(PlayerKind::Human),
         "machine" | "engine" | "ai" | "m" => Ok(PlayerKind::Machine),
         _ => Err("player must be 'human' or 'machine'".to_string()),
+    }
+}
+
+fn search_preset(name: &str) -> Option<SearchPreset> {
+    SEARCH_PRESETS
+        .iter()
+        .copied()
+        .find(|preset| preset.name.eq_ignore_ascii_case(name))
+}
+
+fn parse_play_options(args: Vec<String>) -> Result<(u8, u64, Vec<String>), String> {
+    if args.is_empty() {
+        let preset = search_preset("normal").expect("normal preset");
+        return Ok((preset.depth, preset.budget_ms, Vec::new()));
+    }
+
+    if let Some(preset) = search_preset(&args[0]) {
+        return Ok((preset.depth, preset.budget_ms, args[1..].to_vec()));
+    }
+
+    let depth = args[0]
+        .parse::<u8>()
+        .map_err(|_| "play expects either a preset name or a depth integer".to_string())?;
+    let budget_ms = match args.get(1) {
+        Some(value) => value
+            .parse::<u64>()
+            .map_err(|_| "time budget must be an integer number of milliseconds".to_string())?,
+        None => return Err("missing time budget in milliseconds".to_string()),
+    };
+    Ok((depth, budget_ms, args[2..].to_vec()))
+}
+
+fn print_presets() {
+    println!("search presets:");
+    for preset in SEARCH_PRESETS {
+        println!(
+            "  {}: depth {}, {} ms",
+            preset.name, preset.depth, preset.budget_ms
+        );
     }
 }
 
@@ -656,7 +717,8 @@ fn print_usage() {
     println!("  bench-compare <base> <candidate> Compare two saved benchmark TSV files");
     println!("  apply <moves...>        Alias for board with at least one move");
     println!("  svg <move> [moves...]   Render SVG for a highlighted move");
-    println!("  play [depth] [ms] [white] [black] Start interactive play, default human vs machine");
+    println!("  play [preset|depth] [ms] [white] [black] Start interactive play");
+    println!("  presets                 Show built-in search presets");
     println!("  help                    Show this help");
     println!();
     println!("Examples:");
@@ -669,6 +731,8 @@ fn print_usage() {
     println!("  sanqi bench-save 4 250 baseline.tsv");
     println!("  sanqi bench-compare baseline.tsv candidate.tsv");
     println!("  sanqi svg a7-b5 a1-b3");
+    println!("  sanqi presets");
+    println!("  sanqi play normal human machine");
+    println!("  sanqi play think machine machine");
     println!("  sanqi play 3 250 human machine");
-    println!("  sanqi play 3 250 machine machine");
 }
