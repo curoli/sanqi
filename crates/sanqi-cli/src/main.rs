@@ -7,6 +7,12 @@ use std::time::Duration;
 
 use sanqi_core::{Color, Move, Position};
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum PlayerKind {
+    Human,
+    Machine,
+}
+
 struct BenchmarkCase {
     name: &'static str,
     moves: &'static [&'static str],
@@ -224,11 +230,20 @@ fn run() -> Result<(), String> {
                     .map_err(|_| "time budget must be an integer number of milliseconds".to_string())?,
                 None => 250,
             };
-            let engine_side = match args.next() {
-                Some(side) => parse_side(&side)?,
-                None => Color::Black,
+            let white_player = match args.next() {
+                Some(kind) => parse_player_kind(&kind)?,
+                None => PlayerKind::Human,
             };
-            run_repl(depth, Duration::from_millis(budget_ms), engine_side)?;
+            let black_player = match args.next() {
+                Some(kind) => parse_player_kind(&kind)?,
+                None => PlayerKind::Machine,
+            };
+            run_repl(
+                depth,
+                Duration::from_millis(budget_ms),
+                white_player,
+                black_player,
+            )?;
         }
         "help" | "--help" | "-h" => print_usage(),
         other => {
@@ -250,20 +265,40 @@ fn position_from_moves(moves: Vec<String>) -> Result<Position, String> {
     Ok(position)
 }
 
-fn parse_side(value: &str) -> Result<Color, String> {
+fn parse_player_kind(value: &str) -> Result<PlayerKind, String> {
     match value.to_ascii_lowercase().as_str() {
-        "white" | "w" => Ok(Color::White),
-        "black" | "b" => Ok(Color::Black),
-        _ => Err("side must be 'white' or 'black'".to_string()),
+        "human" | "h" | "person" => Ok(PlayerKind::Human),
+        "machine" | "engine" | "ai" | "m" => Ok(PlayerKind::Machine),
+        _ => Err("player must be 'human' or 'machine'".to_string()),
     }
 }
 
-fn run_repl(depth: u8, budget: Duration, engine_side: Color) -> Result<(), String> {
+fn player_kind_name(player: PlayerKind) -> &'static str {
+    match player {
+        PlayerKind::Human => "human",
+        PlayerKind::Machine => "machine",
+    }
+}
+
+fn player_for_side(color: Color, white: PlayerKind, black: PlayerKind) -> PlayerKind {
+    match color {
+        Color::White => white,
+        Color::Black => black,
+    }
+}
+
+fn run_repl(
+    depth: u8,
+    budget: Duration,
+    white_player: PlayerKind,
+    black_player: PlayerKind,
+) -> Result<(), String> {
     let mut position = Position::initial();
     let stdin = io::stdin();
 
     println!("interactive Sanqi");
-    println!("engine side: {}", color_name(engine_side));
+    println!("white: {}", player_kind_name(white_player));
+    println!("black: {}", player_kind_name(black_player));
     println!("max depth: {depth}, time budget: {} ms", budget.as_millis());
     println!("commands: board, moves, hint, svg <move>, help, quit");
     println!("enter moves as a1-b3");
@@ -278,7 +313,7 @@ fn run_repl(depth: u8, budget: Duration, engine_side: Color) -> Result<(), Strin
             break;
         }
 
-        if position.side_to_move() == engine_side {
+        if player_for_side(position.side_to_move(), white_player, black_player) == PlayerKind::Machine {
             let Some(result) = sanqi_engine::best_move_iterative(&position, depth, budget) else {
                 println!("engine search did not return a move");
                 break;
@@ -621,7 +656,7 @@ fn print_usage() {
     println!("  bench-compare <base> <candidate> Compare two saved benchmark TSV files");
     println!("  apply <moves...>        Alias for board with at least one move");
     println!("  svg <move> [moves...]   Render SVG for a highlighted move");
-    println!("  play [depth] [ms] [side] Start interactive play, default depth 2, 250 ms, engine side black");
+    println!("  play [depth] [ms] [white] [black] Start interactive play, default human vs machine");
     println!("  help                    Show this help");
     println!();
     println!("Examples:");
@@ -634,5 +669,6 @@ fn print_usage() {
     println!("  sanqi bench-save 4 250 baseline.tsv");
     println!("  sanqi bench-compare baseline.tsv candidate.tsv");
     println!("  sanqi svg a7-b5 a1-b3");
-    println!("  sanqi play 3 250 black");
+    println!("  sanqi play 3 250 human machine");
+    println!("  sanqi play 3 250 machine machine");
 }

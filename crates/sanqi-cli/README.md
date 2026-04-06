@@ -21,7 +21,7 @@ cargo run -p sanqi-cli -- bench 4 250
 cargo run -p sanqi-cli -- bench-save 4 250 baseline.tsv
 cargo run -p sanqi-cli -- bench-compare baseline.tsv candidate.tsv
 cargo run -p sanqi-cli -- svg a7-b5 a1-b3
-cargo run -p sanqi-cli -- play 3 250 black
+cargo run -p sanqi-cli -- play 3 250 human machine
 ```
 
 `bench` prints one tab-separated row per benchmark case plus a `summary` row, so repeated runs can be compared easily.
@@ -38,9 +38,13 @@ cargo run -p sanqi-cli -- play
 Optional arguments:
 
 ```bash
-cargo run -p sanqi-cli -- play 3 250 black
-cargo run -p sanqi-cli -- play 2 500 white
+cargo run -p sanqi-cli -- play 3 250 human machine
+cargo run -p sanqi-cli -- play 3 250 machine human
+cargo run -p sanqi-cli -- play 3 250 human human
+cargo run -p sanqi-cli -- play 3 250 machine machine
 ```
+
+The two optional player arguments are given as `white black` and each can be either `human` or `machine`.
 
 Inside the REPL:
 
