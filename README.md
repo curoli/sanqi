@@ -10,3 +10,45 @@ Here are the rules of Sanqi in
 [Chinese 🇨🇳](docs/rules/sanqi-zh.md),
 [Spanish 🇪🇸](docs/rules/sanqi-es.md), and
 [Turkish 🇹🇷](docs/rules/sanqi-tr.md).
+
+## Play
+
+You can play Sanqi from the command line with the Rust CLI:
+
+```bash
+cargo run -p sanqi-cli -- play
+```
+
+Examples:
+
+```bash
+cargo run -p sanqi-cli -- play 3 250 black
+cargo run -p sanqi-cli -- play 2 500 white
+```
+
+This starts an interactive game. Moves use the format `a1-b3`.
+
+Useful commands inside the CLI:
+
+- `moves` lists legal moves
+- `hint` asks the engine for a recommendation
+- `svg a1-b3` shows an annotated SVG for a move
+- `quit` exits the game
+
+You can also access the engine from Python:
+
+```python
+import sanqi_python as sanqi
+
+position = sanqi.Position.initial()
+print(position.ascii_board())
+print(position.legal_moves())
+
+move = position.best_move(2)
+if move is not None:
+    position.apply_move(move)
+    print(position.ascii_board())
+```
+
+For more details, see [crates/sanqi-cli/README.md](crates/sanqi-cli/README.md) and
+[crates/sanqi-python/README.md](crates/sanqi-python/README.md).
