@@ -83,3 +83,6 @@ Before the first release, configure:
 
 - a GitHub Actions secret `CARGO_REGISTRY_TOKEN` for `crates.io`
 - a PyPI Trusted Publisher for the `pypi` GitHub environment
+
+Release details are collected in [RELEASING.md](RELEASING.md), and user-facing
+changes in [CHANGELOG.md](CHANGELOG.md).
