@@ -16,14 +16,21 @@ Here are the rules of Sanqi in
 You can play Sanqi from the command line with the Rust CLI:
 
 ```bash
-cargo run -p sanqi-cli -- play
+cargo run --release -p sanqi-cli -- play
+```
+
+For repeated use, you can also install the CLI:
+
+```bash
+cargo install --path crates/sanqi-cli --locked
+sanqi play
 ```
 
 Examples:
 
 ```bash
-cargo run -p sanqi-cli -- play 3 250 black
-cargo run -p sanqi-cli -- play 2 500 white
+cargo run --release -p sanqi-cli -- play normal human machine
+cargo run --release -p sanqi-cli -- play think machine machine
 ```
 
 This starts an interactive game. Moves use the format `a1-b3`.

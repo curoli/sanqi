@@ -4,25 +4,40 @@ Small command-line demo for the Sanqi Rust engine.
 
 ## Run
 
+For quick experiments, debug builds are fine:
+
 From the repository root:
 
 ```bash
 cargo run -p sanqi-cli -- board
 ```
 
+For actual play and engine benchmarks, use a release build:
+
+```bash
+cargo run --release -p sanqi-cli -- play
+```
+
+Or install the CLI once and run it directly:
+
+```bash
+cargo install --path crates/sanqi-cli --locked
+sanqi play
+```
+
 ## Commands
 
 ```bash
-cargo run -p sanqi-cli -- board
-cargo run -p sanqi-cli -- moves a1-b3
-cargo run -p sanqi-cli -- best 2 a1-b3
-cargo run -p sanqi-cli -- best-time 4 250 a1-b3
-cargo run -p sanqi-cli -- presets
-cargo run -p sanqi-cli -- bench 4 250
-cargo run -p sanqi-cli -- bench-save 4 250 baseline.tsv
-cargo run -p sanqi-cli -- bench-compare baseline.tsv candidate.tsv
-cargo run -p sanqi-cli -- svg a7-b5 a1-b3
-cargo run -p sanqi-cli -- play normal human machine
+cargo run --release -p sanqi-cli -- board
+cargo run --release -p sanqi-cli -- moves a1-b3
+cargo run --release -p sanqi-cli -- best 2 a1-b3
+cargo run --release -p sanqi-cli -- best-time 4 250 a1-b3
+cargo run --release -p sanqi-cli -- presets
+cargo run --release -p sanqi-cli -- bench 4 250
+cargo run --release -p sanqi-cli -- bench-save 4 250 baseline.tsv
+cargo run --release -p sanqi-cli -- bench-compare baseline.tsv candidate.tsv
+cargo run --release -p sanqi-cli -- svg a7-b5 a1-b3
+cargo run --release -p sanqi-cli -- play normal human machine
 ```
 
 `bench` prints one tab-separated row per benchmark case plus a `summary` row, so repeated runs can be compared easily.
@@ -39,12 +54,12 @@ cargo run -p sanqi-cli -- play
 Optional arguments:
 
 ```bash
-cargo run -p sanqi-cli -- play
-cargo run -p sanqi-cli -- play fast human machine
-cargo run -p sanqi-cli -- play normal machine human
-cargo run -p sanqi-cli -- play think human human
-cargo run -p sanqi-cli -- play analysis machine machine
-cargo run -p sanqi-cli -- play 3 250 human machine
+cargo run --release -p sanqi-cli -- play
+cargo run --release -p sanqi-cli -- play fast human machine
+cargo run --release -p sanqi-cli -- play normal machine human
+cargo run --release -p sanqi-cli -- play think human human
+cargo run --release -p sanqi-cli -- play analysis machine machine
+cargo run --release -p sanqi-cli -- play 3 250 human machine
 ```
 
 Without arguments, `play` uses the `normal` preset.
