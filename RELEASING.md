@@ -19,6 +19,14 @@ Configure GitHub before the first release:
 - create the GitHub Actions environment `pypi`
 - configure PyPI Trusted Publishing for the `pypi` environment
 
+For the PyPI Trusted Publisher, use values that match the workflow claims:
+
+- PyPI project: `sanqi-python`
+- owner: `curoli`
+- repository: `sanqi`
+- workflow file: `.github/workflows/release-python.yml`
+- environment: `pypi`
+
 ## Before cutting a release
 
 1. Update versions consistently.
