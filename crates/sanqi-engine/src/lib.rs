@@ -158,7 +158,7 @@ fn evaluate_impl(position: &Position, stats: Option<&mut SearchStats>) -> i32 {
 
     let mut flipped = position.clone();
     flipped.apply_null_turn();
-    let opponent_moves = legal_moves_for_eval(&flipped, stats.as_deref_mut());
+    let opponent_moves = legal_moves_for_eval(&flipped, stats);
     let opponent_mobility = opponent_moves.len() as i32;
     let opponent_capture_pressure = capture_count_from_moves(&flipped, &opponent_moves) as i32;
     let opponent_centrality = opponent_pieces
@@ -371,16 +371,16 @@ fn negamax(
     let original_alpha = alpha;
     let original_beta = beta;
 
-    if let Some(entry) = table.get(position) {
-        if entry.depth >= depth {
-            match entry.bound {
-                Bound::Exact => return Some(entry.score),
-                Bound::Lower => alpha = alpha.max(entry.score),
-                Bound::Upper => beta = beta.min(entry.score),
-            }
-            if alpha >= beta {
-                return Some(entry.score);
-            }
+    if let Some(entry) = table.get(position)
+        && entry.depth >= depth
+    {
+        match entry.bound {
+            Bound::Exact => return Some(entry.score),
+            Bound::Lower => alpha = alpha.max(entry.score),
+            Bound::Upper => beta = beta.min(entry.score),
+        }
+        if alpha >= beta {
+            return Some(entry.score);
         }
     }
 
@@ -451,20 +451,20 @@ fn quiescence(
     let original_alpha = alpha;
     let original_beta = beta;
 
-    if let Some(entry) = table.get(position) {
-        if entry.depth == 0 {
-            match entry.bound {
-                Bound::Exact => {
-                    stats.quiescence_time += started.elapsed();
-                    return Some(entry.score);
-                }
-                Bound::Lower => alpha = alpha.max(entry.score),
-                Bound::Upper => beta = beta.min(entry.score),
-            }
-            if alpha >= beta {
+    if let Some(entry) = table.get(position)
+        && entry.depth == 0
+    {
+        match entry.bound {
+            Bound::Exact => {
                 stats.quiescence_time += started.elapsed();
                 return Some(entry.score);
             }
+            Bound::Lower => alpha = alpha.max(entry.score),
+            Bound::Upper => beta = beta.min(entry.score),
+        }
+        if alpha >= beta {
+            stats.quiescence_time += started.elapsed();
+            return Some(entry.score);
         }
     }
 
