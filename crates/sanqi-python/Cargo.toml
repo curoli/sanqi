@@ -3,7 +3,12 @@ name = "sanqi-python"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "PyO3-based Python bindings for the Sanqi Rust engine"
+readme = "README.md"
+publish = false
 
 [lib]
 name = "sanqi_python"
@@ -12,9 +17,9 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 pyo3 = { version = "0.28.3", features = ["extension-module"] }
-sanqi-core = { path = "../sanqi-core" }
-sanqi-engine = { path = "../sanqi-engine" }
-sanqi-render = { path = "../sanqi-render" }
+sanqi-core = { version = "0.1.0", path = "../sanqi-core" }
+sanqi-engine = { version = "0.1.0", path = "../sanqi-engine" }
+sanqi-render = { version = "0.1.0", path = "../sanqi-render" }
 
 [lints]
 workspace = true

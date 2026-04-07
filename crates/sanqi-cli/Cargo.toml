@@ -3,17 +3,21 @@ name = "sanqi-cli"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "Command-line interface for playing and analyzing Sanqi"
+readme = "README.md"
+publish = false
 
 [[bin]]
 name = "sanqi"
 path = "src/main.rs"
 
 [dependencies]
-sanqi-core = { path = "../sanqi-core" }
-sanqi-engine = { path = "../sanqi-engine" }
-sanqi-render = { path = "../sanqi-render" }
+sanqi-core = { version = "0.1.0", path = "../sanqi-core" }
+sanqi-engine = { version = "0.1.0", path = "../sanqi-engine" }
+sanqi-render = { version = "0.1.0", path = "../sanqi-render" }
 
 [lints]
 workspace = true
-

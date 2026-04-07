@@ -3,7 +3,13 @@ name = "sanqi-core"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "Core rules and data structures for the Sanqi board game"
+readme = "README.md"
+keywords = ["board-game", "engine", "sanqi", "game"]
+categories = ["game-engines"]
 
 [lib]
 name = "sanqi_core"
@@ -11,4 +17,3 @@ path = "src/lib.rs"
 
 [lints]
 workspace = true
-

@@ -3,15 +3,20 @@ name = "sanqi-engine"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+description = "Search and evaluation engine for the Sanqi board game"
+readme = "README.md"
+keywords = ["board-game", "engine", "sanqi", "search"]
+categories = ["game-engines"]
 
 [lib]
 name = "sanqi_engine"
 path = "src/lib.rs"
 
 [dependencies]
-sanqi-core = { path = "../sanqi-core" }
+sanqi-core = { version = "0.1.0", path = "../sanqi-core" }
 
 [lints]
 workspace = true
-

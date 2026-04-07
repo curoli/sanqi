@@ -12,7 +12,9 @@ resolver = "2"
 edition = "2024"
 license = "MIT"
 version = "0.1.0"
-authors = ["Oliver Ruebenacker", "Codex"]
+repository = "https://github.com/curoli/sanqi"
+homepage = "https://github.com/curoli/sanqi"
+rust-version = "1.85"
 
 [workspace.lints.clippy]
 dbg_macro = "deny"
