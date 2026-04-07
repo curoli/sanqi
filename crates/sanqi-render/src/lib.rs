@@ -1,3 +1,15 @@
+//! Text and SVG rendering for Sanqi positions.
+//!
+//! This crate provides lightweight rendering helpers for CLI tools, tests,
+//! and applications which want a simple board visualization.
+//!
+//! ```
+//! use sanqi_core::Position;
+//!
+//! let board = sanqi_render::ascii_board(&Position::initial());
+//! assert!(board.contains("a b c d e f g h"));
+//! ```
+
 use std::fmt::Write;
 
 use sanqi_core::{Color, Move, Pivot, Position, Square, BOARD_SIZE};
@@ -5,23 +17,31 @@ use sanqi_core::{Color, Move, Pivot, Position, Square, BOARD_SIZE};
 const TILE: i32 = 64;
 const BOARD_PX: i32 = 8 * TILE;
 
+/// Rendering options for SVG output.
 #[derive(Clone, Debug, Default)]
 pub struct RenderOptions {
+    /// Optional move to highlight.
     pub highlight_move: Option<Move>,
+    /// Optional pivots to draw as blue markers.
     pub pivots: Vec<Pivot>,
 }
 
+/// Piece style for ASCII board rendering.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum TextPieceStyle {
+    /// Render white and black pieces as `W` and `B`.
     Letters,
+    /// Render white and black pieces as `●` and `○`.
     #[default]
     Discs,
 }
 
+/// Renders a position as an ASCII board using [`TextPieceStyle::Discs`].
 pub fn ascii_board(position: &Position) -> String {
     ascii_board_with_style(position, TextPieceStyle::Discs)
 }
 
+/// Renders a position as an ASCII board with an explicit piece style.
 pub fn ascii_board_with_style(position: &Position, style: TextPieceStyle) -> String {
     let mut out = String::new();
     let files = "  a b c d e f g h\n";
@@ -39,14 +59,19 @@ pub fn ascii_board_with_style(position: &Position, style: TextPieceStyle) -> Str
     out
 }
 
+/// Renders a position as plain SVG without highlights.
 pub fn svg_board(position: &Position) -> String {
     svg_board_with_options(position, &RenderOptions::default())
 }
 
+/// Renders a position as SVG and highlights a move for the side to move.
 pub fn svg_for_move(position: &Position, mv: Move) -> String {
     svg_for_move_for_color(position, position.side_to_move(), mv)
 }
 
+/// Renders a position as SVG and highlights a move for an explicit side.
+///
+/// Any pivots supporting the move for `color` are also marked automatically.
 pub fn svg_for_move_for_color(position: &Position, color: Color, mv: Move) -> String {
     let pivots = position
         .supporting_pivots(color, mv)
@@ -60,6 +85,7 @@ pub fn svg_for_move_for_color(position: &Position, color: Color, mv: Move) -> St
     svg_board_with_options(position, &options)
 }
 
+/// Renders a position as SVG with explicit rendering options.
 pub fn svg_board_with_options(position: &Position, options: &RenderOptions) -> String {
     let mut svg = String::new();
     let _ = write!(

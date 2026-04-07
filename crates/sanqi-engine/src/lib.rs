@@ -1,7 +1,22 @@
+//! Search and evaluation for Sanqi.
+//!
+//! This crate builds on `sanqi-core` and provides a static evaluator, fixed
+//! depth search, iterative deepening with a time budget, and detailed search
+//! statistics.
+//!
+//! ```
+//! use sanqi_core::Position;
+//!
+//! let position = Position::initial();
+//! let result = sanqi_engine::best_move(&position, 2).expect("legal move");
+//! assert!(position.legal_moves().contains(&result.best_move));
+//! ```
+
 use std::time::{Duration, Instant};
 
 use sanqi_core::{Move, Outcome, Position};
 
+/// Score assigned to positions where the side to move has already lost.
 pub const WIN_SCORE: i32 = 100_000;
 const TT_BUCKETS: usize = 1 << 14;
 const TT_BUCKET_SIZE: usize = 4;
@@ -9,41 +24,67 @@ const MAX_QUIESCENCE_DEPTH: u8 = 4;
 const MAX_QUIESCENCE_MOVES: usize = 4;
 const QUIESCENCE_DELTA_MARGIN: i32 = 80;
 
+/// Result of a completed search.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SearchResult {
+    /// Best move found by the search.
     pub best_move: Move,
+    /// Evaluation score from the perspective of the side to move.
     pub score: i32,
+    /// Search depth that produced this result.
     pub depth: u8,
+    /// Principal variation starting with `best_move`.
     pub principal_variation: Vec<Move>,
 }
 
+/// Timing information for one completed iterative-deepening iteration.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct DepthTiming {
+    /// Search depth for this iteration.
     pub depth: u8,
+    /// Wall-clock time spent in this iteration.
     pub elapsed: Duration,
+    /// Number of root moves finished at this depth.
     pub completed_root_moves: usize,
 }
 
+/// Search diagnostics collected during one engine run.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct SearchStats {
+    /// Number of normal search nodes visited.
     pub nodes: u64,
+    /// Number of quiescence nodes visited.
     pub quiescence_nodes: u64,
+    /// Number of quiescence moves skipped by pruning.
     pub quiescence_pruned_moves: u64,
+    /// Number of static evaluations performed.
     pub evaluation_calls: u64,
+    /// Number of move-generation calls performed.
     pub legal_move_generations: u64,
+    /// Total wall-clock time spent in the search.
     pub total_time: Duration,
+    /// Time spent specifically inside quiescence search.
     pub quiescence_time: Duration,
+    /// Per-depth timing information for iterative deepening.
     pub depth_timings: Vec<DepthTiming>,
+    /// Deepest fully completed iteration.
     pub completed_depth: u8,
+    /// Whether the search stopped because the deadline was reached.
     pub timed_out: bool,
+    /// Number of legal moves at the root position.
     pub root_legal_moves: usize,
+    /// Total number of root moves completed across all iterations.
     pub completed_root_moves_total: usize,
+    /// Number of root moves completed in the last attempted depth.
     pub completed_root_moves_current_depth: usize,
 }
 
+/// Search result together with diagnostics.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AnalysisResult {
+    /// Best search result, if at least one legal move exists.
     pub best: Option<SearchResult>,
+    /// Collected diagnostics for the search run.
     pub stats: SearchStats,
 }
 
@@ -125,6 +166,10 @@ impl Default for TranspositionTable {
     }
 }
 
+/// Returns a static evaluation of a position.
+///
+/// Positive scores favor the side to move and negative scores favor the
+/// opponent.
 pub fn evaluate(position: &Position) -> i32 {
     evaluate_impl(position, None)
 }
@@ -174,6 +219,7 @@ fn evaluate_impl(position: &Position, stats: Option<&mut SearchStats>) -> i32 {
         + (opponent_blocked - blocked) * 8
 }
 
+/// Searches to a fixed depth and returns the best move, if any exists.
 pub fn best_move(position: &Position, depth: u8) -> Option<SearchResult> {
     analyze(position, depth, None).best
 }
@@ -265,14 +311,18 @@ fn finalize_root_result(
     Some(result)
 }
 
+/// Searches with iterative deepening up to `max_depth` and stops when the
+/// given time budget expires.
 pub fn best_move_iterative(position: &Position, max_depth: u8, time_budget: Duration) -> Option<SearchResult> {
     analyze(position, max_depth, Some(time_budget)).best
 }
 
+/// Returns a fixed-depth analysis together with search statistics.
 pub fn analyze_fixed_depth(position: &Position, depth: u8) -> AnalysisResult {
     analyze(position, depth, None)
 }
 
+/// Returns an iterative-deepening analysis together with search statistics.
 pub fn analyze_iterative(position: &Position, max_depth: u8, time_budget: Duration) -> AnalysisResult {
     analyze(position, max_depth, Some(time_budget))
 }

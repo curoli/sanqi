@@ -1,10 +1,28 @@
+//! Core data structures and rules for Sanqi.
+//!
+//! This crate models board positions, moves, pivot geometry, and complete
+//! games. The public move notation is `from-to`, for example `a1-b3`.
+//!
+//! Typical usage starts with [`Position::initial`]:
+//!
+//! ```
+//! use sanqi_core::Position;
+//!
+//! let position = Position::initial();
+//! let legal_moves = position.legal_moves();
+//! assert!(!legal_moves.is_empty());
+//! ```
+
 use std::fmt;
 use std::str::FromStr;
 
+/// Board width and height in squares.
 pub const BOARD_SIZE: i8 = 8;
+/// Number of squares on the Sanqi board.
 pub const BOARD_SQUARES: usize = 64;
 const SIDE_TO_MOVE_KEY: u64 = 0x9e37_79b9_7f4a_7c15;
 
+/// The side to move or the owner of a piece.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Color {
     White,
@@ -12,6 +30,7 @@ pub enum Color {
 }
 
 impl Color {
+    /// Returns the opposite color.
     pub fn opponent(self) -> Self {
         match self {
             Self::White => Self::Black,
@@ -20,14 +39,19 @@ impl Color {
     }
 }
 
+/// A square on the 8x8 Sanqi board.
+///
+/// Squares use chess-like coordinates such as `a1` and `h8`.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Square(u8);
 
 impl Square {
+    /// Creates a square from a zero-based board index.
     pub fn new(index: u8) -> Option<Self> {
         (index < BOARD_SQUARES as u8).then_some(Self(index))
     }
 
+    /// Creates a square from zero-based file and rank coordinates.
     pub fn from_coords(file: i8, rank: i8) -> Option<Self> {
         if (0..BOARD_SIZE).contains(&file) && (0..BOARD_SIZE).contains(&rank) {
             let index = rank as u8 * BOARD_SIZE as u8 + file as u8;
@@ -37,18 +61,22 @@ impl Square {
         }
     }
 
+    /// Returns the zero-based square index.
     pub fn index(self) -> u8 {
         self.0
     }
 
+    /// Returns the zero-based file.
     pub fn file(self) -> i8 {
         (self.0 % BOARD_SIZE as u8) as i8
     }
 
+    /// Returns the zero-based rank.
     pub fn rank(self) -> i8 {
         (self.0 / BOARD_SIZE as u8) as i8
     }
 
+    /// Formats the square as an algebraic coordinate such as `a1`.
     pub fn to_coord(self) -> String {
         let file = (b'a' + self.file() as u8) as char;
         let rank = (b'1' + self.rank() as u8) as char;
@@ -68,6 +96,7 @@ impl fmt::Display for Square {
     }
 }
 
+/// Error returned when parsing a square from text fails.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ParseSquareError;
 
@@ -96,25 +125,33 @@ impl FromStr for Square {
     }
 }
 
+/// A Sanqi move written as `from-to`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Move {
+    /// Origin square.
     pub from: Square,
+    /// Destination square.
     pub to: Square,
 }
 
 impl Move {
+    /// Creates a move from two squares.
     pub fn new(from: Square, to: Square) -> Self {
         Self { from, to }
     }
 }
 
+/// A canonicalized pair of supporting pieces.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct SupportPair {
+    /// First support square.
     pub a: Square,
+    /// Second support square.
     pub b: Square,
 }
 
 impl SupportPair {
+    /// Creates a support pair and stores it in a stable order.
     pub fn new(a: Square, b: Square) -> Self {
         if a <= b {
             Self { a, b }
@@ -123,11 +160,13 @@ impl SupportPair {
         }
     }
 
+    /// Returns the pivot implied by the support pair.
     pub fn pivot(self) -> Pivot {
         Pivot::from_supports(self)
     }
 }
 
+/// A doubled-coordinate pivot used for Sanqi reflections.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Pivot {
     file_twice: i8,
@@ -135,6 +174,7 @@ pub struct Pivot {
 }
 
 impl Pivot {
+    /// Builds a pivot from a support pair.
     pub fn from_supports(supports: SupportPair) -> Self {
         Self {
             file_twice: supports.a.file() + supports.b.file(),
@@ -142,18 +182,22 @@ impl Pivot {
         }
     }
 
+    /// Returns twice the file coordinate of the pivot.
     pub fn file_twice(self) -> i8 {
         self.file_twice
     }
 
+    /// Returns twice the rank coordinate of the pivot.
     pub fn rank_twice(self) -> i8 {
         self.rank_twice
     }
 
+    /// Returns whether the pivot lies on the center of a board square.
     pub fn is_square_center(self) -> bool {
         self.file_twice % 2 == 0 && self.rank_twice % 2 == 0
     }
 
+    /// Returns the center square if the pivot lies on an actual square center.
     pub fn center_square(self) -> Option<Square> {
         if self.is_square_center() {
             Square::from_coords(self.file_twice / 2, self.rank_twice / 2)
@@ -162,6 +206,7 @@ impl Pivot {
         }
     }
 
+    /// Reflects a square through this pivot.
     pub fn reflect(self, square: Square) -> Option<Square> {
         Square::from_coords(self.file_twice - square.file(), self.rank_twice - square.rank())
     }
@@ -173,6 +218,7 @@ impl fmt::Display for Move {
     }
 }
 
+/// Error returned when parsing a move from text fails.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ParseMoveError {
     InvalidFormat,
@@ -210,6 +256,7 @@ impl FromStr for Move {
     }
 }
 
+/// Information required to undo a previously applied move.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Undo {
     moved_color: Color,
@@ -217,6 +264,7 @@ pub struct Undo {
     previous_side_to_move: Color,
 }
 
+/// Errors that can occur when validating or applying a move.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MoveError {
     WrongColorToMove,
@@ -242,11 +290,16 @@ impl fmt::Display for MoveError {
 
 impl std::error::Error for MoveError {}
 
+/// The result of a finished position.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Outcome {
     Winner(Color),
 }
 
+/// A complete Sanqi board position.
+///
+/// The position stores both bitboards and the side to move. Legal move
+/// generation uses pivot geometry and returns de-duplicated `from-to` moves.
 #[derive(Clone, PartialEq, Eq)]
 pub struct Position {
     white: u64,
@@ -305,6 +358,7 @@ impl Default for Position {
 }
 
 impl Position {
+    /// Returns the standard initial position.
     pub fn initial() -> Self {
         let mut white = 0_u64;
         let mut black = 0_u64;
@@ -328,6 +382,7 @@ impl Position {
         }
     }
 
+    /// Returns an empty position with the given side to move.
     pub fn empty(side_to_move: Color) -> Self {
         Self {
             white: 0,
@@ -337,10 +392,12 @@ impl Position {
         }
     }
 
+    /// Returns the side to move.
     pub fn side_to_move(&self) -> Color {
         self.side_to_move
     }
 
+    /// Sets the side to move.
     pub fn set_side_to_move(&mut self, color: Color) {
         if self.side_to_move == color {
             return;
@@ -349,14 +406,17 @@ impl Position {
         self.side_to_move = color;
     }
 
+    /// Returns the incremental Zobrist key for the position.
     pub fn zobrist_key(&self) -> u64 {
         self.zobrist_key
     }
 
+    /// Returns the occupancy bitboard of both sides.
     pub fn occupancy(&self) -> u64 {
         self.white | self.black
     }
 
+    /// Returns the occupancy bitboard for one side.
     pub fn occupancy_of(&self, color: Color) -> u64 {
         match color {
             Color::White => self.white,
@@ -364,6 +424,7 @@ impl Position {
         }
     }
 
+    /// Returns the piece color on a square, if any.
     pub fn piece_at(&self, square: Square) -> Option<Color> {
         let mask = 1_u64 << square.index();
         if self.white & mask != 0 {
@@ -375,14 +436,17 @@ impl Position {
         }
     }
 
+    /// Returns whether `color` occupies `square`.
     pub fn has_piece(&self, color: Color, square: Square) -> bool {
         self.occupancy_of(color) & (1_u64 << square.index()) != 0
     }
 
+    /// Returns the number of pieces owned by one side.
     pub fn piece_count(&self, color: Color) -> usize {
         self.occupancy_of(color).count_ones() as usize
     }
 
+    /// Places a piece on a square, replacing any previous occupant.
     pub fn set_piece(&mut self, color: Color, square: Square) {
         self.clear_square(square);
         let mask = 1_u64 << square.index();
@@ -393,6 +457,7 @@ impl Position {
         self.zobrist_key ^= zobrist_piece(color, square.index() as usize);
     }
 
+    /// Removes any piece from a square.
     pub fn clear_square(&mut self, square: Square) {
         let mask = 1_u64 << square.index();
         if self.white & mask != 0 {
@@ -404,6 +469,10 @@ impl Position {
         }
     }
 
+    /// Returns all legal moves for the side to move.
+    ///
+    /// Moves are returned in `from-to` form and are de-duplicated even when
+    /// multiple support pairs allow the same move.
     pub fn legal_moves(&self) -> Vec<Move> {
         let color = self.side_to_move;
         let pieces = self.squares_of(color);
@@ -432,6 +501,7 @@ impl Position {
         moves
     }
 
+    /// Checks whether a move is legal in the current position.
     pub fn is_legal_move(&self, mv: Move) -> Result<(), MoveError> {
         let color = self.side_to_move;
 
@@ -454,6 +524,7 @@ impl Position {
         Ok(())
     }
 
+    /// Applies a legal move and returns undo information.
     pub fn apply_move(&mut self, mv: Move) -> Result<Undo, MoveError> {
         self.is_legal_move(mv)?;
         let color = self.side_to_move;
@@ -471,6 +542,7 @@ impl Position {
         })
     }
 
+    /// Reverts a move that was previously applied with [`Position::apply_move`].
     pub fn undo_move(&mut self, mv: Move, undo: Undo) -> Result<(), MoveError> {
         self.side_to_move = undo.previous_side_to_move;
         self.clear_square(mv.to);
@@ -481,20 +553,24 @@ impl Position {
         Ok(())
     }
 
+    /// Returns the winner if the side to move has no legal moves.
     pub fn outcome(&self) -> Option<Outcome> {
         self.legal_moves()
             .is_empty()
             .then_some(Outcome::Winner(self.side_to_move.opponent()))
     }
 
+    /// Returns all occupied squares for one side.
     pub fn squares_of(&self, color: Color) -> Vec<Square> {
         squares_from_bits(self.occupancy_of(color))
     }
 
+    /// Returns all supporting pivots for the side to move.
     pub fn pivots(&self) -> Vec<PivotEntry> {
         self.pivots_for(self.side_to_move)
     }
 
+    /// Returns all supporting pivots for a given side.
     pub fn pivots_for(&self, color: Color) -> Vec<PivotEntry> {
         let pieces = self.squares_of(color);
         let mut pivots = Vec::new();
@@ -510,6 +586,7 @@ impl Position {
         pivots
     }
 
+    /// Returns all moves that can be generated from one pivot for one side.
     pub fn moves_from_pivot(&self, color: Color, pivot: Pivot) -> Vec<Move> {
         let pieces = self.squares_of(color);
         let own_occupancy = self.occupancy_of(color);
@@ -530,6 +607,7 @@ impl Position {
         moves
     }
 
+    /// Returns all pivots and support pairs that justify a given move.
     pub fn supporting_pivots(&self, color: Color, mv: Move) -> Vec<PivotEntry> {
         let pieces = self.squares_of(color);
         let pivot = Pivot {
@@ -593,12 +671,16 @@ fn squares_from_bits(mut bits: u64) -> Vec<Square> {
         squares
     }
 
+/// A pivot together with the supporting pair that defines it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct PivotEntry {
+    /// The pivot derived from `supports`.
     pub pivot: Pivot,
+    /// The support pair that defines the pivot.
     pub supports: SupportPair,
 }
 
+/// A move history together with all reached positions.
 #[derive(Clone, Debug, Default)]
 pub struct Game {
     positions: Vec<Position>,
@@ -606,6 +688,7 @@ pub struct Game {
 }
 
 impl Game {
+    /// Creates a game from the standard initial position.
     pub fn new() -> Self {
         Self {
             positions: vec![Position::initial()],
@@ -613,6 +696,7 @@ impl Game {
         }
     }
 
+    /// Creates a game from an arbitrary starting position.
     pub fn from_position(position: Position) -> Self {
         Self {
             positions: vec![position],
@@ -620,16 +704,19 @@ impl Game {
         }
     }
 
+    /// Returns the current position.
     pub fn current_position(&self) -> &Position {
         self.positions
             .last()
             .expect("game always contains a current position")
     }
 
+    /// Returns the played move list.
     pub fn moves(&self) -> &[Move] {
         &self.moves
     }
 
+    /// Plays one move from the current position.
     pub fn play(&mut self, mv: Move) -> Result<(), MoveError> {
         let mut position = self.current_position().clone();
         position.apply_move(mv)?;
@@ -638,6 +725,7 @@ impl Game {
         Ok(())
     }
 
+    /// Parses and plays one move in `from-to` notation.
     pub fn play_str(&mut self, mv: &str) -> Result<(), GameError> {
         let parsed: Move = mv.parse()?;
         self.play(parsed)?;
@@ -645,6 +733,7 @@ impl Game {
     }
 }
 
+/// Errors that can occur while parsing or playing moves in a game.
 #[derive(Debug)]
 pub enum GameError {
     Parse(ParseMoveError),
