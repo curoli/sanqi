@@ -71,3 +71,15 @@ if move is not None:
 
 For more details, see [crates/sanqi-cli/README.md](crates/sanqi-cli/README.md) and
 [crates/sanqi-python/README.md](crates/sanqi-python/README.md).
+
+## Releasing
+
+Tag pushes like `v0.1.0` trigger release workflows for:
+
+- `sanqi-core`, `sanqi-engine`, and `sanqi-render` on `crates.io`
+- `sanqi-python` on PyPI
+
+Before the first release, configure:
+
+- a GitHub Actions secret `CARGO_REGISTRY_TOKEN` for `crates.io`
+- a PyPI Trusted Publisher for the `pypi` GitHub environment

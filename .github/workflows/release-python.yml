@@ -1,0 +1,68 @@
+name: Release Python Package
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Python distributions
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install maturin
+        run: python -m pip install --upgrade pip maturin
+
+      - name: Verify release tag matches Python package version
+        run: |
+          expected_version="$(grep -E '^version = ' crates/sanqi-python/pyproject.toml | head -n1 | cut -d'"' -f2)"
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [ "$tag_version" != "$expected_version" ]; then
+            echo "tag version $tag_version does not match Python package version $expected_version"
+            exit 1
+          fi
+
+      - name: Build distributions
+        run: maturin build --release --manifest-path crates/sanqi-python/Cargo.toml --sdist --out dist
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/sanqi-python
+    permissions:
+      id-token: write
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
