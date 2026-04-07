@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
+use pyo3::types::{PyDict, PyList};
 use sanqi_core::{Color, Move, Position};
 use sanqi_render::TextPieceStyle;
 
@@ -32,7 +32,7 @@ fn parse_piece_style(value: Option<&str>) -> PyResult<TextPieceStyle> {
     }
 }
 
-#[pyclass(name = "Position")]
+#[pyclass(name = "Position", skip_from_py_object)]
 #[derive(Clone)]
 struct PyPosition {
     inner: Position,
@@ -135,7 +135,7 @@ impl PyPosition {
         let Some(result) = sanqi_engine::best_move(&self.inner, depth) else {
             return Ok(None);
         };
-        let dict = PyDict::new_bound(py);
+        let dict = PyDict::new(py);
         dict.set_item("best_move", result.best_move.to_string())?;
         dict.set_item("score", result.score)?;
         dict.set_item("depth", result.depth)?;
@@ -158,7 +158,7 @@ impl PyPosition {
     ) -> PyResult<Bound<'py, PyAny>> {
         let analysis =
             sanqi_engine::analyze_iterative(&self.inner, depth, std::time::Duration::from_millis(budget_ms));
-        let dict = PyDict::new_bound(py);
+        let dict = PyDict::new(py);
         dict.set_item("root_legal_moves", analysis.stats.root_legal_moves)?;
         dict.set_item("completed_depth", analysis.stats.completed_depth)?;
         dict.set_item("nodes", analysis.stats.nodes)?;
@@ -202,7 +202,7 @@ impl PyPosition {
         let items = entries
             .into_iter()
             .map(|entry| {
-                let dict = PyDict::new_bound(py);
+                let dict = PyDict::new(py);
                 let supports = vec![entry.supports.a.to_string(), entry.supports.b.to_string()];
                 dict.set_item("supports", supports)?;
                 dict.set_item("file_twice", entry.pivot.file_twice())?;
@@ -215,7 +215,7 @@ impl PyPosition {
                 Ok(dict.into_any())
             })
             .collect::<PyResult<Vec<_>>>()?;
-        Ok(items.into_py(py).into_bound(py))
+        Ok(PyList::new(py, items)?.into_any())
     }
 }
 
