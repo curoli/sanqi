@@ -26,9 +26,7 @@ fn parse_piece_style(value: Option<&str>) -> PyResult<TextPieceStyle> {
     match value.unwrap_or("discs").to_ascii_lowercase().as_str() {
         "discs" | "disc" | "circles" | "circle" | "unicode" => Ok(TextPieceStyle::Discs),
         "letters" | "ascii" => Ok(TextPieceStyle::Letters),
-        _ => Err(PyValueError::new_err(
-            "style must be 'discs' or 'letters'",
-        )),
+        _ => Err(PyValueError::new_err("style must be 'discs' or 'letters'")),
     }
 }
 
@@ -98,7 +96,8 @@ impl PyPosition {
     }
 
     fn set_piece(&mut self, color: &str, square: &str) -> PyResult<()> {
-        self.inner.set_piece(parse_color(color)?, parse_square(square)?);
+        self.inner
+            .set_piece(parse_color(color)?, parse_square(square)?);
         Ok(())
     }
 
@@ -156,8 +155,11 @@ impl PyPosition {
         depth: u8,
         budget_ms: u64,
     ) -> PyResult<Bound<'py, PyAny>> {
-        let analysis =
-            sanqi_engine::analyze_iterative(&self.inner, depth, std::time::Duration::from_millis(budget_ms));
+        let analysis = sanqi_engine::analyze_iterative(
+            &self.inner,
+            depth,
+            std::time::Duration::from_millis(budget_ms),
+        );
         let dict = PyDict::new(py);
         dict.set_item("root_legal_moves", analysis.stats.root_legal_moves)?;
         dict.set_item("completed_depth", analysis.stats.completed_depth)?;

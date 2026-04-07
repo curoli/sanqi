@@ -208,7 +208,10 @@ impl Pivot {
 
     /// Reflects a square through this pivot.
     pub fn reflect(self, square: Square) -> Option<Square> {
-        Square::from_coords(self.file_twice - square.file(), self.rank_twice - square.rank())
+        Square::from_coords(
+            self.file_twice - square.file(),
+            self.rank_twice - square.rank(),
+        )
     }
 }
 
@@ -489,7 +492,8 @@ impl Position {
                             continue;
                         }
                         let mv = Move::new(*attacker, to);
-                        let slot = mv.from.index() as usize * BOARD_SQUARES + mv.to.index() as usize;
+                        let slot =
+                            mv.from.index() as usize * BOARD_SQUARES + mv.to.index() as usize;
                         if !seen[slot] {
                             seen[slot] = true;
                             moves.push(mv);
@@ -662,14 +666,14 @@ impl Position {
 }
 
 fn squares_from_bits(mut bits: u64) -> Vec<Square> {
-        let mut squares = Vec::with_capacity(bits.count_ones() as usize);
-        while bits != 0 {
-            let index = bits.trailing_zeros() as u8;
-            squares.push(Square(index));
-            bits &= bits - 1;
-        }
-        squares
+    let mut squares = Vec::with_capacity(bits.count_ones() as usize);
+    while bits != 0 {
+        let index = bits.trailing_zeros() as u8;
+        squares.push(Square(index));
+        bits &= bits - 1;
     }
+    squares
+}
 
 /// A pivot together with the supporting pair that defines it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -849,7 +853,8 @@ mod tests {
 
     #[test]
     fn pivot_api_exposes_center_and_reflections() {
-        let supports = SupportPair::new("a2".parse().expect("square"), "b2".parse().expect("square"));
+        let supports =
+            SupportPair::new("a2".parse().expect("square"), "b2".parse().expect("square"));
         let pivot = supports.pivot();
         assert!(!pivot.is_square_center());
         assert_eq!(pivot.center_square(), None);
@@ -866,10 +871,8 @@ mod tests {
         let pivots = position.supporting_pivots(Color::White, mv);
         assert!(!pivots.is_empty());
         assert!(pivots.iter().any(|entry| {
-            entry.supports == SupportPair::new(
-                "a2".parse().expect("square"),
-                "b2".parse().expect("square")
-            )
+            entry.supports
+                == SupportPair::new("a2".parse().expect("square"), "b2".parse().expect("square"))
         }));
     }
 }

@@ -12,7 +12,7 @@
 
 use std::fmt::Write;
 
-use sanqi_core::{Color, Move, Pivot, Position, Square, BOARD_SIZE};
+use sanqi_core::{BOARD_SIZE, Color, Move, Pivot, Position, Square};
 
 const TILE: i32 = 64;
 const BOARD_PX: i32 = 8 * TILE;
@@ -221,11 +221,10 @@ mod tests {
         let position = Position::initial();
         let options = RenderOptions {
             highlight_move: Some("a1-b3".parse().expect("move")),
-            pivots: vec![SupportPair::new(
-                "a2".parse().expect("square"),
-                "b2".parse().expect("square"),
-            )
-            .pivot()],
+            pivots: vec![
+                SupportPair::new("a2".parse().expect("square"), "b2".parse().expect("square"))
+                    .pivot(),
+            ],
         };
 
         let svg = svg_board_with_options(&position, &options);

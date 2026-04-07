@@ -138,9 +138,11 @@ fn run() -> Result<(), String> {
                 .parse::<u64>()
                 .map_err(|_| "time budget must be an integer number of milliseconds".to_string())?;
             let position = position_from_moves(args.collect())?;
-            if let Some(result) =
-                sanqi_engine::best_move_iterative(&position, max_depth, Duration::from_millis(budget_ms))
-            {
+            if let Some(result) = sanqi_engine::best_move_iterative(
+                &position,
+                max_depth,
+                Duration::from_millis(budget_ms),
+            ) {
                 println!("best_move: {}", result.best_move);
                 println!("score: {}", result.score);
                 println!("depth: {}", result.depth);
@@ -162,8 +164,11 @@ fn run() -> Result<(), String> {
                 .parse::<u64>()
                 .map_err(|_| "time budget must be an integer number of milliseconds".to_string())?;
             let position = position_from_moves(args.collect())?;
-            let analysis =
-                sanqi_engine::analyze_iterative(&position, max_depth, Duration::from_millis(budget_ms));
+            let analysis = sanqi_engine::analyze_iterative(
+                &position,
+                max_depth,
+                Duration::from_millis(budget_ms),
+            );
             println!("root_legal_moves: {}", analysis.stats.root_legal_moves);
             println!(
                 "completed_root_moves_current_depth: {}",
@@ -176,9 +181,15 @@ fn run() -> Result<(), String> {
             println!("completed_depth: {}", analysis.stats.completed_depth);
             println!("nodes: {}", analysis.stats.nodes);
             println!("quiescence_nodes: {}", analysis.stats.quiescence_nodes);
-            println!("quiescence_pruned_moves: {}", analysis.stats.quiescence_pruned_moves);
+            println!(
+                "quiescence_pruned_moves: {}",
+                analysis.stats.quiescence_pruned_moves
+            );
             println!("evaluation_calls: {}", analysis.stats.evaluation_calls);
-            println!("legal_move_generations: {}", analysis.stats.legal_move_generations);
+            println!(
+                "legal_move_generations: {}",
+                analysis.stats.legal_move_generations
+            );
             println!("total_time_ms: {}", analysis.stats.total_time.as_millis());
             println!(
                 "quiescence_time_ms: {}",
@@ -221,12 +232,18 @@ fn run() -> Result<(), String> {
                 .ok_or_else(|| "missing time budget in milliseconds".to_string())?
                 .parse::<u64>()
                 .map_err(|_| "time budget must be an integer number of milliseconds".to_string())?;
-            let path = args.next().ok_or_else(|| "missing output path".to_string())?;
+            let path = args
+                .next()
+                .ok_or_else(|| "missing output path".to_string())?;
             save_benchmark(max_depth, Duration::from_millis(budget_ms), &path)?;
         }
         "bench-compare" => {
-            let baseline = args.next().ok_or_else(|| "missing baseline path".to_string())?;
-            let candidate = args.next().ok_or_else(|| "missing candidate path".to_string())?;
+            let baseline = args
+                .next()
+                .ok_or_else(|| "missing baseline path".to_string())?;
+            let candidate = args
+                .next()
+                .ok_or_else(|| "missing candidate path".to_string())?;
             compare_benchmarks(&baseline, &candidate)?;
         }
         "apply" => {
@@ -279,7 +296,8 @@ fn run() -> Result<(), String> {
 fn position_from_moves(moves: Vec<String>) -> Result<Position, String> {
     let mut position = Position::initial();
     for mv in moves {
-        let parsed = Move::from_str(&mv).map_err(|error| format!("invalid move '{mv}': {error}"))?;
+        let parsed =
+            Move::from_str(&mv).map_err(|error| format!("invalid move '{mv}': {error}"))?;
         position
             .apply_move(parsed)
             .map_err(|error| format!("illegal move '{mv}': {error}"))?;
@@ -374,7 +392,9 @@ fn run_repl(
             break;
         }
 
-        if player_for_side(position.side_to_move(), white_player, black_player) == PlayerKind::Machine {
+        if player_for_side(position.side_to_move(), white_player, black_player)
+            == PlayerKind::Machine
+        {
             let Some(result) = sanqi_engine::best_move_iterative(&position, depth, budget) else {
                 println!("engine search did not return a move");
                 break;
@@ -422,7 +442,8 @@ fn run_repl(
                 }
             }
             "hint" | "go" => {
-                let Some(result) = sanqi_engine::best_move_iterative(&position, depth, budget) else {
+                let Some(result) = sanqi_engine::best_move_iterative(&position, depth, budget)
+                else {
                     println!("engine search did not return a move");
                     continue;
                 };
@@ -624,7 +645,8 @@ fn compare_benchmarks(baseline: &str, candidate: &str) -> Result<(), String> {
 }
 
 fn load_benchmark_rows(path: &str) -> Result<Vec<BenchmarkRow>, String> {
-    let content = fs::read_to_string(path).map_err(|error| format!("failed to read {path}: {error}"))?;
+    let content =
+        fs::read_to_string(path).map_err(|error| format!("failed to read {path}: {error}"))?;
     let mut rows = Vec::new();
     for line in content.lines() {
         if line.is_empty() || line.starts_with('#') || line.starts_with("name\t") {
@@ -710,7 +732,9 @@ fn print_usage() {
     println!("  board [moves...]        Show the board after applying moves");
     println!("  moves [moves...]        List legal moves in the resulting position");
     println!("  best <depth> [moves...] Show the engine's best move");
-    println!("  best-time <depth> <ms> [moves...]  Search with iterative deepening and time budget");
+    println!(
+        "  best-time <depth> <ms> [moves...]  Search with iterative deepening and time budget"
+    );
     println!("  analyze <depth> <ms> [moves...]    Show search diagnostics");
     println!("  bench <depth> <ms>      Run the built-in benchmark suite");
     println!("  bench-save <depth> <ms> <path>  Save benchmark TSV to a file");

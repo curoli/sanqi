@@ -119,7 +119,11 @@ impl TranspositionTable {
     fn get(&self, position: &Position) -> Option<TableEntry> {
         let key = position_key(position);
         let bucket = &self.buckets[self.index_for(key)];
-        bucket.iter().flatten().find(|entry| entry.key == key).copied()
+        bucket
+            .iter()
+            .flatten()
+            .find(|entry| entry.key == key)
+            .copied()
     }
 
     fn insert(&mut self, position: &Position, entry: TableEntry) {
@@ -128,7 +132,10 @@ impl TranspositionTable {
         let bucket = &mut self.buckets[index];
         let new_entry = TableEntry { key, ..entry };
 
-        if let Some(slot) = bucket.iter_mut().find(|slot| slot.is_some_and(|existing| existing.key == key)) {
+        if let Some(slot) = bucket
+            .iter_mut()
+            .find(|slot| slot.is_some_and(|existing| existing.key == key))
+        {
             if slot.is_some_and(|existing| existing.depth > new_entry.depth) {
                 return;
             }
@@ -249,18 +256,26 @@ fn best_move_with_table(
     for mv in moves {
         if search_expired(deadline) {
             stats.timed_out = true;
-            stats.completed_root_moves_current_depth =
-                stats.completed_root_moves_total.saturating_sub(root_moves_start);
+            stats.completed_root_moves_current_depth = stats
+                .completed_root_moves_total
+                .saturating_sub(root_moves_start);
             return finalize_root_result(position, depth, table, best);
         }
         let mut next = position.clone();
         next.apply_move(mv).ok()?;
-        let Some(score) =
-            negamax(&next, depth.saturating_sub(1), -beta, -alpha, table, deadline, stats)
-        else {
+        let Some(score) = negamax(
+            &next,
+            depth.saturating_sub(1),
+            -beta,
+            -alpha,
+            table,
+            deadline,
+            stats,
+        ) else {
             stats.timed_out = true;
-            stats.completed_root_moves_current_depth =
-                stats.completed_root_moves_total.saturating_sub(root_moves_start);
+            stats.completed_root_moves_current_depth = stats
+                .completed_root_moves_total
+                .saturating_sub(root_moves_start);
             return finalize_root_result(position, depth, table, best);
         };
         let score = -score;
@@ -277,8 +292,9 @@ fn best_move_with_table(
     }
 
     if best.is_some() {
-        stats.completed_root_moves_current_depth =
-            stats.completed_root_moves_total.saturating_sub(root_moves_start);
+        stats.completed_root_moves_current_depth = stats
+            .completed_root_moves_total
+            .saturating_sub(root_moves_start);
         finalize_root_result(position, depth, table, best)
     } else {
         stats.completed_root_moves_total = root_moves_before;
@@ -313,7 +329,11 @@ fn finalize_root_result(
 
 /// Searches with iterative deepening up to `max_depth` and stops when the
 /// given time budget expires.
-pub fn best_move_iterative(position: &Position, max_depth: u8, time_budget: Duration) -> Option<SearchResult> {
+pub fn best_move_iterative(
+    position: &Position,
+    max_depth: u8,
+    time_budget: Duration,
+) -> Option<SearchResult> {
     analyze(position, max_depth, Some(time_budget)).best
 }
 
@@ -323,7 +343,11 @@ pub fn analyze_fixed_depth(position: &Position, depth: u8) -> AnalysisResult {
 }
 
 /// Returns an iterative-deepening analysis together with search statistics.
-pub fn analyze_iterative(position: &Position, max_depth: u8, time_budget: Duration) -> AnalysisResult {
+pub fn analyze_iterative(
+    position: &Position,
+    max_depth: u8,
+    time_budget: Duration,
+) -> AnalysisResult {
     analyze(position, max_depth, Some(time_budget))
 }
 
@@ -340,7 +364,9 @@ fn analyze(position: &Position, max_depth: u8, time_budget: Option<Duration>) ->
     if time_budget.is_some() {
         for depth in 1..=max_depth {
             let depth_started = Instant::now();
-            let Some(result) = best_move_with_table(position, depth, &mut table, deadline, &mut stats) else {
+            let Some(result) =
+                best_move_with_table(position, depth, &mut table, deadline, &mut stats)
+            else {
                 stats.depth_timings.push(DepthTiming {
                     depth,
                     elapsed: depth_started.elapsed(),
@@ -379,7 +405,10 @@ fn analyze(position: &Position, max_depth: u8, time_budget: Option<Duration>) ->
     if best.is_none() && legal_moves_exist {
         let fallback = cheap_fallback(position, &table);
         stats.total_time = search_started.elapsed();
-        return AnalysisResult { best: fallback, stats };
+        return AnalysisResult {
+            best: fallback,
+            stats,
+        };
     }
 
     stats.total_time = search_started.elapsed();
@@ -389,7 +418,9 @@ fn analyze(position: &Position, max_depth: u8, time_budget: Option<Duration>) ->
 fn cheap_fallback(position: &Position, table: &TranspositionTable) -> Option<SearchResult> {
     let tt_move = table.get(position).and_then(|entry| entry.best_move);
     let mut stats = SearchStats::default();
-    let mv = ordered_moves(position, tt_move, &mut stats).into_iter().next()?;
+    let mv = ordered_moves(position, tt_move, &mut stats)
+        .into_iter()
+        .next()?;
     Some(SearchResult {
         best_move: mv,
         score: evaluate(position),
@@ -651,7 +682,11 @@ fn move_ordering_score(position: &Position, mv: Move, tt_move: Option<Move>) -> 
 
 fn quiescence_capture_delta(position: &Position, mv: Move) -> i32 {
     let center_gain = square_centrality(mv.to) - square_centrality(mv.from);
-    let capture_bonus = if position.piece_at(mv.to).is_some() { 120 } else { 0 };
+    let capture_bonus = if position.piece_at(mv.to).is_some() {
+        120
+    } else {
+        0
+    };
     capture_bonus + center_gain * 3 + QUIESCENCE_DELTA_MARGIN
 }
 
@@ -681,12 +716,15 @@ fn direct_capture_moves_counted(position: &Position, stats: &mut SearchStats) ->
             for attacker in &pieces {
                 if let Some(to) = pivot.reflect(*attacker) {
                     let target_mask = 1_u64 << to.index();
-                    if to == *attacker || own_occupancy & target_mask != 0 || opponent_occupancy & target_mask == 0
+                    if to == *attacker
+                        || own_occupancy & target_mask != 0
+                        || opponent_occupancy & target_mask == 0
                     {
                         continue;
                     }
                     let mv = Move::new(*attacker, to);
-                    let slot = mv.from.index() as usize * sanqi_core::BOARD_SQUARES + mv.to.index() as usize;
+                    let slot = mv.from.index() as usize * sanqi_core::BOARD_SQUARES
+                        + mv.to.index() as usize;
                     if !seen[slot] {
                         seen[slot] = true;
                         moves.push(mv);
@@ -709,7 +747,10 @@ fn legal_moves_for_eval(position: &Position, stats: Option<&mut SearchStats>) ->
 
 fn capture_count_from_moves(position: &Position, moves: &[Move]) -> usize {
     let opponent = position.side_to_move().opponent();
-    moves.iter().filter(|mv| position.has_piece(opponent, mv.to)).count()
+    moves
+        .iter()
+        .filter(|mv| position.has_piece(opponent, mv.to))
+        .count()
 }
 
 fn blocked_piece_count_from_moves(pieces: &[sanqi_core::Square], moves: &[Move]) -> usize {
@@ -772,7 +813,10 @@ mod tests {
         let position = Position::initial();
         let result = best_move(&position, 1).expect("move");
         assert!(position.legal_moves().contains(&result.best_move));
-        assert_eq!(result.principal_variation.first().copied(), Some(result.best_move));
+        assert_eq!(
+            result.principal_variation.first().copied(),
+            Some(result.best_move)
+        );
     }
 
     #[test]
@@ -866,7 +910,8 @@ mod tests {
         let position = Position::initial();
         let mut table = TranspositionTable::default();
         let mut stats = SearchStats::default();
-        let result = best_move_with_table(&position, 2, &mut table, None, &mut stats).expect("move");
+        let result =
+            best_move_with_table(&position, 2, &mut table, None, &mut stats).expect("move");
         let entry = table.get(&position).expect("table entry");
         assert_eq!(entry.depth, 2);
         assert_eq!(entry.best_move, Some(result.best_move));
@@ -911,7 +956,10 @@ mod tests {
     fn analysis_reports_root_move_count_and_nodes() {
         let position = Position::initial();
         let analysis = analyze_iterative(&position, 2, Duration::from_millis(20));
-        assert_eq!(analysis.stats.root_legal_moves, position.legal_moves().len());
+        assert_eq!(
+            analysis.stats.root_legal_moves,
+            position.legal_moves().len()
+        );
         assert!(analysis.stats.nodes > 0 || analysis.stats.timed_out);
         assert!(analysis.stats.legal_move_generations > 0);
         assert!(analysis.stats.evaluation_calls > 0 || analysis.stats.timed_out);
