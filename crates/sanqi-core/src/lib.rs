@@ -2,6 +2,8 @@
 //!
 //! This crate models board positions, moves, pivot geometry, and complete
 //! games. The public move notation is `from-to`, for example `a1-b3`.
+//! Complete games can also be serialized as simple PGN-like movetext such as
+//! `1. a1-b3 h8-g6 2. h1-d3 a8-d6`.
 //!
 //! Typical usage starts with [`Position::initial`]:
 //!
@@ -735,6 +737,37 @@ impl Game {
         self.play(parsed)?;
         Ok(())
     }
+
+    /// Parses a simple PGN-like movetext and returns the resulting game.
+    ///
+    /// Move numbers such as `1.` are optional and ignored while parsing.
+    /// Optional trailing result markers `1-0`, `0-1`, `1/2-1/2`, and `*`
+    /// are accepted and ignored as well.
+    pub fn from_movetext(text: &str) -> Result<Self, GameError> {
+        let mut game = Self::new();
+        for token in text.split_whitespace() {
+            if is_movetext_move_number(token) || is_movetext_result(token) {
+                continue;
+            }
+            game.play_str(token).map_err(|error| match error {
+                GameError::Parse(_) => GameError::InvalidMovetextToken(token.to_string()),
+                other => other,
+            })?;
+        }
+        Ok(game)
+    }
+
+    /// Serializes the move list as simple PGN-like movetext.
+    pub fn to_movetext(&self) -> String {
+        let mut chunks = Vec::new();
+        for (index, mv) in self.moves.iter().enumerate() {
+            if index % 2 == 0 {
+                chunks.push(format!("{}.", index / 2 + 1));
+            }
+            chunks.push(mv.to_string());
+        }
+        chunks.join(" ")
+    }
 }
 
 /// Errors that can occur while parsing or playing moves in a game.
@@ -742,6 +775,7 @@ impl Game {
 pub enum GameError {
     Parse(ParseMoveError),
     IllegalMove(MoveError),
+    InvalidMovetextToken(String),
 }
 
 impl fmt::Display for GameError {
@@ -749,6 +783,7 @@ impl fmt::Display for GameError {
         match self {
             Self::Parse(error) => error.fmt(f),
             Self::IllegalMove(error) => error.fmt(f),
+            Self::InvalidMovetextToken(token) => write!(f, "invalid movetext token '{token}'"),
         }
     }
 }
@@ -765,6 +800,17 @@ impl From<MoveError> for GameError {
     fn from(value: MoveError) -> Self {
         Self::IllegalMove(value)
     }
+}
+
+fn is_movetext_move_number(token: &str) -> bool {
+    let Some(prefix) = token.strip_suffix('.') else {
+        return false;
+    };
+    !prefix.is_empty() && prefix.bytes().all(|byte| byte.is_ascii_digit())
+}
+
+fn is_movetext_result(token: &str) -> bool {
+    matches!(token, "1-0" | "0-1" | "1/2-1/2" | "*")
 }
 
 #[cfg(test)]
@@ -874,5 +920,31 @@ mod tests {
             entry.supports
                 == SupportPair::new("a2".parse().expect("square"), "b2".parse().expect("square"))
         }));
+    }
+
+    #[test]
+    fn game_movetext_roundtrip() {
+        let mut game = Game::new();
+        game.play_str("h1-d3").expect("move");
+        game.play_str("h8-d6").expect("move");
+        game.play_str("a1-d4").expect("move");
+        assert_eq!(game.to_movetext(), "1. h1-d3 h8-d6 2. a1-d4");
+
+        let parsed = Game::from_movetext("1. h1-d3 h8-d6 2. a1-d4").expect("movetext");
+        assert_eq!(parsed.moves(), game.moves());
+    }
+
+    #[test]
+    fn game_movetext_accepts_result_marker() {
+        let game = Game::from_movetext("1. h1-d3 h8-d6 0-1").expect("movetext");
+        assert_eq!(game.moves().len(), 2);
+    }
+
+    #[test]
+    fn game_movetext_rejects_unknown_tokens() {
+        let error = Game::from_movetext("1. h1-d3 ???")
+            .expect_err("invalid movetext should fail")
+            .to_string();
+        assert!(error.contains("invalid movetext token"));
     }
 }

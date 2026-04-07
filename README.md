@@ -35,6 +35,18 @@ cargo run --release -p sanqi-cli -- play think machine machine
 
 This starts an interactive game. Moves use the format `a1-b3`.
 
+Game scores can also be written in a simple PGN-like movetext:
+
+```text
+1. h1-d3 h8-d6 2. a1-d4
+```
+
+You can format a move list as movetext with:
+
+```bash
+cargo run --release -p sanqi-cli -- record h1-d3 h8-d6 a1-d4
+```
+
 Useful commands inside the CLI:
 
 - `moves` lists legal moves

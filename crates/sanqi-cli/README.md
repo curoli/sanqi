@@ -36,6 +36,8 @@ cargo run --release -p sanqi-cli -- presets
 cargo run --release -p sanqi-cli -- bench 4 250
 cargo run --release -p sanqi-cli -- bench-save 4 250 baseline.tsv
 cargo run --release -p sanqi-cli -- bench-compare baseline.tsv candidate.tsv
+cargo run --release -p sanqi-cli -- record h1-d3 h8-d6 a1-d4
+cargo run --release -p sanqi-cli -- replay examples/game.sanqi
 cargo run --release -p sanqi-cli -- svg a7-b5 a1-b3
 cargo run --release -p sanqi-cli -- play normal human machine
 ```
@@ -44,6 +46,17 @@ cargo run --release -p sanqi-cli -- play normal human machine
 `bench-save` writes the same tabular format to a file, and `bench-compare` prints deltas between two saved benchmark files.
 
 The move list after a command is applied in order, starting from the initial position.
+
+## Movetext
+
+Games can be serialized in a simple PGN-like movetext:
+
+```text
+1. h1-d3 h8-d6 2. a1-d4
+```
+
+Use `record` to format a move list as movetext and `replay` to load a movetext
+file and show the final board.
 
 ## Interactive Play
 

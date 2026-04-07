@@ -5,7 +5,7 @@ use std::process::ExitCode;
 use std::str::FromStr;
 use std::time::Duration;
 
-use sanqi_core::{Color, Move, Position};
+use sanqi_core::{Color, Game, Move, Position};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum PlayerKind {
@@ -254,6 +254,22 @@ fn run() -> Result<(), String> {
             let position = position_from_moves(moves)?;
             print!("{}", sanqi_render::ascii_board(&position));
         }
+        "record" => {
+            let game = game_from_moves(args.collect())?;
+            println!("{}", game.to_movetext());
+        }
+        "replay" => {
+            let path = args
+                .next()
+                .ok_or_else(|| "replay requires a movetext file path".to_string())?;
+            let text = fs::read_to_string(&path)
+                .map_err(|error| format!("failed to read {path}: {error}"))?;
+            let game = Game::from_movetext(&text)
+                .map_err(|error| format!("failed to parse movetext from {path}: {error}"))?;
+            println!("movetext: {}", game.to_movetext());
+            println!("plies: {}", game.moves().len());
+            print!("{}", sanqi_render::ascii_board(game.current_position()));
+        }
         "svg" => {
             let mut rest: Vec<String> = args.collect();
             if rest.is_empty() {
@@ -303,6 +319,15 @@ fn position_from_moves(moves: Vec<String>) -> Result<Position, String> {
             .map_err(|error| format!("illegal move '{mv}': {error}"))?;
     }
     Ok(position)
+}
+
+fn game_from_moves(moves: Vec<String>) -> Result<Game, String> {
+    let mut game = Game::new();
+    for mv in moves {
+        game.play_str(&mv)
+            .map_err(|error| format!("invalid game move '{mv}': {error}"))?;
+    }
+    Ok(game)
 }
 
 fn parse_player_kind(value: &str) -> Result<PlayerKind, String> {
@@ -740,6 +765,8 @@ fn print_usage() {
     println!("  bench-save <depth> <ms> <path>  Save benchmark TSV to a file");
     println!("  bench-compare <base> <candidate> Compare two saved benchmark TSV files");
     println!("  apply <moves...>        Alias for board with at least one move");
+    println!("  record [moves...]       Format a move sequence as movetext");
+    println!("  replay <path>           Load a movetext file and show the final board");
     println!("  svg <move> [moves...]   Render SVG for a highlighted move");
     println!("  play [preset|depth] [ms] [white] [black] Start interactive play");
     println!("  presets                 Show built-in search presets");
@@ -754,6 +781,8 @@ fn print_usage() {
     println!("  sanqi bench 4 250");
     println!("  sanqi bench-save 4 250 baseline.tsv");
     println!("  sanqi bench-compare baseline.tsv candidate.tsv");
+    println!("  sanqi record h1-d3 h8-d6 a1-d4");
+    println!("  sanqi replay examples/game.sanqi");
     println!("  sanqi svg a7-b5 a1-b3");
     println!("  sanqi presets");
     println!("  sanqi play normal human machine");
