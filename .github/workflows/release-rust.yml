@@ -6,8 +6,15 @@ on:
       - "v*"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
+  security:
+    uses: ./.github/workflows/security.yml
+
   publish:
+    needs: security
     name: Publish sanqi-core, sanqi-engine, sanqi-render
     runs-on: ubuntu-latest
     environment:
@@ -18,7 +25,7 @@ jobs:
       CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -36,7 +43,7 @@ jobs:
           fi
 
       - name: Run tests
-        run: cargo test --all-targets
+        run: cargo test --workspace --locked
 
       - name: Publish sanqi-core
         run: cargo publish -p sanqi-core --locked

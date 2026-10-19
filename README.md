@@ -11,6 +11,30 @@ Here are the rules of Sanqi in
 [Spanish 🇪🇸](docs/rules/sanqi-es.md), and
 [Turkish 🇹🇷](docs/rules/sanqi-tr.md).
 
+## Development
+
+The development toolchain is pinned to Rust 1.99.1 in `rust-toolchain.toml`.
+Rustup installs it automatically. The minimum supported Rust version is
+1.88 (Rust 2024, including let chains); CI checks both the minimum version and
+current stable Rust.
+
+```bash
+cargo fmt --all --check
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+cargo test --workspace --locked
+```
+
+CI builds, installs, and tests Python wheels on Linux (x86-64 and ARM64), Windows
+(x86-64), and macOS (Intel and Apple Silicon), using Python 3.9, 3.13, and 3.14.
+Releases cover every Python version from 3.9 through 3.14. Linux wheels use
+manylinux 2.28 (glibc 2.28 or newer).
+
+The dependency security workflow checks `Cargo.lock` against RustSec advisories
+on pushes, pull requests, every Monday, and before releases. Vulnerabilities and
+advisory warnings block publication. To run it locally, install `cargo-audit`
+with `cargo install cargo-audit --locked`, then run `cargo audit --deny warnings`.
+Dependabot checks Cargo, Python build dependencies, and GitHub Actions monthly.
+
 ## Play
 
 You can play Sanqi from the command line with the Rust CLI:
@@ -74,7 +98,7 @@ For more details, see [crates/sanqi-cli/README.md](crates/sanqi-cli/README.md) a
 
 ## Releasing
 
-Tag pushes like `v0.1.0` trigger release workflows for:
+Tag pushes like `v0.1.1` trigger release workflows for:
 
 - `sanqi-core`, `sanqi-engine`, and `sanqi-render` on `crates.io`
 - `sanqi-python` on PyPI

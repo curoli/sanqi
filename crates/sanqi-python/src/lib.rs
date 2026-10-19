@@ -30,7 +30,7 @@ fn parse_piece_style(value: Option<&str>) -> PyResult<TextPieceStyle> {
     }
 }
 
-#[pyclass(name = "Position", skip_from_py_object)]
+#[pyclass(name = "Position")]
 #[derive(Clone)]
 struct PyPosition {
     inner: Position,

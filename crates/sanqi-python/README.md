@@ -16,6 +16,13 @@ Or build a wheel:
 maturin build
 ```
 
+To test the installed bindings:
+
+```bash
+python -m pip install ../../target/wheels/sanqi_python-*.whl
+python -m unittest discover -s tests
+```
+
 ## Example
 
 ```python
@@ -48,4 +55,3 @@ if move is not None:
 - `Position.evaluate()`
 - `Position.outcome()`
 - `Position.supporting_pivots(move)`
-

@@ -29,10 +29,30 @@ For the PyPI Trusted Publisher, use values that match the workflow claims:
 
 ## Before cutting a release
 
-1. Update versions consistently.
-2. Update `CHANGELOG.md`.
-3. Make sure CI is green.
-4. Confirm that the release workflows still match the package names and versions.
+1. Update the workspace version, internal dependency versions, and Python project
+   version consistently, then regenerate `Cargo.lock`.
+2. Move the pending changes in `CHANGELOG.md` into the release entry with its date.
+3. Run the Rust publish dry run and build and test the Python distributions locally.
+4. Commit and push the release changes, then wait for CI and the dependency security
+   workflow to pass on that commit, including the Python wheel platform matrix.
+5. Confirm that the release workflows still match the package names and versions.
+
+Both release workflows must pass the RustSec dependency audit before publishing.
+
+## Python distributions
+
+The reusable `python-wheels.yml` workflow builds release wheels for CPython
+3.9 through 3.14 on:
+
+- Linux x86-64 and ARM64, using manylinux 2.28 (glibc 2.28 or newer)
+- Windows x86-64
+- macOS Intel and Apple Silicon
+
+Each wheel is installed and the Python binding tests run on its native runner
+before it is uploaded. CI exercises the same workflow on Python 3.9, 3.13, and
+3.14. The release workflow builds a separate source distribution and merges it
+with the tested wheels for PyPI Trusted Publishing. Publication requires every
+wheel build, its tests, the source distribution, and the security audit to pass.
 
 ## Rust crate publish order
 
@@ -47,11 +67,11 @@ This order matters because `sanqi-engine` and `sanqi-render` depend on
 
 ## Cutting a release
 
-Create and push an annotated tag:
+After the checks above pass, create and push an annotated tag on the tested commit:
 
 ```bash
-git tag -a v0.1.0 -m "Sanqi 0.1.0"
-git push origin v0.1.0
+git tag -a v0.1.1 -m "Sanqi 0.1.1"
+git push origin v0.1.1
 ```
 
 Tag pushes trigger:

@@ -16,7 +16,7 @@ name = "sanqi_render"
 path = "src/lib.rs"
 
 [dependencies]
-sanqi-core = { version = "0.1.0", path = "../sanqi-core" }
+sanqi-core = { version = "0.1.1", path = "../sanqi-core" }
 
 [lints]
 workspace = true

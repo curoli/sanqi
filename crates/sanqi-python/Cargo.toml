@@ -16,10 +16,10 @@ path = "src/lib.rs"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-pyo3 = { version = "0.28.3", features = ["extension-module"] }
-sanqi-core = { version = "0.1.0", path = "../sanqi-core" }
-sanqi-engine = { version = "0.1.0", path = "../sanqi-engine" }
-sanqi-render = { version = "0.1.0", path = "../sanqi-render" }
+pyo3 = "0.30.1"
+sanqi-core = { version = "0.1.1", path = "../sanqi-core" }
+sanqi-engine = { version = "0.1.1", path = "../sanqi-engine" }
+sanqi-render = { version = "0.1.1", path = "../sanqi-render" }
 
 [lints]
 workspace = true

@@ -11,10 +11,10 @@ resolver = "2"
 [workspace.package]
 edition = "2024"
 license = "MIT"
-version = "0.1.0"
+version = "0.1.1"
 repository = "https://github.com/curoli/sanqi"
 homepage = "https://github.com/curoli/sanqi"
-rust-version = "1.85"
+rust-version = "1.88"
 
 [workspace.lints.clippy]
 dbg_macro = "deny"
