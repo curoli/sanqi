@@ -1,0 +1,25 @@
+name: flutter_app
+description: Local two-player Sanqi, powered by the existing Rust rules.
+publish_to: none
+version: 0.1.0+1
+environment:
+  sdk: '>=3.14.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_rust_bridge: 2.12.0
+  material_ui: ^1.1.0
+  flutter_svg: ^2.2.0
+  shared_preferences: ^2.5.0
+  sanqi_mobile:
+    path: rust_builder
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+flutter:
+  uses-material-design: true
+  config:
+    enable-swift-package-manager: false
