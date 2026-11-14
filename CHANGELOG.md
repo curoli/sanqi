@@ -7,6 +7,17 @@ Versioning.
 
 ## [Unreleased]
 
+### Changed
+
+- Update the development toolchain to Rust 1.100.0 and wheel builds to maturin 1.16.0.
+- Refresh transitive Rust dependencies while retaining Rust 1.88 compatibility.
+- Remove redundant Cargo homepage metadata flagged by Rust 1.100.
+
+### Fixed
+
+- Install Rust 1.88 explicitly in the minimum-version CI job so dependency updates
+  cannot change the compiler version being installed.
+
 ## [0.1.1] - 2026-10-19
 
 ### Changed
