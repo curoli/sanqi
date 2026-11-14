@@ -61,6 +61,12 @@ service only to test interaction/layout; the native bridge test exercises the
 real generated Dart/Rust API. Linux desktop application support is not part of
 this phase.
 
+App analysis excludes `rust_builder/cargokit/**`, a vendored standalone Dart
+build-tool package. Its dependencies are bootstrapped by the native build, not
+by the app's `flutter pub get`. App code, generated bridge bindings, widget tests,
+and device integration tests remain covered by `flutter analyze` on a clean
+checkout, before any native build has bootstrapped Cargokit.
+
 ## Android SDK and a physical device
 
 In Android Studio's SDK Manager install Android SDK Platform **36**, Build Tools
