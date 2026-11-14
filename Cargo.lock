@@ -103,7 +103,7 @@ dependencies = [
 
 [[package]]
 name = "sanqi-cli"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "sanqi-core",
  "sanqi-engine",
@@ -112,18 +112,18 @@ dependencies = [
 
 [[package]]
 name = "sanqi-core"
-version = "0.1.1"
+version = "0.1.2"
 
 [[package]]
 name = "sanqi-engine"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "sanqi-core",
 ]
 
 [[package]]
 name = "sanqi-python"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "pyo3",
  "sanqi-core",
@@ -133,7 +133,7 @@ dependencies = [
 
 [[package]]
 name = "sanqi-render"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "sanqi-core",
 ]

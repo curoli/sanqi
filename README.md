@@ -98,7 +98,7 @@ For more details, see [crates/sanqi-cli/README.md](crates/sanqi-cli/README.md) a
 
 ## Releasing
 
-Tag pushes like `v0.1.1` trigger release workflows for:
+Tag pushes like `v0.1.2` trigger release workflows for:
 
 - `sanqi-core`, `sanqi-engine`, and `sanqi-render` on `crates.io`
 - `sanqi-python` on PyPI
