@@ -7,6 +7,8 @@ Versioning.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-14
+
 ### Changed
 
 - Update the development toolchain to Rust 1.100.0 and wheel builds to maturin 1.16.0.
