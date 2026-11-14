@@ -4,7 +4,6 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
-homepage.workspace = true
 rust-version.workspace = true
 description = "PyO3-based Python bindings for the Sanqi Rust engine"
 readme = "README.md"

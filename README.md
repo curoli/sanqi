@@ -13,7 +13,7 @@ Here are the rules of Sanqi in
 
 ## Development
 
-The development toolchain is pinned to Rust 1.99.1 in `rust-toolchain.toml`.
+The development toolchain is pinned to Rust 1.100.0 in `rust-toolchain.toml`.
 Rustup installs it automatically. The minimum supported Rust version is
 1.88 (Rust 2024, including let chains); CI checks both the minimum version and
 current stable Rust.
