@@ -37,6 +37,16 @@ Dependabot checks Cargo, Python build dependencies, and GitHub Actions monthly.
 
 ## Play
 
+### Mobile prototype
+
+The local two-player Flutter app is in [`mobile/flutter_app`](mobile/flutter_app).
+It uses the Rust rules through Flutter Rust Bridge, with an SVG board, move and
+support previews, undo, and movetext saving/restoring. See the
+[mobile setup and device testing guide](mobile/flutter_app/README.md) for
+Android/Linux and iOS/macOS instructions.
+
+### Command line
+
 You can play Sanqi from the command line with the Rust CLI:
 
 ```bash

@@ -7,6 +7,15 @@ Versioning.
 
 ## [Unreleased]
 
+### Added
+
+- Private `sanqi-mobile` crate with Rust-owned local game sessions through
+  Flutter Rust Bridge v2, leaving the existing crate APIs unchanged.
+- Android/iOS Flutter prototype with the Rust SVG board, legal move selection,
+  supporting-pair and pivot previews, New Game, Undo, and movetext persistence.
+- Mobile API, widget, native bridge, and on-device smoke tests, plus setup docs
+  and Flutter CI.
+
 ## [0.1.2] - 2026-11-14
 
 ### Changed
