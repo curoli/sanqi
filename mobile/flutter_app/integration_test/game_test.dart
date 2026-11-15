@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_app/game_service.dart';
+import 'package:flutter_app/l10n/generated/app_localizations.dart';
 import 'package:flutter_app/main.dart';
 import 'package:flutter_app/src/rust/api/game.dart';
 import 'package:flutter_app/src/rust/frb_generated.dart';
@@ -26,6 +27,9 @@ void main() {
       SanqiApp(createService: () async => RustGameService(game), store: store),
     );
     await tester.pumpAndSettle();
+    final strings = AppLocalizations.of(
+      tester.element(find.byType(GameScreen)),
+    )!;
     for (final square in [move.from, move.to]) {
       await tester.ensureVisible(find.byKey(const Key('board')));
       final board = tester.getRect(find.byKey(const Key('board')));
@@ -39,10 +43,10 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(store.record, contains(move.notation));
-    await tester.ensureVisible(find.text('Undo'));
-    await tester.tap(find.text('Undo'));
+    await tester.ensureVisible(find.text(strings.undo));
+    await tester.tap(find.text(strings.undo));
     await tester.pumpAndSettle();
     expect(store.record, '');
-    expect(find.text('White to move'), findsOneWidget);
+    expect(find.text(strings.whiteToMove), findsOneWidget);
   });
 }

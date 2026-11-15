@@ -11,6 +11,8 @@ Here are the rules of Sanqi in
 [Spanish 🇪🇸](docs/rules/sanqi-es.md), and
 [Turkish 🇹🇷](docs/rules/sanqi-tr.md).
 
+The mobile app supports these seven interface languages through its flag selector.
+
 ## Development
 
 The development toolchain is pinned to Rust 1.100.0 in `rust-toolchain.toml`.

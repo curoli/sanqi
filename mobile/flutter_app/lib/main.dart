@@ -1,12 +1,18 @@
 import 'dart:math' as math;
 
-import 'package:material_ui/material_ui.dart';
+import 'package:cupertino_ui/cupertino_ui.dart'
+    show GlobalCupertinoLocalizations;
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'
+    show GlobalWidgetsLocalizations;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:material_ui/material_ui.dart';
 
+import 'app_language.dart';
 import 'board.dart';
 import 'game_background.dart';
 import 'game_service.dart';
+import 'l10n/generated/app_localizations.dart';
 import 'src/rust/api/game.dart';
 import 'src/rust/frb_generated.dart';
 
@@ -23,22 +29,73 @@ void main() {
   );
 }
 
-class SanqiApp extends StatelessWidget {
+class SanqiApp extends StatefulWidget {
   const SanqiApp({super.key, required this.createService, required this.store});
 
   final Future<GameService> Function() createService;
   final GameStore store;
 
   @override
+  State<SanqiApp> createState() => _SanqiAppState();
+}
+
+class _SanqiAppState extends State<SanqiApp> {
+  Locale? _locale;
+  bool _languageChosen = false;
+  Future<void> _languageWrites = Future.value();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    try {
+      final language = AppLanguage.fromCode(await widget.store.loadLanguage());
+      if (mounted && !_languageChosen && language != null) {
+        setState(() => _locale = Locale(language.code));
+      }
+    } catch (error) {
+      // A failed preference read leaves the device locale (or English fallback).
+      debugPrint('Could not load language preference: $error');
+    }
+  }
+
+  Future<void> _setLanguage(String code) {
+    _languageChosen = true;
+    setState(() => _locale = Locale(code));
+    final write = _languageWrites.then((_) => widget.store.saveLanguage(code));
+    // Serialize writes without letting a failed write block later choices.
+    _languageWrites = write.catchError((Object _) {});
+    return write;
+  }
+
+  @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'Sanqi',
+    locale: _locale,
+    // Use delegates matching our UI packages rather than the SDK's legacy types.
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+    ],
+    supportedLocales: [
+      for (final language in AppLanguage.values) Locale(language.code),
+    ],
     theme: ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF315948)),
       scaffoldBackgroundColor: const Color(0xFFE9DFC9),
       appBarTheme: const AppBarTheme(backgroundColor: Color(0xFFE9DFC9)),
       useMaterial3: true,
     ),
-    home: GameScreen(createService: createService, store: store),
+    home: GameScreen(
+      createService: widget.createService,
+      store: widget.store,
+      onLanguageChanged: _setLanguage,
+    ),
   );
 }
 
@@ -47,10 +104,12 @@ class GameScreen extends StatefulWidget {
     super.key,
     required this.createService,
     required this.store,
+    this.onLanguageChanged,
   });
 
   final Future<GameService> Function() createService;
   final GameStore store;
+  final Future<void> Function(String code)? onLanguageChanged;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -60,7 +119,12 @@ class _GameScreenState extends State<GameScreen> {
   final _recordController = TextEditingController();
   GameService? _service;
   GameView? _view;
-  String? _error;
+  String Function(AppLocalizations)? _error;
+  String Function(AppLocalizations)? _languageError;
+  int _languageEpoch = 0;
+  AppLocalizations get _l =>
+      AppLocalizations.of(context) ??
+      lookupAppLocalizations(const Locale('en'));
   bool _busy = true;
   bool _thinking = false;
   int _searchEpoch = 0;
@@ -94,11 +158,11 @@ class _GameScreenState extends State<GameScreen> {
         final saved = await widget.store.load();
         if (saved != null) view = await service.restore(saved);
       } catch (error) {
-        _error = 'Could not restore saved game: $error';
+        _error = (l) => l.restoreSavedError('$error');
       }
       if (mounted) setState(() => _view = view);
     } catch (error) {
-      if (mounted) setState(() => _error = 'Could not open Sanqi: $error');
+      if (mounted) setState(() => _error = (l) => l.openError('$error'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -122,7 +186,8 @@ class _GameScreenState extends State<GameScreen> {
       final view = await service.computerTurn();
       if (!mounted || epoch != _searchEpoch) return;
       if (view == null) {
-        throw StateError('The computer could not choose a move. Please retry.');
+        setState(() => _error = (l) => l.computerNoMove);
+        return;
       }
       setState(() {
         _view = view;
@@ -135,7 +200,7 @@ class _GameScreenState extends State<GameScreen> {
       advanced = true;
     } catch (error) {
       if (mounted && epoch == _searchEpoch) {
-        setState(() => _error = 'Computer turn failed: $error');
+        setState(() => _error = (l) => l.computerError('$error'));
       }
     } finally {
       if (mounted && epoch == _searchEpoch) {
@@ -168,12 +233,12 @@ class _GameScreenState extends State<GameScreen> {
         await widget.store.save(view.movetext);
       } catch (error) {
         if (mounted) {
-          setState(() => _error = 'Game updated, but could not save: $error');
+          setState(() => _error = (l) => l.saveError('$error'));
         }
       }
       return true;
     } catch (error) {
-      if (mounted) setState(() => _error = 'Could not update game: $error');
+      if (mounted) setState(() => _error = (l) => l.updateError('$error'));
       try {
         final current = await service.view();
         if (!mounted) return false;
@@ -185,9 +250,7 @@ class _GameScreenState extends State<GameScreen> {
       } catch (recoveryError) {
         if (mounted) {
           setState(
-            () => _error =
-                'Could not update game: $error. '
-                'Could not refresh/save the current game: $recoveryError',
+            () => _error = (l) => l.recoveryError('$error', '$recoveryError'),
           );
         }
       }
@@ -204,17 +267,18 @@ class _GameScreenState extends State<GameScreen> {
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Save / restore game'),
+        title: Text(_l.saveTitle),
         content: SizedBox(
           width: 420,
           child: TextField(
             key: const Key('movetext-input'),
             controller: controller,
+            textDirection: TextDirection.ltr,
             minLines: 3,
             maxLines: 8,
-            decoration: const InputDecoration(
-              labelText: 'Movetext',
-              helperText: 'Copy to save elsewhere, or paste a game to restore.',
+            decoration: InputDecoration(
+              labelText: _l.movetextLabel,
+              helperText: _l.movetextHint,
               helperMaxLines: 3,
             ),
           ),
@@ -223,11 +287,11 @@ class _GameScreenState extends State<GameScreen> {
           TextButton(
             onPressed: () =>
                 Clipboard.setData(ClipboardData(text: controller.text)),
-            child: const Text('Copy'),
+            child: Text(_l.copy),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(_l.cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -238,11 +302,11 @@ class _GameScreenState extends State<GameScreen> {
                 Navigator.pop(dialogContext);
               } else if (dialogContext.mounted && mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(_error ?? 'Restore failed')),
+                  SnackBar(content: Text(_error?.call(_l) ?? _l.restoreFailed)),
                 );
               }
             },
-            child: const Text('Restore'),
+            child: Text(_l.restore),
           ),
         ],
       ),
@@ -257,6 +321,48 @@ class _GameScreenState extends State<GameScreen> {
     );
     final next = candidates[(current + 1) % candidates.length];
     await _act((service) => service.inspect(next.notation));
+  }
+
+  Future<void> _changeLanguage(String code) async {
+    final epoch = ++_languageEpoch;
+    setState(() => _languageError = null);
+    try {
+      await widget.onLanguageChanged?.call(code);
+    } catch (error) {
+      if (mounted && epoch == _languageEpoch) {
+        setState(() => _languageError = (l) => l.languageSaveError('$error'));
+      }
+    }
+  }
+
+  Widget _languageSelector() {
+    final current = AppLanguage.fromCode(_l.localeName) ?? AppLanguage.english;
+    return PopupMenuButton<String>(
+      key: const Key('language-selector'),
+      tooltip: _l.language,
+      enabled: widget.onLanguageChanged != null,
+      icon: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.language, size: 18),
+          const SizedBox(width: 4),
+          Text(current.flag, style: const TextStyle(fontSize: 18)),
+        ],
+      ),
+      onSelected: _changeLanguage,
+      itemBuilder: (context) => [
+        for (final language in AppLanguage.values)
+          PopupMenuItem(
+            value: language.code,
+            child: Text(
+              '${language.flag} ${language.name}',
+              textDirection: language == AppLanguage.arabic
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
+            ),
+          ),
+      ],
+    );
   }
 
   Widget _controls(
@@ -306,10 +412,16 @@ class _GameScreenState extends State<GameScreen> {
                     'assets/branding/sanqi-logo.svg',
                     width: 30,
                     height: 30,
-                    semanticsLabel: 'Sanqi logo',
+                    semanticsLabel: _l.logoLabel,
                   ),
                   const SizedBox(width: 8),
-                  Text('Sanqi', style: Theme.of(context).textTheme.titleLarge),
+                  Expanded(
+                    child: Text(
+                      'Sanqi',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  _languageSelector(),
                 ],
               ),
             ),
@@ -320,22 +432,33 @@ class _GameScreenState extends State<GameScreen> {
                 Expanded(
                   child: Text(
                     view.winner == null
-                        ? '${view.sideToMove} to move'
-                        : '${view.winner} wins',
+                        ? (view.sideToMove == 'White'
+                              ? _l.whiteToMove
+                              : _l.blackToMove)
+                        : (view.winner == 'White'
+                              ? _l.whiteWins
+                              : _l.blackWins),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
-                if (_thinking) const Text('Thinking…'),
-                if (view.computerBoth && _computerPaused) const Text('Paused'),
+                if (_thinking) Text(_l.thinking),
+                if (view.computerBoth && _computerPaused) Text(_l.paused),
                 if (!_busy &&
                     !_thinking &&
                     view.computerTurn &&
                     !_computerPaused)
-                  TextButton(
-                    onPressed: _maybeComputer,
-                    child: const Text('Retry computer move'),
+                  Flexible(
+                    flex: 2,
+                    child: TextButton(
+                      onPressed: _maybeComputer,
+                      child: Text(
+                        _l.retryComputer,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -357,22 +480,38 @@ class _GameScreenState extends State<GameScreen> {
                         ? 'Computer'
                         : view.humanColor ?? 'Local',
                     isExpanded: true,
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'Local',
-                        child: Text('Human vs Human'),
+                        child: Text(
+                          _l.humanHuman,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       DropdownMenuItem(
                         value: 'White',
-                        child: Text('Human vs Computer'),
+                        child: Text(
+                          _l.humanComputer,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       DropdownMenuItem(
                         value: 'Black',
-                        child: Text('Computer vs human'),
+                        child: Text(
+                          _l.computerHuman,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       DropdownMenuItem(
                         value: 'Computer',
-                        child: Text('Computer vs Computer'),
+                        child: Text(
+                          _l.computerComputer,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                     onChanged: _busy
@@ -395,7 +534,7 @@ class _GameScreenState extends State<GameScreen> {
             child: Row(
               children: [
                 button(
-                  'New Game',
+                  _l.newGame,
                   _busy
                       ? null
                       : () {
@@ -404,7 +543,7 @@ class _GameScreenState extends State<GameScreen> {
                         },
                 ),
                 button(
-                  'Undo',
+                  _l.undo,
                   _busy || !view.canUndo
                       ? null
                       : () {
@@ -412,7 +551,7 @@ class _GameScreenState extends State<GameScreen> {
                           _act((service) => service.undo());
                         },
                 ),
-                button('Save / restore', _busy ? null : _movetext),
+                button(_l.saveRestore, _busy ? null : _movetext),
               ],
             ),
           ),
@@ -421,14 +560,14 @@ class _GameScreenState extends State<GameScreen> {
             child: Row(
               children: [
                 button(
-                  'Example move',
+                  _l.exampleMove,
                   _busy || view.computerTurn || candidates.isEmpty
                       ? null
                       : () => _example(view),
                 ),
                 if (view.computerBoth)
                   button(
-                    _computerPaused ? 'Resume' : 'Pause',
+                    _computerPaused ? _l.resume : _l.pause,
                     _busy
                         ? null
                         : () {
@@ -447,7 +586,7 @@ class _GameScreenState extends State<GameScreen> {
                   Expanded(
                     child: Tooltip(
                       message: supportText.isEmpty
-                          ? 'Select a piece, then tap a destination to move.'
+                          ? _l.selectHint
                           : supportText,
                       child: Align(
                         alignment: Alignment.topLeft,
@@ -455,9 +594,20 @@ class _GameScreenState extends State<GameScreen> {
                           view.inspectedMove == null
                               ? (view.selected == null
                                     ? ''
-                                    : 'Selected ${squareName(view.selected!)} · ${view.legalMoves.where((move) => move.from == view.selected).length} legal moves')
+                                    : _l.selectedSummary(
+                                        squareName(view.selected!),
+                                        view.legalMoves
+                                            .where(
+                                              (move) =>
+                                                  move.from == view.selected,
+                                            )
+                                            .length,
+                                      ))
                               : '${view.inspectedMove!.notation} · $supportText',
                           maxLines: 2,
+                          textDirection: view.inspectedMove == null
+                              ? null
+                              : TextDirection.ltr,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
@@ -487,7 +637,7 @@ class _GameScreenState extends State<GameScreen> {
     final scaler = MediaQuery.textScalerOf(context);
     // Keep the end of the record visible even when only one line fits.
     final painter = TextPainter(
-      textDirection: Directionality.of(context),
+      textDirection: TextDirection.ltr,
       textScaler: scaler,
       maxLines: 2,
     );
@@ -507,7 +657,8 @@ class _GameScreenState extends State<GameScreen> {
     }
     painter.dispose();
     return Text(
-      record.isEmpty ? 'No moves yet' : suffix(low),
+      record.isEmpty ? _l.noMoves : suffix(low),
+      textDirection: record.isEmpty ? null : TextDirection.ltr,
       key: const Key('recent-moves'),
       maxLines: 2,
       overflow: TextOverflow.clip,
@@ -518,6 +669,7 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     final view = _view;
+    final error = _error ?? _languageError;
     return LayoutBuilder(
       builder: (context, screen) {
         final landscapeScreen = screen.maxWidth > screen.maxHeight;
@@ -530,10 +682,11 @@ class _GameScreenState extends State<GameScreen> {
                     padding: const EdgeInsets.all(8),
                     child: SvgPicture.asset(
                       'assets/branding/sanqi-logo.svg',
-                      semanticsLabel: 'Sanqi logo',
+                      semanticsLabel: _l.logoLabel,
                     ),
                   ),
                   title: const Text('Sanqi'),
+                  actions: [_languageSelector()],
                 ),
           body: CustomPaint(
             painter: const GameBackground(),
@@ -541,11 +694,11 @@ class _GameScreenState extends State<GameScreen> {
               child: Column(
                 children: [
                   if (_busy) const LinearProgressIndicator(),
-                  if (_error != null)
+                  if (error != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
-                        _error!,
+                        error(_l),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -560,7 +713,7 @@ class _GameScreenState extends State<GameScreen> {
                                 ? const CircularProgressIndicator()
                                 : FilledButton(
                                     onPressed: _initialize,
-                                    child: const Text('Retry'),
+                                    child: Text(_l.retry),
                                   ),
                           )
                         : LayoutBuilder(

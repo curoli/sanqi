@@ -17,6 +17,9 @@ Versioning.
 
 ### Added
 
+- Mobile language selector with flags and saved preferences for English, German,
+  Indonesian, Arabic, Chinese, Spanish, and Turkish, including right-to-left UI
+  for Arabic and unchanged board orientation/movetext.
 - Warm geometric mobile background, a bordered control panel, and tinted controls.
 - Responsive mobile layout without scrolling, cycling example moves, recent-move
   display, and Computer vs Computer play with pause/resume.

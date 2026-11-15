@@ -6,6 +6,17 @@ networking or multiplayer services.
 
 ## Play
 
+Use the globe-and-flag button in the header to choose **🇬🇧 English**,
+**🇩🇪 Deutsch**, **🇮🇩 Bahasa Indonesia**, **🇸🇦 العربية**, **🇨🇳 中文**,
+**🇪🇸 Español**, or **🇹🇷 Türkçe**. The header sits in the side panel in
+landscape. The app initially follows a supported device language, falling back
+to English; an explicit choice is remembered on this device. Changing language
+updates controls, status, dialogs, and error summaries without resetting the
+game, selection, or computer search. Arabic uses a right-to-left interface.
+The board orientation, coordinates, and canonical movetext remain unchanged;
+movetext and support coordinates are displayed left to right. Technical details
+reported by Rust or platform storage may retain their original wording.
+
 Use the game-mode dropdown: **Human vs Human**, **Human vs Computer**,
 **Computer vs human**, or **Computer vs Computer**. The first player is White;
 the second is Black. Changing mode starts a new game. The computer moves first
@@ -67,7 +78,18 @@ available screen without scrolling, placing controls below or beside the board
 to maximize its size. Only the latest moves are shown when space is limited;
 Save / restore always contains the complete record. Rust calls are
 asynchronous, controls are disabled while a call/save is outstanding, and errors
-are visible. Preferences store movetext and mode, never Dart-derived game state.
+are visible. Preferences store movetext, mode, and language, never Dart-derived
+game state.
+
+Translations live in `lib/l10n/app_*.arb`; `flutter gen-l10n` regenerates the
+committed typed Dart files in `lib/l10n/generated`. Add text to all seven
+catalogs, using placeholders and ICU plurals for dynamic messages. The app uses
+the localization delegates exported by `material_ui` and `cupertino_ui`, plus
+Flutter's widget delegate. Flutter 3.50's generator still emits references to
+the legacy Material/Cupertino delegates in its unused convenience list; the
+generated header suppresses that specific deprecation diagnostic. App analysis
+still covers the generated translations. iOS advertises all seven locales in
+`Runner/Info.plist`.
 
 In landscape the logo and title move into the side panel, so the board fills
 the safe height apart from an 8-pixel margin. Portrait retains the top header.

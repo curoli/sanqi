@@ -80,6 +80,8 @@ class RustGameService extends GameService {
 }
 
 abstract class GameStore {
+  Future<String?> loadLanguage() async => null;
+  Future<void> saveLanguage(String code) async {}
   Future<String?> load();
   Future<void> save(String movetext);
   Future<String?> loadHumanColor() async => null;
@@ -87,6 +89,13 @@ abstract class GameStore {
 }
 
 class PreferenceGameStore extends GameStore {
+  static const languageKey = 'sanqi.language.v1';
+  @override
+  Future<String?> loadLanguage() =>
+      SharedPreferencesAsync().getString(languageKey);
+  @override
+  Future<void> saveLanguage(String code) =>
+      SharedPreferencesAsync().setString(languageKey, code);
   static const storageKey = 'sanqi.movetext.v1';
   @override
   Future<String?> loadHumanColor() =>
