@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_app/board.dart';
@@ -7,21 +9,29 @@ import 'package:flutter_app/src/rust/api/game.dart';
 
 const move = MobileMove(from: 0, to: 17, notation: 'a1-b3');
 
-GameView snapshot({int? selected, bool played = false, bool preview = false}) =>
-    GameView(
-      svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#f5e6c8"/></svg>',
-      sideToMove: played ? 'Black' : 'White',
-      selected: selected,
-      legalMoves: played ? [] : [move],
-      inspectedMove: preview ? move : null,
-      supports: preview
-          ? [const SupportView(first: 1, second: 8, fileTwice: 1, rankTwice: 1)]
-          : [],
-      movetext: played ? '1. a1-b3' : '',
-      canUndo: played,
-    );
+GameView snapshot({
+  int? selected,
+  bool played = false,
+  bool preview = false,
+  String? humanColor,
+  bool computerTurn = false,
+}) => GameView(
+  revision: BigInt.zero,
+  computerTurn: computerTurn,
+  humanColor: humanColor,
+  svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#f5e6c8"/></svg>',
+  sideToMove: played ? 'Black' : 'White',
+  selected: selected,
+  legalMoves: played ? [] : [move],
+  inspectedMove: preview ? move : null,
+  supports: preview
+      ? [const SupportView(first: 1, second: 8, fileTwice: 1, rankTwice: 1)]
+      : [],
+  movetext: played ? '1. a1-b3' : '',
+  canUndo: played,
+);
 
-class FakeService implements GameService {
+class FakeService extends GameService {
   GameView current = snapshot();
   final calls = <String>[];
 
@@ -61,12 +71,27 @@ class FakeService implements GameService {
   }
 }
 
-class MemoryStore implements GameStore {
+class MemoryStore extends GameStore {
   String? text;
   @override
   Future<String?> load() async => text;
   @override
   Future<void> save(String movetext) async => text = movetext;
+}
+
+class PendingComputerService extends FakeService {
+  final reply = Completer<GameView?>();
+  int searches = 0;
+  @override
+  Future<GameView> startGame(String? humanColor) async => current = snapshot(
+    humanColor: humanColor,
+    computerTurn: humanColor == 'Black',
+  );
+  @override
+  Future<GameView?> computerTurn() {
+    searches++;
+    return reply.future;
+  }
 }
 
 Future<void> tapSquare(WidgetTester tester, int square) async {
@@ -82,6 +107,38 @@ Future<void> tapSquare(WidgetTester tester, int square) async {
 }
 
 void main() {
+  testWidgets(
+    'computer opening shows thinking and stale replies cannot replace a new local game',
+    (tester) async {
+      final service = PendingComputerService();
+      final store = MemoryStore();
+      await tester.binding.setSurfaceSize(const Size(430, 1100));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        SanqiApp(createService: () async => service, store: store),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('game-mode')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Computer opponent — play Black').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Computer is thinking…'), findsOneWidget);
+      expect(service.searches, 1);
+      expect(
+        tester.widget<SanqiBoard>(find.byType(SanqiBoard)).enabled,
+        isFalse,
+      );
+      await tester.tap(find.byKey(const Key('game-mode')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Local two-player game').last);
+      await tester.pumpAndSettle();
+      service.reply.complete(snapshot(played: true, humanColor: 'Black'));
+      await tester.pumpAndSettle();
+      expect(find.text('White to move'), findsOneWidget);
+      expect(find.text('Computer is thinking…'), findsNothing);
+      expect(store.text, '');
+    },
+  );
   test('coordinate mapping matches the SVG orientation at every square', () {
     for (final side in [240.0, 560.0]) {
       for (var square = 0; square < 64; square++) {

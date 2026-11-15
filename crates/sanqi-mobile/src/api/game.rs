@@ -18,6 +18,9 @@ pub struct SupportView {
 
 #[derive(Clone, Debug)]
 pub struct GameView {
+    pub revision: u64,
+    pub human_color: Option<String>,
+    pub computer_turn: bool,
     pub svg: String,
     pub side_to_move: String,
     pub winner: Option<String>,
@@ -31,6 +34,8 @@ pub struct GameView {
 
 #[frb(opaque)]
 pub struct MobileGame {
+    revision: u64,
+    human_color: Option<Color>,
     game: Game,
     selected: Option<Square>,
     inspected: Option<Move>,
@@ -39,6 +44,19 @@ pub struct MobileGame {
 
 pub fn create_game() -> MobileGame {
     MobileGame::new()
+}
+
+pub fn find_computer_move(movetext: String) -> Result<Option<String>, String> {
+    let game = Game::from_movetext(&movetext).map_err(|error| error.to_string())?;
+    let position = game.current_position();
+    if position.outcome().is_some() {
+        return Ok(None);
+    }
+    Ok(
+        sanqi_engine::analyze_iterative(position, 6, std::time::Duration::from_millis(600))
+            .best
+            .map(|result| result.best_move.to_string()),
+    )
 }
 
 fn move_view(mv: Move) -> MobileMove {
@@ -65,6 +83,8 @@ impl Default for MobileGame {
 impl MobileGame {
     pub fn new() -> Self {
         Self {
+            revision: 0,
+            human_color: None,
             game: Game::new(),
             selected: None,
             inspected: None,
@@ -87,6 +107,12 @@ impl MobileGame {
             None => sanqi_render::svg_board(position),
         };
         GameView {
+            revision: self.revision,
+            human_color: self.human_color.map(color_name),
+            computer_turn: self
+                .human_color
+                .is_some_and(|human| human != position.side_to_move())
+                && winner.is_none(),
             svg,
             side_to_move: color_name(position.side_to_move()),
             winner,
@@ -95,19 +121,21 @@ impl MobileGame {
             inspected_move: self.inspected.map(move_view),
             supports: self.last_supports.clone(),
             movetext: self.game.to_movetext(),
-            can_undo: !self.game.moves().is_empty(),
+            can_undo: !self.game.moves().is_empty()
+                && !(self.human_color == Some(Color::Black) && self.game.moves().len() == 1),
         }
     }
 
     pub fn tap(&mut self, index: u8) -> Result<GameView, String> {
         let square = Square::new(index).ok_or("Square must be between 0 and 63")?;
-        if self.game.current_position().outcome().is_some() {
+        if self.view().computer_turn || self.game.current_position().outcome().is_some() {
             return Ok(self.view());
         }
         if let Some(from) = self.selected {
             let mv = Move::new(from, square);
             if self.game.current_position().legal_moves().contains(&mv) {
                 self.game.play(mv).map_err(|error| error.to_string())?;
+                self.revision += 1;
                 self.selected = None;
                 self.inspected = None;
                 self.last_supports.clear();
@@ -151,17 +179,58 @@ impl MobileGame {
     }
 
     pub fn new_game(&mut self) -> GameView {
+        let revision = self.revision + 1;
+        let human_color = self.human_color;
         *self = Self::new();
+        self.revision = revision;
+        self.human_color = human_color;
         self.view()
+    }
+
+    pub fn start_game(&mut self, human_color: Option<String>) -> Result<GameView, String> {
+        let human = match human_color.as_deref() {
+            None => None,
+            Some("White") => Some(Color::White),
+            Some("Black") => Some(Color::Black),
+            _ => return Err("Human color must be White or Black".to_owned()),
+        };
+        self.human_color = human;
+        Ok(self.new_game())
+    }
+
+    pub fn apply_computer_move(
+        &mut self,
+        expected_revision: u64,
+        notation: String,
+    ) -> Result<GameView, String> {
+        if self.revision != expected_revision || !self.view().computer_turn {
+            return Ok(self.view());
+        }
+        self.game
+            .play_str(&notation)
+            .map_err(|error| error.to_string())?;
+        self.revision += 1;
+        self.selected = None;
+        self.inspected = None;
+        self.last_supports.clear();
+        Ok(self.view())
     }
 
     pub fn undo(&mut self) -> Result<GameView, String> {
         let mut replacement = Game::new();
         let moves = self.game.moves();
-        for mv in moves.iter().take(moves.len().saturating_sub(1)) {
+        let remove = if self.human_color == Some(self.game.current_position().side_to_move())
+            && moves.len() >= 2
+        {
+            2
+        } else {
+            1
+        };
+        for mv in moves.iter().take(moves.len().saturating_sub(remove)) {
             replacement.play(*mv).map_err(|error| error.to_string())?;
         }
         self.game = replacement;
+        self.revision += 1;
         self.selected = None;
         self.inspected = None;
         self.last_supports.clear();
@@ -171,6 +240,7 @@ impl MobileGame {
     pub fn restore(&mut self, movetext: String) -> Result<GameView, String> {
         let replacement = Game::from_movetext(&movetext).map_err(|error| error.to_string())?;
         self.game = replacement;
+        self.revision += 1;
         self.selected = None;
         self.inspected = None;
         self.last_supports.clear();
@@ -181,6 +251,64 @@ impl MobileGame {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn computer_search_is_legal_and_stale_results_cannot_change_a_new_game() {
+        let mut session = MobileGame::new();
+        let before = session.start_game(Some("Black".to_owned())).expect("mode");
+        assert!(before.computer_turn);
+        assert_eq!(session.tap(0).expect("blocked tap").movetext, "");
+        let reply = find_computer_move(before.movetext)
+            .expect("search")
+            .expect("move");
+        assert!(
+            session
+                .game
+                .current_position()
+                .legal_moves()
+                .iter()
+                .any(|mv| mv.to_string() == reply)
+        );
+        session.new_game();
+        assert_eq!(
+            session
+                .apply_computer_move(before.revision, reply)
+                .expect("stale")
+                .movetext,
+            ""
+        );
+    }
+
+    #[test]
+    fn computer_reply_and_undo_return_control_to_the_human() {
+        let mut session = MobileGame::new();
+        session.start_game(Some("White".to_owned())).expect("mode");
+        let mv = session.view().legal_moves[0].clone();
+        session.tap(mv.from).expect("select");
+        let pending = session.tap(mv.to).expect("human move");
+        assert!(pending.computer_turn);
+        let reply = find_computer_move(pending.movetext.clone())
+            .expect("search")
+            .expect("reply");
+        let played = session
+            .apply_computer_move(pending.revision, reply.clone())
+            .expect("computer");
+        assert!(!played.computer_turn);
+        assert_eq!(
+            session
+                .apply_computer_move(pending.revision, reply)
+                .expect("duplicate")
+                .movetext,
+            played.movetext
+        );
+        assert_eq!(session.undo().expect("undo round").movetext, "");
+        session.restore(pending.movetext).expect("restore pending");
+        assert!(session.view().computer_turn);
+        assert_eq!(session.undo().expect("undo pending").movetext, "");
+        assert!(!session.view().computer_turn);
+        session.start_game(None).expect("local mode");
+        assert_eq!(session.view().human_color, None);
+    }
 
     #[test]
     fn moves_and_turns_are_owned_by_game() {

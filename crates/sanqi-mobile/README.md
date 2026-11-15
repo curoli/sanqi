@@ -2,6 +2,15 @@
 
 Private Flutter Rust Bridge v2 adapter for the Sanqi mobile prototype.
 
+Computer play delegates to `sanqi-engine` on a detached movetext snapshot, with a
+600 ms iterative-search budget and depth cap 6. `find_computer_move` holds no
+live session lock. `apply_computer_move` requires the matching monotonic session
+revision and a computer turn before validating/playing the reply through core.
+Reset, restore, mode changes, and undo invalidate outstanding results, including
+results for a position that later happens to recur. New Game preserves the mode;
+`start_game` changes mode and resets. Computer-mode undo returns to the previous
+human decision point; local-mode undo remains one ply.
+
 `api::game::MobileGame` owns one `sanqi_core::Game`. The generated Dart object is
 an opaque handle, not a serialized game or a global singleton. Its asynchronous
 methods return immutable snapshots with the existing renderer's SVG, current

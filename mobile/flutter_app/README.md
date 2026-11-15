@@ -1,10 +1,26 @@
 # Sanqi mobile prototype
 
-Local human-vs-human Sanqi for Android (API 24+) and iOS (15+). This is a
+Local two-player or human-vs-computer Sanqi for Android (API 24+) and iOS (15+). This is a
 development prototype, not a signed store release. There are no accounts,
-networking, AI opponents, or multiplayer services.
+networking or multiplayer services.
 
 ## Play
+
+Use the game-mode dropdown to play locally with another person, or against the
+computer as White or Black. Changing mode starts a new game. The computer moves
+first when you choose Black. The board keeps White at the bottom in both modes.
+Computer search uses `sanqi-engine` iterative deepening (depth cap 6, 600 ms
+search budget) through the asynchronous Rust bridge, with a thinking indicator.
+New Game, mode changes, and Undo remain available during search. Work runs on a
+detached movetext snapshot; Rust revision checks discard outdated/duplicate
+results. An interrupted search may finish in the background but cannot play
+into a replacement game. Search failures expose a retry action.
+
+In computer mode Undo takes back your move and the computer's reply, or just
+your move if it is still thinking. The computer's opening move alone cannot be
+undone; use New Game instead. Local mode still undoes one ply. Mode/color are
+stored alongside the movetext preferences, and a restored computer turn resumes
+automatically.
 
 White is at the bottom and moves first. Tap a current-player piece to select it;
 green dots mark destinations supplied by Rust. Tap a destination to move. Tap

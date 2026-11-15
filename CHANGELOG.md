@@ -9,6 +9,8 @@ Versioning.
 
 ### Added
 
+- Mobile computer opponent with a choice of color, asynchronous time-bounded
+  search, thinking/retry UI, saved mode, stale-result protection, and round undo.
 - Private `sanqi-mobile` crate with Rust-owned local game sessions through
   Flutter Rust Bridge v2, leaving the existing crate APIs unchanged.
 - Android/iOS Flutter prototype with the Rust SVG board, legal move selection,

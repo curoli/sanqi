@@ -58,6 +58,8 @@ class _GameScreenState extends State<GameScreen> {
   GameView? _view;
   String? _error;
   bool _busy = true;
+  bool _thinking = false;
+  int _searchEpoch = 0;
 
   @override
   void initState() {
@@ -67,6 +69,7 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   void dispose() {
+    _searchEpoch++;
     _recordController.dispose();
     super.dispose();
   }
@@ -81,6 +84,8 @@ class _GameScreenState extends State<GameScreen> {
       _service = service;
       var view = await service.view();
       try {
+        final humanColor = await widget.store.loadHumanColor();
+        if (humanColor != null) view = await service.startGame(humanColor);
         final saved = await widget.store.load();
         if (saved != null) view = await service.restore(saved);
       } catch (error) {
@@ -92,12 +97,52 @@ class _GameScreenState extends State<GameScreen> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+    _maybeComputer();
+  }
+
+  Future<void> _maybeComputer() async {
+    final service = _service;
+    if (!mounted ||
+        _busy ||
+        _thinking ||
+        service == null ||
+        !(_view?.computerTurn ?? false)) {
+      return;
+    }
+    final epoch = ++_searchEpoch;
+    setState(() => _thinking = true);
+    try {
+      final view = await service.computerTurn();
+      if (!mounted || epoch != _searchEpoch) return;
+      if (view == null) {
+        throw StateError('The computer could not choose a move. Please retry.');
+      }
+      setState(() {
+        _view = view;
+        _busy = true;
+      });
+      await widget.store.saveHumanColor(view.humanColor);
+      await widget.store.save(view.movetext);
+    } catch (error) {
+      if (mounted && epoch == _searchEpoch) {
+        setState(() => _error = 'Computer turn failed: $error');
+      }
+    } finally {
+      if (mounted && epoch == _searchEpoch) {
+        setState(() {
+          _thinking = false;
+          _busy = false;
+        });
+      }
+    }
   }
 
   Future<bool> _act(Future<GameView> Function(GameService) action) async {
     final service = _service;
     if (_busy || service == null) return false;
+    _searchEpoch++;
     setState(() {
+      _thinking = false;
       _busy = true;
       _error = null;
     });
@@ -106,6 +151,7 @@ class _GameScreenState extends State<GameScreen> {
       if (!mounted) return false;
       setState(() => _view = view);
       try {
+        await widget.store.saveHumanColor(view.humanColor);
         await widget.store.save(view.movetext);
       } catch (error) {
         if (mounted) {
@@ -118,6 +164,7 @@ class _GameScreenState extends State<GameScreen> {
       return false;
     } finally {
       if (mounted) setState(() => _busy = false);
+      _maybeComputer();
     }
   }
 
@@ -185,7 +232,38 @@ class _GameScreenState extends State<GameScreen> {
               : '${view.winner} wins',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
-        const Text('Local two-player game'),
+        DropdownButton<String>(
+          key: const Key('game-mode'),
+          value: view.humanColor ?? 'Local',
+          isExpanded: true,
+          items: const [
+            DropdownMenuItem(
+              value: 'Local',
+              child: Text('Local two-player game'),
+            ),
+            DropdownMenuItem(
+              value: 'White',
+              child: Text('Computer opponent — play White'),
+            ),
+            DropdownMenuItem(
+              value: 'Black',
+              child: Text('Computer opponent — play Black'),
+            ),
+          ],
+          onChanged: _busy
+              ? null
+              : (value) => _act(
+                  (service) =>
+                      service.startGame(value == 'Local' ? null : value),
+                ),
+        ),
+        const Text('Changing mode starts a new game.'),
+        if (_thinking) const Text('Computer is thinking…'),
+        if (!_busy && !_thinking && view.computerTurn)
+          TextButton(
+            onPressed: _maybeComputer,
+            child: const Text('Retry computer move'),
+          ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -280,7 +358,10 @@ class _GameScreenState extends State<GameScreen> {
                       builder: (context, constraints) {
                         final board = SanqiBoard(
                           view: view,
-                          enabled: !_busy && view.winner == null,
+                          enabled:
+                              !_busy &&
+                              !view.computerTurn &&
+                              view.winner == null,
                           onTap: (square) =>
                               _act((service) => service.tap(square)),
                           onInspect: (move) =>

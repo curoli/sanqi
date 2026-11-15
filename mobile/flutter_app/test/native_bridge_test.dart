@@ -30,6 +30,16 @@ void main() {
       await expectLater(game.restore(movetext: 'invalid'), throwsA(anything));
       expect((await game.view()).movetext, played.movetext);
       expect((await game.undo()).svg, initial.svg);
+      final opening = await game.startGame(humanColor: 'Black');
+      expect(opening.computerTurn, isTrue);
+      final reply = await findComputerMove(movetext: opening.movetext);
+      expect(reply, isNotNull);
+      final playedOpening = await game.applyComputerMove(
+        expectedRevision: opening.revision,
+        notation: reply!,
+      );
+      expect(playedOpening.sideToMove, 'Black');
+      expect(playedOpening.computerTurn, isFalse);
       game.dispose();
       RustLib.dispose();
     },
