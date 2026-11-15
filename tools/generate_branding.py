@@ -20,7 +20,7 @@ def character(value, center_x, center_y, fill):
     bounds = BoundsPen(glyphs)
     glyph.draw(bounds)
     left, bottom, right, top = bounds.bounds
-    scale = min(154 / (right - left), 154 / (top - bottom))
+    scale = min(216 / (right - left), 216 / (top - bottom))
     pen = SVGPathPen(glyphs)
     glyph.draw(pen)
     offset_x = center_x - scale * (left + right) / 2
