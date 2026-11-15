@@ -35,10 +35,8 @@ board = (
     '<path fill="#a06b3b" d="M256 12h244v244H256zM12 256h244v244H12z"/>'
     + character("三", 134, 134, "#1f1f1f")
     + character("棋", 378, 134, "#fffdf7")
-    + '<circle cx="134" cy="378" r="72" fill="#fffdf7"/>'
-    '<circle cx="134" cy="378" r="61" fill="none" stroke="#56452f" stroke-width="3"/>'
-    '<circle cx="378" cy="378" r="72" fill="#1f1f1f"/>'
-    '<circle cx="378" cy="378" r="61" fill="none" stroke="#f2eadb" stroke-width="3"/>'
+    + '<circle cx="134" cy="378" r="76.25" fill="#fffdf7" stroke="#56452f" stroke-width="11.4375"/>'
+    '<circle cx="378" cy="378" r="76.25" fill="#1f1f1f" stroke="#f2eadb" stroke-width="11.4375"/>'
     '</g><rect x="12" y="12" width="488" height="488" rx="24" fill="none" stroke="#56452f" stroke-width="8"/>'
 )
 logo = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>Sanqi: 三棋 and two game pieces on four alternating squares</title>{board}</svg>\n'
