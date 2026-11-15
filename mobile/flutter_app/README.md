@@ -37,9 +37,11 @@ White is at the bottom and moves first. Tap a current-player piece to select it;
 green dots mark destinations supplied by Rust. Tap a destination to move. Tap
 the selected piece again or an unrelated square to clear selection.
 
-Select a piece and press **Example move** to inspect its first legal move
-without playing it. Press again to cycle through all its legal moves and wrap
-back to the first. Holding a legal destination also inspects that move.
+Press **Example move** to cycle through every legal move in the position,
+across all pieces, then wrap back to the first. The inspected move's piece is
+selected automatically, without playing a move. An existing selection does not
+restrict the cycle. The button is available on human turns with legal moves.
+Holding a legal destination also inspects that move.
 Blue rings mark supporting pieces and blue dots mark pivots. The compact panel
 shows support pairs; hold the text to see every pair, including shared pivots.
 Pivot coordinates start at a1=(0,0) and can include halves. Multiple pairs are
@@ -66,6 +68,11 @@ to maximize its size. Only the latest moves are shown when space is limited;
 Save / restore always contains the complete record. Rust calls are
 asynchronous, controls are disabled while a call/save is outstanding, and errors
 are visible. Preferences store movetext and mode, never Dart-derived game state.
+
+In landscape the logo and title move into the side panel, so the board fills
+the safe height apart from an 8-pixel margin. Portrait retains the top header.
+A muted diamond pattern sits behind the board and the cream control panel;
+buttons and the mode selector have borders and tinted backgrounds.
 
 ## Linux host setup
 

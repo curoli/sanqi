@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'board.dart';
+import 'game_background.dart';
 import 'game_service.dart';
 import 'src/rust/api/game.dart';
 import 'src/rust/frb_generated.dart';
@@ -33,6 +34,8 @@ class SanqiApp extends StatelessWidget {
     title: 'Sanqi',
     theme: ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF315948)),
+      scaffoldBackgroundColor: const Color(0xFFE9DFC9),
+      appBarTheme: const AppBarTheme(backgroundColor: Color(0xFFE9DFC9)),
       useMaterial3: true,
     ),
     home: GameScreen(createService: createService, store: store),
@@ -247,9 +250,7 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _example(GameView view) async {
-    final candidates = view.legalMoves
-        .where((move) => move.from == view.selected)
-        .toList();
+    final candidates = view.legalMoves;
     if (candidates.isEmpty) return;
     final current = candidates.indexWhere(
       (move) => move.notation == view.inspectedMove?.notation,
@@ -258,10 +259,13 @@ class _GameScreenState extends State<GameScreen> {
     await _act((service) => service.inspect(next.notation));
   }
 
-  Widget _controls(GameView view, double width, double height) {
-    final candidates = view.legalMoves
-        .where((move) => move.from == view.selected)
-        .toList();
+  Widget _controls(
+    GameView view,
+    double width,
+    double height, {
+    required bool showHeader,
+  }) {
+    final candidates = view.legalMoves;
     final supportText = view.supports
         .map(
           (pair) =>
@@ -270,12 +274,21 @@ class _GameScreenState extends State<GameScreen> {
         .join('; ');
     final record = view.movetext;
     Widget button(String label, VoidCallback? onPressed) => Expanded(
-      child: TextButton(
-        onPressed: onPressed,
-        style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Padding(
+        padding: const EdgeInsets.all(2),
+        child: OutlinedButton(
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            backgroundColor: const Color(0xFFE3E9D9),
+            disabledBackgroundColor: const Color(0xFFECE5D7),
+            side: const BorderSide(color: Color(0xFF879A7C)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: FittedBox(fit: BoxFit.scaleDown, child: Text(label)),
         ),
-        child: FittedBox(fit: BoxFit.scaleDown, child: Text(label)),
       ),
     );
     return SizedBox(
@@ -284,6 +297,22 @@ class _GameScreenState extends State<GameScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (showHeader)
+            SizedBox(
+              height: 40,
+              child: Row(
+                children: [
+                  SvgPicture.asset(
+                    'assets/branding/sanqi-logo.svg',
+                    width: 30,
+                    height: 30,
+                    semanticsLabel: 'Sanqi logo',
+                  ),
+                  const SizedBox(width: 8),
+                  Text('Sanqi', style: Theme.of(context).textTheme.titleLarge),
+                ],
+              ),
+            ),
           SizedBox(
             height: 28,
             child: Row(
@@ -313,36 +342,52 @@ class _GameScreenState extends State<GameScreen> {
           ),
           SizedBox(
             height: 44,
-            child: DropdownButton<String>(
-              key: const Key('game-mode'),
-              value: view.computerBoth
-                  ? 'Computer'
-                  : view.humanColor ?? 'Local',
-              isExpanded: true,
-              items: const [
-                DropdownMenuItem(value: 'Local', child: Text('Human vs Human')),
-                DropdownMenuItem(
-                  value: 'White',
-                  child: Text('Human vs Computer'),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF2E8D3),
+                border: Border.all(color: const Color(0xFFB39D7D)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    key: const Key('game-mode'),
+                    value: view.computerBoth
+                        ? 'Computer'
+                        : view.humanColor ?? 'Local',
+                    isExpanded: true,
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'Local',
+                        child: Text('Human vs Human'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'White',
+                        child: Text('Human vs Computer'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Black',
+                        child: Text('Computer vs human'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Computer',
+                        child: Text('Computer vs Computer'),
+                      ),
+                    ],
+                    onChanged: _busy
+                        ? null
+                        : (value) {
+                            _computerPaused = false;
+                            _act(
+                              (service) => service.startGame(
+                                value == 'Local' ? null : value,
+                              ),
+                            );
+                          },
+                  ),
                 ),
-                DropdownMenuItem(
-                  value: 'Black',
-                  child: Text('Computer vs human'),
-                ),
-                DropdownMenuItem(
-                  value: 'Computer',
-                  child: Text('Computer vs Computer'),
-                ),
-              ],
-              onChanged: _busy
-                  ? null
-                  : (value) {
-                      _computerPaused = false;
-                      _act(
-                        (service) =>
-                            service.startGame(value == 'Local' ? null : value),
-                      );
-                    },
+              ),
             ),
           ),
           SizedBox(
@@ -409,8 +454,8 @@ class _GameScreenState extends State<GameScreen> {
                         child: Text(
                           view.inspectedMove == null
                               ? (view.selected == null
-                                    ? 'White starts at the bottom.'
-                                    : 'Selected ${squareName(view.selected!)} · ${candidates.length} legal moves')
+                                    ? ''
+                                    : 'Selected ${squareName(view.selected!)} · ${view.legalMoves.where((move) => move.from == view.selected).length} legal moves')
                               : '${view.inspectedMove!.notation} · $supportText',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -473,117 +518,157 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     final view = _view;
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 48,
-        leading: Padding(
-          padding: const EdgeInsets.all(8),
-          child: SvgPicture.asset(
-            'assets/branding/sanqi-logo.svg',
-            semanticsLabel: 'Sanqi logo',
-          ),
-        ),
-        title: const Text('Sanqi'),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            if (_busy) const LinearProgressIndicator(),
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  _error!,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-              ),
-            Expanded(
-              child: view == null
-                  ? Center(
-                      child: _busy
-                          ? const CircularProgressIndicator()
-                          : FilledButton(
-                              onPressed: _initialize,
-                              child: const Text('Retry'),
-                            ),
-                    )
-                  : LayoutBuilder(
-                      builder: (context, constraints) {
-                        final width = math.max(0.0, constraints.maxWidth - 16);
-                        final height = math.max(
-                          0.0,
-                          constraints.maxHeight - 16,
-                        );
-                        final panelHeight = math.min(220.0, height * .45);
-                        final panelWidth = math.min(260.0, width * .42);
-                        final portraitSide = math.min(
-                          width,
-                          math.max(0.0, height - panelHeight - 8),
-                        );
-                        final landscapeSide = math.min(
-                          height,
-                          math.max(0.0, width - panelWidth - 8),
-                        );
-                        final landscape = landscapeSide > portraitSide;
-                        final side = landscape ? landscapeSide : portraitSide;
-                        final board = SizedBox(
-                          width: side,
-                          height: side,
-                          child: SanqiBoard(
-                            view: view,
-                            enabled:
-                                !_busy &&
-                                !view.computerTurn &&
-                                view.winner == null,
-                            onTap: (square) =>
-                                _act((service) => service.tap(square)),
-                            onInspect: (move) =>
-                                _act((service) => service.inspect(move)),
-                          ),
-                        );
-                        final controlsWidth = landscape ? panelWidth : width;
-                        final controlsHeight = landscape ? height : panelHeight;
-                        final controls = SizedBox(
-                          width: controlsWidth,
-                          height: controlsHeight,
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.topLeft,
-                            child: _controls(
-                              view,
-                              controlsWidth,
-                              math.max(212.0, controlsHeight),
-                            ),
-                          ),
-                        );
-                        return Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: landscape
-                              ? Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    board,
-                                    const SizedBox(width: 8),
-                                    controls,
-                                  ],
-                                )
-                              : Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    board,
-                                    const SizedBox(height: 8),
-                                    controls,
-                                  ],
-                                ),
-                        );
-                      },
+    return LayoutBuilder(
+      builder: (context, screen) {
+        final landscapeScreen = screen.maxWidth > screen.maxHeight;
+        return Scaffold(
+          appBar: landscapeScreen
+              ? null
+              : AppBar(
+                  toolbarHeight: 48,
+                  leading: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: SvgPicture.asset(
+                      'assets/branding/sanqi-logo.svg',
+                      semanticsLabel: 'Sanqi logo',
                     ),
+                  ),
+                  title: const Text('Sanqi'),
+                ),
+          body: CustomPaint(
+            painter: const GameBackground(),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  if (_busy) const LinearProgressIndicator(),
+                  if (_error != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        _error!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                  Expanded(
+                    child: view == null
+                        ? Center(
+                            child: _busy
+                                ? const CircularProgressIndicator()
+                                : FilledButton(
+                                    onPressed: _initialize,
+                                    child: const Text('Retry'),
+                                  ),
+                          )
+                        : LayoutBuilder(
+                            builder: (context, constraints) {
+                              final width = math.max(
+                                0.0,
+                                constraints.maxWidth - 16,
+                              );
+                              final height = math.max(
+                                0.0,
+                                constraints.maxHeight - 16,
+                              );
+                              final panelHeight = math.min(220.0, height * .45);
+                              final panelWidth = math.min(260.0, width * .42);
+                              final portraitSide = math.min(
+                                width,
+                                math.max(0.0, height - panelHeight - 8),
+                              );
+                              final landscapeSide = math.min(
+                                height,
+                                math.max(0.0, width - panelWidth - 8),
+                              );
+                              final landscape = landscapeSide > portraitSide;
+                              final side = landscape
+                                  ? landscapeSide
+                                  : portraitSide;
+                              final board = SizedBox(
+                                width: side,
+                                height: side,
+                                child: SanqiBoard(
+                                  view: view,
+                                  enabled:
+                                      !_busy &&
+                                      !view.computerTurn &&
+                                      view.winner == null,
+                                  onTap: (square) =>
+                                      _act((service) => service.tap(square)),
+                                  onInspect: (move) =>
+                                      _act((service) => service.inspect(move)),
+                                ),
+                              );
+                              final controlsWidth = landscape
+                                  ? panelWidth
+                                  : width;
+                              final controlsHeight = landscape
+                                  ? height
+                                  : panelHeight;
+                              final controls = SizedBox(
+                                width: controlsWidth,
+                                height: controlsHeight,
+                                child: DecoratedBox(
+                                  key: const Key('controls-panel'),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF8EFDD),
+                                    border: Border.all(
+                                      color: const Color(0xFFB39D7D),
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.topLeft,
+                                      child: _controls(
+                                        view,
+                                        math.max(0, controlsWidth - 16),
+                                        math.max(
+                                          212.0 + (landscapeScreen ? 40 : 0),
+                                          controlsHeight - 16,
+                                        ),
+                                        showHeader: landscapeScreen,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                              return Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: landscape
+                                    ? Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          board,
+                                          const SizedBox(width: 8),
+                                          controls,
+                                        ],
+                                      )
+                                    : Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          board,
+                                          const SizedBox(height: 8),
+                                          controls,
+                                        ],
+                                      ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
