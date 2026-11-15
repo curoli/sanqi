@@ -36,7 +36,7 @@ class RustGameService extends GameService {
   @override
   Future<GameView?> computerTurn() async {
     final snapshot = await game.view();
-    if (!snapshot.computerTurn) return null;
+    if (!snapshot.computerTurn) return snapshot;
     final move = await findComputerMove(movetext: snapshot.movetext);
     if (move == null) return null;
     return game.applyComputerMove(

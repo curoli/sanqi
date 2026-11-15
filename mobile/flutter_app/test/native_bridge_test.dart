@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_app/game_service.dart';
 import 'package:flutter_app/src/rust/api/game.dart';
 import 'package:flutter_app/src/rust/frb_generated.dart';
 
@@ -40,6 +41,9 @@ void main() {
       );
       expect(playedOpening.sideToMove, 'Black');
       expect(playedOpening.computerTurn, isFalse);
+      final humanTurn = await RustGameService(game).computerTurn();
+      expect(humanTurn?.movetext, playedOpening.movetext);
+      expect(humanTurn?.computerTurn, isFalse);
       game.dispose();
       RustLib.dispose();
     },

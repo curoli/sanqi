@@ -161,6 +161,21 @@ class _GameScreenState extends State<GameScreen> {
       return true;
     } catch (error) {
       if (mounted) setState(() => _error = 'Could not update game: $error');
+      try {
+        final current = await service.view();
+        if (!mounted) return false;
+        setState(() => _view = current);
+        await widget.store.saveHumanColor(current.humanColor);
+        await widget.store.save(current.movetext);
+      } catch (recoveryError) {
+        if (mounted) {
+          setState(
+            () => _error =
+                'Could not update game: $error. '
+                'Could not refresh/save the current game: $recoveryError',
+          );
+        }
+      }
       return false;
     } finally {
       if (mounted) setState(() => _busy = false);

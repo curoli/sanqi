@@ -106,7 +106,64 @@ Future<void> tapSquare(WidgetTester tester, int square) async {
   await tester.pumpAndSettle();
 }
 
+class FailedImportDuringSearchService extends PendingComputerService {
+  @override
+  Future<GameView?> computerTurn() {
+    if (!current.computerTurn) {
+      searches++;
+      return Future.value(null);
+    }
+    return super.computerTurn();
+  }
+
+  @override
+  Future<GameView> restore(String movetext) async {
+    current = snapshot(played: true, humanColor: 'Black');
+    reply.complete(current);
+    throw StateError('invalid movetext');
+  }
+}
+
 void main() {
+  testWidgets(
+    'failed import reconciles a committed reply whose UI epoch was invalidated',
+    (tester) async {
+      final service = FailedImportDuringSearchService();
+      final store = MemoryStore();
+      await tester.binding.setSurfaceSize(const Size(430, 1100));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        SanqiApp(createService: () async => service, store: store),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('game-mode')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Computer opponent — play Black').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Computer is thinking…'), findsOneWidget);
+      await tester.tap(find.text('Save / restore'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('movetext-input')),
+        'invalid',
+      );
+      await tester.tap(find.text('Restore'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.textContaining('invalid movetext'), findsWidgets);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(find.text('Black to move'), findsOneWidget);
+      expect(
+        tester.widget<SanqiBoard>(find.byType(SanqiBoard)).enabled,
+        isTrue,
+      );
+      expect(find.text('Retry computer move'), findsNothing);
+      expect(find.text('Computer is thinking…'), findsNothing);
+      expect(store.text, '1. a1-b3');
+      expect(service.searches, 1);
+    },
+  );
   testWidgets(
     'computer opening shows thinking and stale replies cannot replace a new local game',
     (tester) async {
