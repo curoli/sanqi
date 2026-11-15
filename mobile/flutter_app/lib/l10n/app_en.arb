@@ -1,0 +1,103 @@
+{
+  "@@locale": "en",
+  "language": "Language",
+  "logoLabel": "Sanqi logo",
+  "humanHuman": "Human vs Human",
+  "humanComputer": "Human vs Computer",
+  "computerHuman": "Computer vs human",
+  "computerComputer": "Computer vs Computer",
+  "newGame": "New Game",
+  "undo": "Undo",
+  "saveRestore": "Save / restore",
+  "exampleMove": "Example move",
+  "pause": "Pause",
+  "resume": "Resume",
+  "thinking": "Thinking…",
+  "paused": "Paused",
+  "retryComputer": "Retry computer move",
+  "retry": "Retry",
+  "whiteToMove": "White to move",
+  "blackToMove": "Black to move",
+  "whiteWins": "White wins",
+  "blackWins": "Black wins",
+  "selectedSummary": "Selected {square} · {count, plural, =0{no legal moves} one{1 legal move} other{{count} legal moves}}",
+  "@selectedSummary": {
+    "placeholders": {
+      "square": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectHint": "Select a piece, then tap a destination to move.",
+  "noMoves": "No moves yet",
+  "saveTitle": "Save / restore game",
+  "movetextLabel": "Movetext",
+  "movetextHint": "Copy to save elsewhere, or paste a game to restore.",
+  "copy": "Copy",
+  "cancel": "Cancel",
+  "restore": "Restore",
+  "restoreFailed": "Restore failed",
+  "computerNoMove": "The computer could not choose a move. Please retry.",
+  "restoreSavedError": "Could not restore saved game: {error}",
+  "@restoreSavedError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "openError": "Could not open Sanqi: {error}",
+  "@openError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "computerError": "Computer turn failed: {error}",
+  "@computerError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "saveError": "Game updated, but could not save: {error}",
+  "@saveError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "updateError": "Could not update game: {error}",
+  "@updateError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "recoveryError": "Could not update game: {error}. Could not refresh/save the current game: {recoveryError}",
+  "@recoveryError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      },
+      "recoveryError": {
+        "type": "String"
+      }
+    }
+  },
+  "languageSaveError": "Could not save language preference: {error}",
+  "@languageSaveError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+}
