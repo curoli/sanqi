@@ -30,5 +30,25 @@ flutter:
   assets:
     - assets/branding/sanqi-logo.svg
     - assets/branding/FONT-LICENSE.txt
+    - assets/fonts/licenses/
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf
+    - family: Lora
+      fonts:
+        - asset: assets/fonts/Lora.ttf
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito.ttf
+    - family: SpaceMono
+      fonts:
+        - asset: assets/fonts/SpaceMono.ttf
+    - family: NotoSansArabic
+      fonts:
+        - asset: assets/fonts/NotoSansArabic.ttf
+    - family: NotoNaskhArabic
+      fonts:
+        - asset: assets/fonts/NotoNaskhArabic.ttf
   config:
     enable-swift-package-manager: false

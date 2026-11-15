@@ -417,6 +417,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More below — scroll'**
   String get moreBelow;
+
+  /// No description provided for @chooseSkin.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose skin'**
+  String get chooseSkin;
+
+  /// No description provided for @skinScrollHint.
+  ///
+  /// In en, this message translates to:
+  /// **'14 skins · scroll to see them all'**
+  String get skinScrollHint;
+
+  /// No description provided for @lightSkin.
+  ///
+  /// In en, this message translates to:
+  /// **'Light skin'**
+  String get lightSkin;
+
+  /// No description provided for @darkSkin.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark skin'**
+  String get darkSkin;
+
+  /// No description provided for @fontLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Font licenses'**
+  String get fontLicenses;
+
+  /// No description provided for @skinSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save skin preference: {error}'**
+  String skinSaveError(String error);
+
+  /// No description provided for @skinLinen.
+  ///
+  /// In en, this message translates to:
+  /// **'Linen'**
+  String get skinLinen;
+
+  /// No description provided for @skinPorcelain.
+  ///
+  /// In en, this message translates to:
+  /// **'Porcelain'**
+  String get skinPorcelain;
+
+  /// No description provided for @skinMint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mint'**
+  String get skinMint;
+
+  /// No description provided for @skinSakura.
+  ///
+  /// In en, this message translates to:
+  /// **'Sakura'**
+  String get skinSakura;
+
+  /// No description provided for @skinSorbet.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorbet'**
+  String get skinSorbet;
+
+  /// No description provided for @skinLagoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Lagoon'**
+  String get skinLagoon;
+
+  /// No description provided for @skinSunflower.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunflower'**
+  String get skinSunflower;
+
+  /// No description provided for @skinBlueprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Blueprint'**
+  String get skinBlueprint;
+
+  /// No description provided for @skinArcade.
+  ///
+  /// In en, this message translates to:
+  /// **'Arcade'**
+  String get skinArcade;
+
+  /// No description provided for @skinMidnight.
+  ///
+  /// In en, this message translates to:
+  /// **'Midnight'**
+  String get skinMidnight;
+
+  /// No description provided for @skinGraphite.
+  ///
+  /// In en, this message translates to:
+  /// **'Graphite'**
+  String get skinGraphite;
+
+  /// No description provided for @skinEmber.
+  ///
+  /// In en, this message translates to:
+  /// **'Ember'**
+  String get skinEmber;
+
+  /// No description provided for @skinGilded.
+  ///
+  /// In en, this message translates to:
+  /// **'Gilded'**
+  String get skinGilded;
+
+  /// No description provided for @skinAurora.
+  ///
+  /// In en, this message translates to:
+  /// **'Aurora'**
+  String get skinAurora;
 }
 
 class _AppLocalizationsDelegate

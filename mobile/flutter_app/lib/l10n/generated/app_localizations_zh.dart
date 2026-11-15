@@ -181,4 +181,66 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get moreBelow => '向下滚动查看更多';
+
+  @override
+  String get chooseSkin => '选择皮肤';
+
+  @override
+  String get skinScrollHint => '14 种皮肤 · 滚动查看全部';
+
+  @override
+  String get lightSkin => '明亮皮肤';
+
+  @override
+  String get darkSkin => '深色皮肤';
+
+  @override
+  String get fontLicenses => '字体许可';
+
+  @override
+  String skinSaveError(String error) {
+    return '无法保存皮肤设置：$error';
+  }
+
+  @override
+  String get skinLinen => '亚麻';
+
+  @override
+  String get skinPorcelain => '瓷白';
+
+  @override
+  String get skinMint => '薄荷';
+
+  @override
+  String get skinSakura => '樱花';
+
+  @override
+  String get skinSorbet => '果霜';
+
+  @override
+  String get skinLagoon => '潟湖';
+
+  @override
+  String get skinSunflower => '向日葵';
+
+  @override
+  String get skinBlueprint => '蓝图';
+
+  @override
+  String get skinArcade => '街机';
+
+  @override
+  String get skinMidnight => '午夜';
+
+  @override
+  String get skinGraphite => '石墨';
+
+  @override
+  String get skinEmber => '余烬';
+
+  @override
+  String get skinGilded => '鎏金';
+
+  @override
+  String get skinAurora => '极光';
 }

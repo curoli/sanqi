@@ -192,4 +192,66 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get moreBelow => 'مرّر لعرض المزيد';
+
+  @override
+  String get chooseSkin => 'اختر مظهرًا';
+
+  @override
+  String get skinScrollHint => '١٤ مظهرًا · مرّر لرؤيتها جميعًا';
+
+  @override
+  String get lightSkin => 'مظهر فاتح';
+
+  @override
+  String get darkSkin => 'مظهر داكن';
+
+  @override
+  String get fontLicenses => 'تراخيص الخطوط';
+
+  @override
+  String skinSaveError(String error) {
+    return 'تعذر حفظ تفضيل المظهر: $error';
+  }
+
+  @override
+  String get skinLinen => 'كتان';
+
+  @override
+  String get skinPorcelain => 'خزف';
+
+  @override
+  String get skinMint => 'نعناع';
+
+  @override
+  String get skinSakura => 'ساكورا';
+
+  @override
+  String get skinSorbet => 'مثلجات';
+
+  @override
+  String get skinLagoon => 'بحيرة';
+
+  @override
+  String get skinSunflower => 'دوّار الشمس';
+
+  @override
+  String get skinBlueprint => 'مخطط أزرق';
+
+  @override
+  String get skinArcade => 'أركيد';
+
+  @override
+  String get skinMidnight => 'منتصف الليل';
+
+  @override
+  String get skinGraphite => 'غرافيت';
+
+  @override
+  String get skinEmber => 'جمر';
+
+  @override
+  String get skinGilded => 'مذهّب';
+
+  @override
+  String get skinAurora => 'شفق';
 }

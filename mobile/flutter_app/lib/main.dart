@@ -10,15 +10,19 @@ import 'package:material_ui/material_ui.dart';
 
 import 'about_dialog.dart';
 import 'app_language.dart';
+import 'app_skin.dart';
 import 'board.dart';
 import 'game_background.dart';
 import 'game_service.dart';
 import 'l10n/generated/app_localizations.dart';
+import 'skin_fonts.dart';
+import 'skin_picker.dart';
 import 'src/rust/api/game.dart';
 import 'src/rust/frb_generated.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  registerSkinFontLicenses();
   runApp(
     SanqiApp(
       createService: () async {
@@ -41,6 +45,9 @@ class SanqiApp extends StatefulWidget {
 }
 
 class _SanqiAppState extends State<SanqiApp> {
+  AppSkin _skin = AppSkin.linen;
+  bool _skinChosen = false;
+  Future<void> _skinWrites = Future.value();
   Locale? _locale;
   bool _languageChosen = false;
   Future<void> _languageWrites = Future.value();
@@ -49,6 +56,24 @@ class _SanqiAppState extends State<SanqiApp> {
   void initState() {
     super.initState();
     _loadLanguage();
+    _loadSkin();
+  }
+
+  Future<void> _loadSkin() async {
+    try {
+      final skin = AppSkin.fromId(await widget.store.loadSkin());
+      if (mounted && !_skinChosen && skin != null) setState(() => _skin = skin);
+    } catch (error) {
+      debugPrint('Could not load skin preference: $error');
+    }
+  }
+
+  Future<void> _setSkin(AppSkin skin) {
+    _skinChosen = true;
+    setState(() => _skin = skin);
+    final write = _skinWrites.then((_) => widget.store.saveSkin(skin.name));
+    _skinWrites = write.catchError((Object _) {});
+    return write;
   }
 
   Future<void> _loadLanguage() async {
@@ -75,6 +100,7 @@ class _SanqiAppState extends State<SanqiApp> {
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'Sanqi',
+    debugShowCheckedModeBanner: false,
     locale: _locale,
     // Use delegates matching our UI packages rather than the SDK's legacy types.
     localizationsDelegates: const [
@@ -86,16 +112,21 @@ class _SanqiAppState extends State<SanqiApp> {
     supportedLocales: [
       for (final language in AppLanguage.values) Locale(language.code),
     ],
-    theme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF315948)),
-      scaffoldBackgroundColor: const Color(0xFFE9DFC9),
-      appBarTheme: const AppBarTheme(backgroundColor: Color(0xFFE9DFC9)),
-      useMaterial3: true,
+    theme: _skin.theme,
+    themeAnimationDuration: Duration.zero,
+    builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+      value:
+          (_skin.brightness == Brightness.dark
+                  ? SystemUiOverlayStyle.light
+                  : SystemUiOverlayStyle.dark)
+              .copyWith(systemNavigationBarColor: _skin.background),
+      child: child!,
     ),
     home: GameScreen(
       createService: widget.createService,
       store: widget.store,
       onLanguageChanged: _setLanguage,
+      onSkinChanged: _setSkin,
     ),
   );
 }
@@ -106,11 +137,13 @@ class GameScreen extends StatefulWidget {
     required this.createService,
     required this.store,
     this.onLanguageChanged,
+    this.onSkinChanged,
   });
 
   final Future<GameService> Function() createService;
   final GameStore store;
   final Future<void> Function(String code)? onLanguageChanged;
+  final Future<void> Function(AppSkin skin)? onSkinChanged;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -122,6 +155,8 @@ class _GameScreenState extends State<GameScreen> {
   GameView? _view;
   String Function(AppLocalizations)? _error;
   String Function(AppLocalizations)? _languageError;
+  String Function(AppLocalizations)? _skinError;
+  int _skinEpoch = 0;
   int _languageEpoch = 0;
   AppLocalizations get _l =>
       AppLocalizations.of(context) ??
@@ -336,6 +371,31 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
+  Future<void> _chooseSkin() async {
+    final skin = await showDialog<AppSkin>(
+      context: context,
+      builder: (_) => SkinPicker(selected: AppSkin.of(context)),
+    );
+    if (skin == null || !mounted) return;
+    final epoch = ++_skinEpoch;
+    setState(() => _skinError = null);
+    try {
+      await widget.onSkinChanged?.call(skin);
+    } catch (error) {
+      if (mounted && epoch == _skinEpoch) {
+        setState(() => _skinError = (l) => l.skinSaveError('$error'));
+      }
+    }
+  }
+
+  Widget _skinSelector() => IconButton(
+    key: const Key('skin-selector'),
+    tooltip: _l.chooseSkin,
+    onPressed: widget.onSkinChanged == null ? null : _chooseSkin,
+    icon: const Icon(Icons.palette_outlined),
+    visualDensity: VisualDensity.compact,
+  );
+
   Widget _languageSelector() {
     final current = AppLanguage.fromCode(_l.localeName) ?? AppLanguage.english;
     return PopupMenuButton<String>(
@@ -372,6 +432,7 @@ class _GameScreenState extends State<GameScreen> {
     double height, {
     required bool showHeader,
   }) {
+    final skin = AppSkin.of(context);
     final candidates = view.legalMoves;
     final supportText = view.supports
         .map(
@@ -387,12 +448,6 @@ class _GameScreenState extends State<GameScreen> {
           onPressed: onPressed,
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            backgroundColor: const Color(0xFFE3E9D9),
-            disabledBackgroundColor: const Color(0xFFECE5D7),
-            side: const BorderSide(color: Color(0xFF879A7C)),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
           ),
           child: FittedBox(fit: BoxFit.scaleDown, child: Text(label)),
         ),
@@ -419,10 +474,13 @@ class _GameScreenState extends State<GameScreen> {
                   Expanded(
                     child: Text(
                       'Sanqi',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
                   _languageSelector(),
+                  _skinSelector(),
                 ],
               ),
             ),
@@ -468,9 +526,9 @@ class _GameScreenState extends State<GameScreen> {
             height: 44,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: const Color(0xFFF2E8D3),
-                border: Border.all(color: const Color(0xFFB39D7D)),
-                borderRadius: BorderRadius.circular(8),
+                color: skin.button,
+                border: Border.all(color: skin.border),
+                borderRadius: BorderRadius.circular(skin.radius),
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -481,6 +539,7 @@ class _GameScreenState extends State<GameScreen> {
                         ? 'Computer'
                         : view.humanColor ?? 'Local',
                     isExpanded: true,
+                    dropdownColor: skin.surface,
                     items: [
                       DropdownMenuItem(
                         value: 'Local',
@@ -677,7 +736,8 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     final view = _view;
-    final error = _error ?? _languageError;
+    final error = _error ?? _languageError ?? _skinError;
+    final skin = AppSkin.of(context);
     return LayoutBuilder(
       builder: (context, screen) {
         final landscapeScreen = screen.maxWidth > screen.maxHeight;
@@ -694,10 +754,10 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                   ),
                   title: const Text('Sanqi'),
-                  actions: [_languageSelector()],
+                  actions: [_languageSelector(), _skinSelector()],
                 ),
           body: CustomPaint(
-            painter: const GameBackground(),
+            painter: GameBackground(skin: skin),
             child: SafeArea(
               child: Column(
                 children: [
@@ -775,11 +835,11 @@ class _GameScreenState extends State<GameScreen> {
                                 child: DecoratedBox(
                                   key: const Key('controls-panel'),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF8EFDD),
-                                    border: Border.all(
-                                      color: const Color(0xFFB39D7D),
+                                    color: skin.surface,
+                                    border: Border.all(color: skin.border),
+                                    borderRadius: BorderRadius.circular(
+                                      skin.radius,
                                     ),
-                                    borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(8),

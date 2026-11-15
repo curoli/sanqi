@@ -185,4 +185,66 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get moreBelow => 'Devamı için kaydırın';
+
+  @override
+  String get chooseSkin => 'Görünüm seç';
+
+  @override
+  String get skinScrollHint => '14 görünüm · tümü için kaydırın';
+
+  @override
+  String get lightSkin => 'Açık görünüm';
+
+  @override
+  String get darkSkin => 'Koyu görünüm';
+
+  @override
+  String get fontLicenses => 'Yazı tipi lisansları';
+
+  @override
+  String skinSaveError(String error) {
+    return 'Görünüm tercihi kaydedilemedi: $error';
+  }
+
+  @override
+  String get skinLinen => 'Keten';
+
+  @override
+  String get skinPorcelain => 'Porselen';
+
+  @override
+  String get skinMint => 'Nane';
+
+  @override
+  String get skinSakura => 'Sakura';
+
+  @override
+  String get skinSorbet => 'Sorbe';
+
+  @override
+  String get skinLagoon => 'Lagün';
+
+  @override
+  String get skinSunflower => 'Ayçiçeği';
+
+  @override
+  String get skinBlueprint => 'Mavi Plan';
+
+  @override
+  String get skinArcade => 'Arcade';
+
+  @override
+  String get skinMidnight => 'Gece Yarısı';
+
+  @override
+  String get skinGraphite => 'Grafit';
+
+  @override
+  String get skinEmber => 'Köz';
+
+  @override
+  String get skinGilded => 'Yaldız';
+
+  @override
+  String get skinAurora => 'Kutup Işığı';
 }

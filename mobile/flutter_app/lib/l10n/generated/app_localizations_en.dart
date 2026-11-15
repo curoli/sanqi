@@ -191,4 +191,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moreBelow => 'More below — scroll';
+
+  @override
+  String get chooseSkin => 'Choose skin';
+
+  @override
+  String get skinScrollHint => '14 skins · scroll to see them all';
+
+  @override
+  String get lightSkin => 'Light skin';
+
+  @override
+  String get darkSkin => 'Dark skin';
+
+  @override
+  String get fontLicenses => 'Font licenses';
+
+  @override
+  String skinSaveError(String error) {
+    return 'Could not save skin preference: $error';
+  }
+
+  @override
+  String get skinLinen => 'Linen';
+
+  @override
+  String get skinPorcelain => 'Porcelain';
+
+  @override
+  String get skinMint => 'Mint';
+
+  @override
+  String get skinSakura => 'Sakura';
+
+  @override
+  String get skinSorbet => 'Sorbet';
+
+  @override
+  String get skinLagoon => 'Lagoon';
+
+  @override
+  String get skinSunflower => 'Sunflower';
+
+  @override
+  String get skinBlueprint => 'Blueprint';
+
+  @override
+  String get skinArcade => 'Arcade';
+
+  @override
+  String get skinMidnight => 'Midnight';
+
+  @override
+  String get skinGraphite => 'Graphite';
+
+  @override
+  String get skinEmber => 'Ember';
+
+  @override
+  String get skinGilded => 'Gilded';
+
+  @override
+  String get skinAurora => 'Aurora';
 }

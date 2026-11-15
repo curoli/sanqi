@@ -17,6 +17,9 @@ Versioning.
 
 ### Added
 
+- Fourteen mobile skins with light/dark palettes, geometric backgrounds, button
+  styling, and offline fonts; a localized preview chooser saves the selection
+  without changing the board, pieces, or game state.
 - Localized mobile About dialog with pronunciation, slogan, author credit,
   build date/commit metadata, and browser links to the repository and rules in
   the selected language. Links stay visible in a fixed footer; a scrollbar and
