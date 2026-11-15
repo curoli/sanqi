@@ -10,7 +10,8 @@ Versioning.
 ### Fixed
 
 - Use the full safe height for the mobile board in landscape by placing the
-  header beside it. Example move also works without selecting a movable piece.
+  header beside it. Example move cycles all legal moves across every piece,
+  regardless of the current selection.
 - Cancel mobile computer turns even when their initial Rust snapshot is still
   queued when Pause, New Game, Undo, restore, or a mode change occurs.
 

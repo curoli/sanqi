@@ -105,10 +105,13 @@ class PendingComputerService extends FakeService {
 }
 
 class CyclingService extends FakeService {
+  CyclingService() {
+    current = snapshot(moves: moves);
+  }
   static const moves = [
     move,
-    MobileMove(from: 0, to: 18, notation: 'a1-c3'),
-    MobileMove(from: 0, to: 19, notation: 'a1-d3'),
+    MobileMove(from: 1, to: 18, notation: 'b1-c3'),
+    MobileMove(from: 7, to: 19, notation: 'h1-d3'),
   ];
   @override
   Future<GameView> tap(int square) async =>
@@ -116,11 +119,12 @@ class CyclingService extends FakeService {
   @override
   Future<GameView> inspect(String notation) async {
     calls.add('inspect:$notation');
+    final inspected = moves.firstWhere((move) => move.notation == notation);
     return current = snapshot(
-      selected: 0,
+      selected: inspected.from,
       moves: moves,
       preview: true,
-      inspected: moves.firstWhere((move) => move.notation == notation),
+      inspected: inspected,
     );
   }
 }
@@ -201,31 +205,35 @@ void main() {
   );
 
   testWidgets(
-    'Example move cycles every destination and wraps without playing',
+    'Example move cycles all pieces and wraps with or without a selection',
     (tester) async {
-      final service = CyclingService();
-      await tester.pumpWidget(
-        SanqiApp(createService: () async => service, store: MemoryStore()),
-      );
-      await tester.pumpAndSettle();
-      await tapSquare(tester, 0);
-      for (final move in [
-        ...CyclingService.moves,
-        CyclingService.moves.first,
-      ]) {
-        await tester.tap(find.text('Example move'));
+      for (final selectFirst in [false, true]) {
+        final service = CyclingService();
+        await tester.pumpWidget(
+          SanqiApp(createService: () async => service, store: MemoryStore()),
+        );
         await tester.pumpAndSettle();
-        final view = tester.widget<SanqiBoard>(find.byType(SanqiBoard)).view;
-        expect(view.inspectedMove, move);
-        expect(view.supports, isNotEmpty);
-        expect(view.movetext, isEmpty);
+        if (selectFirst) await tapSquare(tester, 0);
+        for (final move in [
+          ...CyclingService.moves,
+          CyclingService.moves.first,
+        ]) {
+          await tester.tap(find.text('Example move'));
+          await tester.pumpAndSettle();
+          final view = tester.widget<SanqiBoard>(find.byType(SanqiBoard)).view;
+          expect(view.inspectedMove, move);
+          expect(view.selected, move.from);
+          expect(view.supports, isNotEmpty);
+          expect(view.movetext, isEmpty);
+        }
+        expect(service.calls, [
+          'inspect:a1-b3',
+          'inspect:b1-c3',
+          'inspect:h1-d3',
+          'inspect:a1-b3',
+        ]);
+        await tester.pumpWidget(const SizedBox());
       }
-      expect(service.calls, [
-        'inspect:a1-b3',
-        'inspect:a1-c3',
-        'inspect:a1-d3',
-        'inspect:a1-b3',
-      ]);
     },
   );
 

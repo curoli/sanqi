@@ -249,15 +249,8 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  List<MobileMove> _exampleCandidates(GameView view) {
-    final selected = view.legalMoves
-        .where((move) => move.from == view.selected)
-        .toList();
-    return selected.isEmpty ? view.legalMoves : selected;
-  }
-
   Future<void> _example(GameView view) async {
-    final candidates = _exampleCandidates(view);
+    final candidates = view.legalMoves;
     if (candidates.isEmpty) return;
     final current = candidates.indexWhere(
       (move) => move.notation == view.inspectedMove?.notation,
@@ -272,7 +265,7 @@ class _GameScreenState extends State<GameScreen> {
     double height, {
     required bool showHeader,
   }) {
-    final candidates = _exampleCandidates(view);
+    final candidates = view.legalMoves;
     final supportText = view.supports
         .map(
           (pair) =>
