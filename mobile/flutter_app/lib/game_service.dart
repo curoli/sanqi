@@ -9,9 +9,11 @@ abstract class GameService {
   Future<GameView> undo();
   Future<GameView> newGame();
   Future<GameView> restore(String movetext);
+  Future<GameView> startGame(String? humanColor) => newGame();
+  Future<GameView?> computerTurn() async => null;
 }
 
-class RustGameService implements GameService {
+class RustGameService extends GameService {
   RustGameService(this.game);
 
   final MobileGame game;
@@ -28,15 +30,42 @@ class RustGameService implements GameService {
   Future<GameView> newGame() => game.newGame();
   @override
   Future<GameView> restore(String movetext) => game.restore(movetext: movetext);
+  @override
+  Future<GameView> startGame(String? humanColor) =>
+      game.startGame(humanColor: humanColor);
+  @override
+  Future<GameView?> computerTurn() async {
+    final snapshot = await game.view();
+    if (!snapshot.computerTurn) return snapshot;
+    final move = await findComputerMove(movetext: snapshot.movetext);
+    if (move == null) return null;
+    return game.applyComputerMove(
+      expectedRevision: snapshot.revision,
+      notation: move,
+    );
+  }
 }
 
 abstract class GameStore {
   Future<String?> load();
   Future<void> save(String movetext);
+  Future<String?> loadHumanColor() async => null;
+  Future<void> saveHumanColor(String? color) async {}
 }
 
-class PreferenceGameStore implements GameStore {
+class PreferenceGameStore extends GameStore {
   static const storageKey = 'sanqi.movetext.v1';
+  @override
+  Future<String?> loadHumanColor() =>
+      SharedPreferencesAsync().getString('sanqi.humanColor.v1');
+  @override
+  Future<void> saveHumanColor(String? color) async {
+    if (color == null) {
+      await SharedPreferencesAsync().remove('sanqi.humanColor.v1');
+    } else {
+      await SharedPreferencesAsync().setString('sanqi.humanColor.v1', color);
+    }
+  }
 
   @override
   Future<String?> load() => SharedPreferencesAsync().getString(storageKey);

@@ -67,7 +67,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => 976157508;
+  int get rustContentHash => -240841055;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -79,6 +79,12 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
+  Future<GameView> crateApiGameMobileGameApplyComputerMove({
+    required MobileGame that,
+    required BigInt expectedRevision,
+    required String notation,
+  });
+
   Future<MobileGame> crateApiGameMobileGameDefault();
 
   Future<GameView> crateApiGameMobileGameInspectMove({
@@ -95,6 +101,11 @@ abstract class RustLibApi extends BaseApi {
     required String movetext,
   });
 
+  Future<GameView> crateApiGameMobileGameStartGame({
+    required MobileGame that,
+    String? humanColor,
+  });
+
   Future<GameView> crateApiGameMobileGameTap({
     required MobileGame that,
     required int index,
@@ -105,6 +116,8 @@ abstract class RustLibApi extends BaseApi {
   Future<GameView> crateApiGameMobileGameView({required MobileGame that});
 
   Future<MobileGame> crateApiGameCreateGame();
+
+  Future<String?> crateApiGameFindComputerMove({required String movetext});
 
   RustArcIncrementStrongCountFnType
   get rust_arc_increment_strong_count_MobileGame;
@@ -124,6 +137,46 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   });
 
   @override
+  Future<GameView> crateApiGameMobileGameApplyComputerMove({
+    required MobileGame that,
+    required BigInt expectedRevision,
+    required String notation,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMobileGame(
+            that,
+            serializer,
+          );
+          sse_encode_u_64(expectedRevision, serializer);
+          sse_encode_String(notation, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 1,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_game_view,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiGameMobileGameApplyComputerMoveConstMeta,
+        argValues: [that, expectedRevision, notation],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiGameMobileGameApplyComputerMoveConstMeta =>
+      const TaskConstMeta(
+        debugName: "MobileGame_apply_computer_move",
+        argNames: ["that", "expectedRevision", "notation"],
+      );
+
+  @override
   Future<MobileGame> crateApiGameMobileGameDefault() {
     return handler.executeNormal(
       NormalTask(
@@ -132,7 +185,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 1,
+            funcId: 2,
             port: port_,
           );
         },
@@ -168,7 +221,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 2,
+            funcId: 3,
             port: port_,
           );
         },
@@ -198,7 +251,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 4,
             port: port_,
           );
         },
@@ -230,7 +283,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 5,
             port: port_,
           );
         },
@@ -265,7 +318,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 6,
             port: port_,
           );
         },
@@ -287,6 +340,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<GameView> crateApiGameMobileGameStartGame({
+    required MobileGame that,
+    String? humanColor,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMobileGame(
+            that,
+            serializer,
+          );
+          sse_encode_opt_String(humanColor, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 7,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_game_view,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiGameMobileGameStartGameConstMeta,
+        argValues: [that, humanColor],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiGameMobileGameStartGameConstMeta =>
+      const TaskConstMeta(
+        debugName: "MobileGame_start_game",
+        argNames: ["that", "humanColor"],
+      );
+
+  @override
   Future<GameView> crateApiGameMobileGameTap({
     required MobileGame that,
     required int index,
@@ -303,7 +394,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 8,
             port: port_,
           );
         },
@@ -336,7 +427,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 9,
             port: port_,
           );
         },
@@ -367,7 +458,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 10,
             port: port_,
           );
         },
@@ -394,7 +485,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 9,
+            funcId: 11,
             port: port_,
           );
         },
@@ -412,6 +503,37 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiGameCreateGameConstMeta =>
       const TaskConstMeta(debugName: "create_game", argNames: []);
+
+  @override
+  Future<String?> crateApiGameFindComputerMove({required String movetext}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(movetext, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 12,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_String,
+          decodeErrorData: sse_decode_String,
+        ),
+        constMeta: kCrateApiGameFindComputerMoveConstMeta,
+        argValues: [movetext],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiGameFindComputerMoveConstMeta =>
+      const TaskConstMeta(
+        debugName: "find_computer_move",
+        argNames: ["movetext"],
+      );
 
   RustArcIncrementStrongCountFnType
   get rust_arc_increment_strong_count_MobileGame => wire
@@ -485,18 +607,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   GameView dco_decode_game_view(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 9)
-      throw Exception('unexpected arr length: expect 9 but see ${arr.length}');
+    if (arr.length != 12)
+      throw Exception('unexpected arr length: expect 12 but see ${arr.length}');
     return GameView(
-      svg: dco_decode_String(arr[0]),
-      sideToMove: dco_decode_String(arr[1]),
-      winner: dco_decode_opt_String(arr[2]),
-      selected: dco_decode_opt_box_autoadd_u_8(arr[3]),
-      legalMoves: dco_decode_list_mobile_move(arr[4]),
-      inspectedMove: dco_decode_opt_box_autoadd_mobile_move(arr[5]),
-      supports: dco_decode_list_support_view(arr[6]),
-      movetext: dco_decode_String(arr[7]),
-      canUndo: dco_decode_bool(arr[8]),
+      revision: dco_decode_u_64(arr[0]),
+      humanColor: dco_decode_opt_String(arr[1]),
+      computerTurn: dco_decode_bool(arr[2]),
+      svg: dco_decode_String(arr[3]),
+      sideToMove: dco_decode_String(arr[4]),
+      winner: dco_decode_opt_String(arr[5]),
+      selected: dco_decode_opt_box_autoadd_u_8(arr[6]),
+      legalMoves: dco_decode_list_mobile_move(arr[7]),
+      inspectedMove: dco_decode_opt_box_autoadd_mobile_move(arr[8]),
+      supports: dco_decode_list_support_view(arr[9]),
+      movetext: dco_decode_String(arr[10]),
+      canUndo: dco_decode_bool(arr[11]),
     );
   }
 
@@ -567,6 +692,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       fileTwice: dco_decode_i_8(arr[2]),
       rankTwice: dco_decode_i_8(arr[3]),
     );
+  }
+
+  @protected
+  BigInt dco_decode_u_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dcoDecodeU64(raw);
   }
 
   @protected
@@ -663,6 +794,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   GameView sse_decode_game_view(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_revision = sse_decode_u_64(deserializer);
+    var var_humanColor = sse_decode_opt_String(deserializer);
+    var var_computerTurn = sse_decode_bool(deserializer);
     var var_svg = sse_decode_String(deserializer);
     var var_sideToMove = sse_decode_String(deserializer);
     var var_winner = sse_decode_opt_String(deserializer);
@@ -675,6 +809,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_movetext = sse_decode_String(deserializer);
     var var_canUndo = sse_decode_bool(deserializer);
     return GameView(
+      revision: var_revision,
+      humanColor: var_humanColor,
+      computerTurn: var_computerTurn,
       svg: var_svg,
       sideToMove: var_sideToMove,
       winner: var_winner,
@@ -784,6 +921,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  BigInt sse_decode_u_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getBigUint64();
+  }
+
+  @protected
   int sse_decode_u_8(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getUint8();
@@ -888,6 +1031,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_encode_game_view(GameView self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_64(self.revision, serializer);
+    sse_encode_opt_String(self.humanColor, serializer);
+    sse_encode_bool(self.computerTurn, serializer);
     sse_encode_String(self.svg, serializer);
     sse_encode_String(self.sideToMove, serializer);
     sse_encode_opt_String(self.winner, serializer);
@@ -990,6 +1136,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_u_64(BigInt self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putBigUint64(self);
+  }
+
+  @protected
   void sse_encode_u_8(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putUint8(self);
@@ -1032,6 +1184,15 @@ class MobileGameImpl extends RustOpaque implements MobileGame {
         RustLib.instance.api.rust_arc_decrement_strong_count_MobileGamePtr,
   );
 
+  Future<GameView> applyComputerMove({
+    required BigInt expectedRevision,
+    required String notation,
+  }) => RustLib.instance.api.crateApiGameMobileGameApplyComputerMove(
+    that: this,
+    expectedRevision: expectedRevision,
+    notation: notation,
+  );
+
   Future<GameView> inspectMove({required String notation}) => RustLib
       .instance
       .api
@@ -1042,6 +1203,9 @@ class MobileGameImpl extends RustOpaque implements MobileGame {
 
   Future<GameView> restore({required String movetext}) => RustLib.instance.api
       .crateApiGameMobileGameRestore(that: this, movetext: movetext);
+
+  Future<GameView> startGame({String? humanColor}) => RustLib.instance.api
+      .crateApiGameMobileGameStartGame(that: this, humanColor: humanColor);
 
   Future<GameView> tap({required int index}) =>
       RustLib.instance.api.crateApiGameMobileGameTap(that: this, index: index);

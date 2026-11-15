@@ -660,6 +660,7 @@ version = "0.1.2"
 dependencies = [
  "flutter_rust_bridge",
  "sanqi-core",
+ "sanqi-engine",
  "sanqi-render",
 ]
 

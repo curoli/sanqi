@@ -6,7 +6,7 @@ import 'package:flutter_app/main.dart';
 import 'package:flutter_app/src/rust/api/game.dart';
 import 'package:flutter_app/src/rust/frb_generated.dart';
 
-class DeviceTestStore implements GameStore {
+class DeviceTestStore extends GameStore {
   String? record;
   @override
   Future<String?> load() async => record;

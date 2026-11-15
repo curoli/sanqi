@@ -13,8 +13,16 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 Future<MobileGame> createGame() =>
     RustLib.instance.api.crateApiGameCreateGame();
 
+Future<String?> findComputerMove({required String movetext}) =>
+    RustLib.instance.api.crateApiGameFindComputerMove(movetext: movetext);
+
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MobileGame>>
 abstract class MobileGame implements RustOpaqueInterface {
+  Future<GameView> applyComputerMove({
+    required BigInt expectedRevision,
+    required String notation,
+  });
+
   static Future<MobileGame> default_() =>
       RustLib.instance.api.crateApiGameMobileGameDefault();
 
@@ -28,6 +36,8 @@ abstract class MobileGame implements RustOpaqueInterface {
 
   Future<GameView> restore({required String movetext});
 
+  Future<GameView> startGame({String? humanColor});
+
   Future<GameView> tap({required int index});
 
   Future<GameView> undo();
@@ -36,6 +46,9 @@ abstract class MobileGame implements RustOpaqueInterface {
 }
 
 class GameView {
+  final BigInt revision;
+  final String? humanColor;
+  final bool computerTurn;
   final String svg;
   final String sideToMove;
   final String? winner;
@@ -47,6 +60,9 @@ class GameView {
   final bool canUndo;
 
   const GameView({
+    required this.revision,
+    this.humanColor,
+    required this.computerTurn,
     required this.svg,
     required this.sideToMove,
     this.winner,
@@ -60,6 +76,9 @@ class GameView {
 
   @override
   int get hashCode =>
+      revision.hashCode ^
+      humanColor.hashCode ^
+      computerTurn.hashCode ^
       svg.hashCode ^
       sideToMove.hashCode ^
       winner.hashCode ^
@@ -75,6 +94,9 @@ class GameView {
       identical(this, other) ||
       other is GameView &&
           runtimeType == other.runtimeType &&
+          revision == other.revision &&
+          humanColor == other.humanColor &&
+          computerTurn == other.computerTurn &&
           svg == other.svg &&
           sideToMove == other.sideToMove &&
           winner == other.winner &&

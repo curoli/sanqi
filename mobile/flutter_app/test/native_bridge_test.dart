@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_app/game_service.dart';
 import 'package:flutter_app/src/rust/api/game.dart';
 import 'package:flutter_app/src/rust/frb_generated.dart';
 
@@ -30,6 +31,19 @@ void main() {
       await expectLater(game.restore(movetext: 'invalid'), throwsA(anything));
       expect((await game.view()).movetext, played.movetext);
       expect((await game.undo()).svg, initial.svg);
+      final opening = await game.startGame(humanColor: 'Black');
+      expect(opening.computerTurn, isTrue);
+      final reply = await findComputerMove(movetext: opening.movetext);
+      expect(reply, isNotNull);
+      final playedOpening = await game.applyComputerMove(
+        expectedRevision: opening.revision,
+        notation: reply!,
+      );
+      expect(playedOpening.sideToMove, 'Black');
+      expect(playedOpening.computerTurn, isFalse);
+      final humanTurn = await RustGameService(game).computerTurn();
+      expect(humanTurn?.movetext, playedOpening.movetext);
+      expect(humanTurn?.computerTurn, isFalse);
       game.dispose();
       RustLib.dispose();
     },
