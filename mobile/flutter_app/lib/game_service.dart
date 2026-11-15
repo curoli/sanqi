@@ -11,6 +11,7 @@ abstract class GameService {
   Future<GameView> restore(String movetext);
   Future<GameView> startGame(String? humanColor) => newGame();
   Future<GameView?> computerTurn() async => null;
+  Future<GameView> cancelSearch() => view();
 }
 
 class RustGameService extends GameService {
@@ -31,8 +32,11 @@ class RustGameService extends GameService {
   @override
   Future<GameView> restore(String movetext) => game.restore(movetext: movetext);
   @override
-  Future<GameView> startGame(String? humanColor) =>
-      game.startGame(humanColor: humanColor);
+  Future<GameView> startGame(String? humanColor) => humanColor == 'Computer'
+      ? game.startComputerGame()
+      : game.startGame(humanColor: humanColor);
+  @override
+  Future<GameView> cancelSearch() => game.cancelSearch();
   @override
   Future<GameView?> computerTurn() async {
     final snapshot = await game.view();

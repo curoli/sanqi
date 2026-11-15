@@ -1,14 +1,15 @@
 # Sanqi mobile prototype
 
-Local two-player or human-vs-computer Sanqi for Android (API 24+) and iOS (15+). This is a
+Human and computer Sanqi for Android (API 24+) and iOS (15+). This is a
 development prototype, not a signed store release. There are no accounts,
 networking or multiplayer services.
 
 ## Play
 
-Use the game-mode dropdown to play locally with another person, or against the
-computer as White or Black. Changing mode starts a new game. The computer moves
-first when you choose Black. The board keeps White at the bottom in both modes.
+Use the game-mode dropdown: **Human vs Human**, **Human vs Computer**,
+**Computer vs human**, or **Computer vs Computer**. The first player is White;
+the second is Black. Changing mode starts a new game. The computer moves first
+when you play Black. The board always keeps White at the bottom.
 Computer search uses `sanqi-engine` iterative deepening (depth cap 6, 600 ms
 search budget) through the asynchronous Rust bridge, with a thinking indicator.
 New Game, mode changes, and Undo remain available during search. Work runs on a
@@ -22,17 +23,25 @@ undone; use New Game instead. Local mode still undoes one ply. Mode/color are
 stored alongside the movetext preferences, and a restored computer turn resumes
 automatically.
 
+Computer vs Computer plays both sides automatically. Pause stops automatic play
+and invalidates the outstanding search; Resume continues from the live position.
+Undo removes one ply and pauses so the computer does not immediately replay it.
+New Game resumes automatic play. The selected mode is saved; spectator play
+resumes automatically when the app is reopened.
+
 White is at the bottom and moves first. Tap a current-player piece to select it;
 green dots mark destinations supplied by Rust. Tap a destination to move. Tap
 the selected piece again or an unrelated square to clear selection.
 
-Hold a legal destination or choose a `Preview from-to` chip to inspect a move
-without playing it. Blue rings mark supporting pieces and blue dots mark
-pivots. The panel lists **every** support pair, including pairs sharing a pivot.
+Select a piece and press **Example move** to inspect its first legal move
+without playing it. Press again to cycle through all its legal moves and wrap
+back to the first. Holding a legal destination also inspects that move.
+Blue rings mark supporting pieces and blue dots mark pivots. The compact panel
+shows support pairs; hold the text to see every pair, including shared pivots.
 Pivot coordinates start at a1=(0,0) and can include halves. Multiple pairs are
 alternative supports for one move, not separate moves or a player choice.
 
-New Game resets the position; Undo removes one ply. The canonical Rust movetext
+New Game resets the position. The canonical Rust movetext
 is saved on the device after each action and restored at startup. Save / restore
 lets you copy a record or paste an existing one. An invalid import leaves the
 game intact. Storage errors are displayed; play can continue in memory.
@@ -47,10 +56,12 @@ Undo replays the retained moves into a new `Game` (O(n), suitable for this MVP).
 
 The board is always square. Its SVG fills exactly the gesture rectangle with no
 letterboxing. Screen row zero maps to rank 8, and the bottom-left maps to a1.
-The coordinate helper rejects points outside the rectangle. The app scrolls on
-small portrait screens and uses a side panel on wide screens. Rust calls are
+The coordinate helper rejects points outside the rectangle. The app fits the
+available screen without scrolling, placing controls below or beside the board
+to maximize its size. Only the latest moves are shown when space is limited;
+Save / restore always contains the complete record. Rust calls are
 asynchronous, controls are disabled while a call/save is outstanding, and errors
-are visible. Preferences store only movetext, never Dart-derived game state.
+are visible. Preferences store movetext and mode, never Dart-derived game state.
 
 ## Linux host setup
 
