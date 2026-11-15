@@ -23,6 +23,8 @@ abstract class MobileGame implements RustOpaqueInterface {
     required String notation,
   });
 
+  Future<GameView> cancelSearch();
+
   static Future<MobileGame> default_() =>
       RustLib.instance.api.crateApiGameMobileGameDefault();
 
@@ -36,6 +38,8 @@ abstract class MobileGame implements RustOpaqueInterface {
 
   Future<GameView> restore({required String movetext});
 
+  Future<GameView> startComputerGame();
+
   Future<GameView> startGame({String? humanColor});
 
   Future<GameView> tap({required int index});
@@ -46,6 +50,7 @@ abstract class MobileGame implements RustOpaqueInterface {
 }
 
 class GameView {
+  final bool computerBoth;
   final BigInt revision;
   final String? humanColor;
   final bool computerTurn;
@@ -60,6 +65,7 @@ class GameView {
   final bool canUndo;
 
   const GameView({
+    required this.computerBoth,
     required this.revision,
     this.humanColor,
     required this.computerTurn,
@@ -76,6 +82,7 @@ class GameView {
 
   @override
   int get hashCode =>
+      computerBoth.hashCode ^
       revision.hashCode ^
       humanColor.hashCode ^
       computerTurn.hashCode ^
@@ -94,6 +101,7 @@ class GameView {
       identical(this, other) ||
       other is GameView &&
           runtimeType == other.runtimeType &&
+          computerBoth == other.computerBoth &&
           revision == other.revision &&
           humanColor == other.humanColor &&
           computerTurn == other.computerTurn &&

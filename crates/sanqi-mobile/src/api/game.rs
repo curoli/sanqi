@@ -18,6 +18,7 @@ pub struct SupportView {
 
 #[derive(Clone, Debug)]
 pub struct GameView {
+    pub computer_both: bool,
     pub revision: u64,
     pub human_color: Option<String>,
     pub computer_turn: bool,
@@ -34,6 +35,7 @@ pub struct GameView {
 
 #[frb(opaque)]
 pub struct MobileGame {
+    computer_both: bool,
     revision: u64,
     human_color: Option<Color>,
     game: Game,
@@ -83,6 +85,7 @@ impl Default for MobileGame {
 impl MobileGame {
     pub fn new() -> Self {
         Self {
+            computer_both: false,
             revision: 0,
             human_color: None,
             game: Game::new(),
@@ -107,11 +110,13 @@ impl MobileGame {
             None => sanqi_render::svg_board(position),
         };
         GameView {
+            computer_both: self.computer_both,
             revision: self.revision,
             human_color: self.human_color.map(color_name),
-            computer_turn: self
-                .human_color
-                .is_some_and(|human| human != position.side_to_move())
+            computer_turn: (self.computer_both
+                || self
+                    .human_color
+                    .is_some_and(|human| human != position.side_to_move()))
                 && winner.is_none(),
             svg,
             side_to_move: color_name(position.side_to_move()),
@@ -181,9 +186,11 @@ impl MobileGame {
     pub fn new_game(&mut self) -> GameView {
         let revision = self.revision + 1;
         let human_color = self.human_color;
+        let computer_both = self.computer_both;
         *self = Self::new();
         self.revision = revision;
         self.human_color = human_color;
+        self.computer_both = computer_both;
         self.view()
     }
 
@@ -195,7 +202,19 @@ impl MobileGame {
             _ => return Err("Human color must be White or Black".to_owned()),
         };
         self.human_color = human;
+        self.computer_both = false;
         Ok(self.new_game())
+    }
+
+    pub fn start_computer_game(&mut self) -> GameView {
+        self.human_color = None;
+        self.computer_both = true;
+        self.new_game()
+    }
+
+    pub fn cancel_search(&mut self) -> GameView {
+        self.revision += 1;
+        self.view()
     }
 
     pub fn apply_computer_move(
@@ -251,6 +270,43 @@ impl MobileGame {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn both_computers_alternate_and_cancelled_search_cannot_commit() {
+        let mut session = MobileGame::new();
+        let opening = session.start_computer_game();
+        assert!(opening.computer_both && opening.computer_turn);
+        assert_eq!(session.tap(0).expect("blocked human").selected, None);
+        let first = opening.legal_moves[0].notation.clone();
+        let cancelled = session.cancel_search();
+        assert!(cancelled.revision > opening.revision);
+        assert_eq!(cancelled.movetext, opening.movetext);
+        assert_eq!(
+            session
+                .apply_computer_move(opening.revision, first.clone())
+                .expect("cancelled result")
+                .movetext,
+            ""
+        );
+        let white = session
+            .apply_computer_move(cancelled.revision, first)
+            .expect("white move");
+        assert_eq!(white.side_to_move, "Black");
+        assert!(white.computer_turn);
+        let black = session
+            .apply_computer_move(white.revision, white.legal_moves[0].notation.clone())
+            .expect("black move");
+        assert_eq!(black.side_to_move, "White");
+        assert!(black.computer_turn);
+        let undone = session.undo().expect("one ply");
+        assert_eq!(undone.movetext, white.movetext);
+        assert!(undone.computer_turn);
+        assert!(session.new_game().computer_both);
+        let local = session.start_game(None).expect("local");
+        assert!(!local.computer_both && !local.computer_turn);
+        let human = session.start_game(Some("White".to_owned())).expect("human");
+        assert!(!human.computer_both && !human.computer_turn);
+    }
 
     #[test]
     fn computer_search_is_legal_and_stale_results_cannot_change_a_new_game() {

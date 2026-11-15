@@ -11,12 +11,18 @@ abstract class GameService {
   Future<GameView> restore(String movetext);
   Future<GameView> startGame(String? humanColor) => newGame();
   Future<GameView?> computerTurn() async => null;
+  Future<GameView> cancelSearch() => view();
 }
 
 class RustGameService extends GameService {
-  RustGameService(this.game);
+  RustGameService(
+    this.game, {
+    Future<String?> Function(String movetext)? findMove,
+  }) : _findMove = findMove ?? ((record) => findComputerMove(movetext: record));
 
   final MobileGame game;
+  final Future<String?> Function(String movetext) _findMove;
+  int _searchGeneration = 0;
 
   @override
   Future<GameView> view() => game.view();
@@ -25,19 +31,46 @@ class RustGameService extends GameService {
   @override
   Future<GameView> inspect(String move) => game.inspectMove(notation: move);
   @override
-  Future<GameView> undo() => game.undo();
+  Future<GameView> undo() {
+    _searchGeneration++;
+    return game.undo();
+  }
+
   @override
-  Future<GameView> newGame() => game.newGame();
+  Future<GameView> newGame() {
+    _searchGeneration++;
+    return game.newGame();
+  }
+
   @override
-  Future<GameView> restore(String movetext) => game.restore(movetext: movetext);
+  Future<GameView> restore(String movetext) {
+    _searchGeneration++;
+    return game.restore(movetext: movetext);
+  }
+
   @override
-  Future<GameView> startGame(String? humanColor) =>
-      game.startGame(humanColor: humanColor);
+  Future<GameView> startGame(String? humanColor) {
+    _searchGeneration++;
+    return humanColor == 'Computer'
+        ? game.startComputerGame()
+        : game.startGame(humanColor: humanColor);
+  }
+
+  @override
+  Future<GameView> cancelSearch() {
+    // Invalidate synchronously: a queued bridge view may run after cancellation.
+    _searchGeneration++;
+    return game.cancelSearch();
+  }
+
   @override
   Future<GameView?> computerTurn() async {
+    final generation = _searchGeneration;
     final snapshot = await game.view();
+    if (generation != _searchGeneration) return null;
     if (!snapshot.computerTurn) return snapshot;
-    final move = await findComputerMove(movetext: snapshot.movetext);
+    final move = await _findMove(snapshot.movetext);
+    if (generation != _searchGeneration) return null;
     if (move == null) return null;
     return game.applyComputerMove(
       expectedRevision: snapshot.revision,

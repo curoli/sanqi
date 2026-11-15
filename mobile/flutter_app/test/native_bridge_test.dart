@@ -44,6 +44,19 @@ void main() {
       final humanTurn = await RustGameService(game).computerTurn();
       expect(humanTurn?.movetext, playedOpening.movetext);
       expect(humanTurn?.computerTurn, isFalse);
+      final spectators = await RustGameService(game).startGame('Computer');
+      expect(spectators.computerBoth, isTrue);
+      final cancelled = await game.cancelSearch();
+      expect(cancelled.revision, greaterThan(spectators.revision));
+      final stale = await game.applyComputerMove(
+        expectedRevision: spectators.revision,
+        notation: spectators.legalMoves.first.notation,
+      );
+      expect(stale.movetext, isEmpty);
+      final computerWhite = await RustGameService(game).computerTurn();
+      expect(computerWhite?.sideToMove, 'Black');
+      expect(computerWhite?.computerTurn, isTrue);
+      expect((await game.newGame()).computerBoth, isTrue);
       game.dispose();
       RustLib.dispose();
     },

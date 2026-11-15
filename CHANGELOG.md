@@ -7,8 +7,15 @@ Versioning.
 
 ## [Unreleased]
 
+### Fixed
+
+- Cancel mobile computer turns even when their initial Rust snapshot is still
+  queued when Pause, New Game, Undo, restore, or a mode change occurs.
+
 ### Added
 
+- Responsive mobile layout without scrolling, cycling example moves, recent-move
+  display, and Computer vs Computer play with pause/resume.
 - Four-square Sanqi logo with outlined 三棋 characters and contrasting game
   pieces, used for Android/iOS icons, native launch screens, app header, and README.
 - Mobile computer opponent with a choice of color, asynchronous time-bounded
