@@ -189,4 +189,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get openLinkError => 'تعذر فتح الرابط. يمكنك نسخ العنوان أدناه.';
+
+  @override
+  String get moreBelow => 'مرّر لعرض المزيد';
 }

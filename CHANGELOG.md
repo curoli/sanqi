@@ -19,8 +19,9 @@ Versioning.
 
 - Localized mobile About dialog with pronunciation, slogan, author credit,
   build date/commit metadata, and browser links to the repository and rules in
-  the selected language. Android/iOS CI and a local Flutter wrapper record build
-  metadata at compilation.
+  the selected language. Links stay visible in a fixed footer; a scrollbar and
+  localized scrolling cue reveal hidden text. Android/iOS CI and a local Flutter
+  wrapper record build metadata at compilation.
 - Mobile language selector with flags and saved preferences for English, German,
   Indonesian, Arabic, Chinese, Spanish, and Turkish, including right-to-left UI
   for Arabic and unchanged board orientation/movetext.

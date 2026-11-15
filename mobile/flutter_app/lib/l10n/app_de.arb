@@ -49,5 +49,6 @@
   "rulesLink": "Spielregeln lesen",
   "repositoryLink": "Quellcode-Repository",
   "close": "Schließen",
-  "openLinkError": "Der Link konnte nicht geöffnet werden. Du kannst die Adresse unten kopieren."
+  "openLinkError": "Der Link konnte nicht geöffnet werden. Du kannst die Adresse unten kopieren.",
+  "moreBelow": "Mehr anzeigen — scrollen"
 }

@@ -183,4 +183,7 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get openLinkError =>
       'Tidak dapat membuka tautan. Anda dapat menyalin alamat di bawah.';
+
+  @override
+  String get moreBelow => 'Gulir untuk melihat lagi';
 }

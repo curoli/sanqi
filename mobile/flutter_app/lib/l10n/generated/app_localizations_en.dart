@@ -188,4 +188,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get openLinkError =>
       'Could not open the link. You can copy the address below.';
+
+  @override
+  String get moreBelow => 'More below — scroll';
 }

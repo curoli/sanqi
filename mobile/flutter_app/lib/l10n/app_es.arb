@@ -49,5 +49,6 @@
   "rulesLink": "Leer las reglas",
   "repositoryLink": "Repositorio del código",
   "close": "Cerrar",
-  "openLinkError": "No se pudo abrir el enlace. Puedes copiar la dirección de abajo."
+  "openLinkError": "No se pudo abrir el enlace. Puedes copiar la dirección de abajo.",
+  "moreBelow": "Desplázate para ver más"
 }

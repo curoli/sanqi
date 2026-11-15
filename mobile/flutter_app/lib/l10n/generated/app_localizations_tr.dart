@@ -182,4 +182,7 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get openLinkError =>
       'Bağlantı açılamadı. Aşağıdaki adresi kopyalayabilirsiniz.';
+
+  @override
+  String get moreBelow => 'Devamı için kaydırın';
 }

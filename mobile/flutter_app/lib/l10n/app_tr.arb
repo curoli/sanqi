@@ -49,5 +49,6 @@
   "rulesLink": "Kuralları oku",
   "repositoryLink": "Kaynak kod deposu",
   "close": "Kapat",
-  "openLinkError": "Bağlantı açılamadı. Aşağıdaki adresi kopyalayabilirsiniz."
+  "openLinkError": "Bağlantı açılamadı. Aşağıdaki adresi kopyalayabilirsiniz.",
+  "moreBelow": "Devamı için kaydırın"
 }

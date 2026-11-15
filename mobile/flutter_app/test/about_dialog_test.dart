@@ -56,10 +56,17 @@ void main() {
           if (language == AppLanguage.english) {
             expect(l.pronunciation, contains('sun chee'));
           }
-          await tester.ensureVisible(find.byKey(const Key('about-repository')));
+          expect(
+            find.byKey(const Key('about-rules')).hitTestable(),
+            findsOneWidget,
+          );
+          expect(
+            find.byKey(const Key('about-repository')).hitTestable(),
+            findsOneWidget,
+          );
           expect(find.text(l.rulesLink), findsOneWidget);
           expect(find.text(l.repositoryLink), findsOneWidget);
-          await tester.tap(find.text(l.close));
+          await tester.tap(find.byTooltip(l.close));
           await tester.pumpAndSettle();
           expect(service.calls, isEmpty);
           expect(
@@ -71,6 +78,70 @@ void main() {
             isNull,
             reason: '${language.code} at $size',
           );
+          await tester.pumpWidget(const SizedBox());
+        }
+      }
+    },
+  );
+
+  testWidgets(
+    'overflow is indicated, the cue scrolls, and links stay visible with large text',
+    (tester) async {
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      for (final scale in [1.0, 1.6]) {
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        for (final language in AppLanguage.values) {
+          await tester.binding.setSurfaceSize(const Size(800, 1200));
+          final l = lookupAppLocalizations(Locale(language.code));
+          await tester.pumpWidget(
+            SanqiApp(
+              createService: () async => FakeService(),
+              store: LanguageStore()..code = language.code,
+            ),
+          );
+          await tester.pumpAndSettle();
+          await openTestDialog(tester, openLink: (_) async => true);
+          final content = find.byKey(const Key('about-scroll-content'));
+          final controller = tester
+              .widget<SingleChildScrollView>(content)
+              .controller!;
+          expect(controller.position.maxScrollExtent, 0);
+          expect(find.byKey(const Key('about-more-below')), findsNothing);
+
+          await tester.binding.setSurfaceSize(const Size(568, 320));
+          await tester.pumpAndSettle();
+          expect(controller.position.maxScrollExtent, greaterThan(0));
+          expect(find.text(l.moreBelow).hitTestable(), findsOneWidget);
+          final scrollbar = tester.widget<Scrollbar>(
+            find.byKey(const Key('about-scrollbar')),
+          );
+          expect(scrollbar.thumbVisibility, isTrue);
+          expect(scrollbar.trackVisibility, isTrue);
+          for (final key in ['about-rules', 'about-repository']) {
+            expect(find.byKey(Key(key)).hitTestable(), findsOneWidget);
+          }
+          final before = controller.offset;
+          await tester.tap(find.byKey(const Key('about-more-below')));
+          await tester.pumpAndSettle();
+          expect(controller.offset, greaterThan(before));
+          controller.jumpTo(controller.position.maxScrollExtent);
+          await tester.pumpAndSettle();
+          expect(find.byKey(const Key('about-more-below')), findsNothing);
+          expect(
+            find.byKey(const Key('build-commit')).hitTestable(),
+            findsOneWidget,
+          );
+          controller.jumpTo(0);
+          await tester.pumpAndSettle();
+          expect(find.text(l.moreBelow).hitTestable(), findsOneWidget);
+          expect(
+            tester.takeException(),
+            isNull,
+            reason: '${language.code} at scale $scale',
+          );
+          await tester.tap(find.byTooltip(l.close));
+          await tester.pumpAndSettle();
           await tester.pumpWidget(const SizedBox());
         }
       }
@@ -116,7 +187,7 @@ void main() {
           'https://github.com/curoli/sanqi/blob/main/docs/rules/sanqi-${language.code}.md',
           'https://github.com/curoli/sanqi',
         ]);
-        await tester.tap(find.text(l.close));
+        await tester.tap(find.byTooltip(l.close));
         await tester.pumpAndSettle();
         await tester.pumpWidget(const SizedBox());
       }
@@ -187,7 +258,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(SanqiAboutDialog), findsOneWidget);
     expect(store.text, '1. a1-b3');
-    await tester.tap(find.text('Close'));
+    await tester.tap(find.byTooltip('Close'));
     await tester.pumpAndSettle();
     expect(find.text('Black to move'), findsOneWidget);
     expect(tester.widget<SanqiBoard>(find.byType(SanqiBoard)).enabled, isTrue);

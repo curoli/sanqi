@@ -111,5 +111,6 @@
   "rulesLink": "Read the rules",
   "repositoryLink": "Source repository",
   "close": "Close",
-  "openLinkError": "Could not open the link. You can copy the address below."
+  "openLinkError": "Could not open the link. You can copy the address below.",
+  "moreBelow": "More below — scroll"
 }

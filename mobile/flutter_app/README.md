@@ -23,6 +23,10 @@ the UTC build date and full Git commit, and links to this repository and the
 rules in the current language. Links open in the system browser; if opening a
 link fails, its address remains available to copy. Opening About leaves the
 game and any computer search running.
+The rules and repository buttons stay visible in the footer, and the close
+button stays in the header. A persistent scrollbar and a localized “More below”
+button indicate hidden text; tapping the hint scrolls down. The hint disappears
+at the end and updates when the device rotates.
 
 Use the game-mode dropdown: **Human vs Human**, **Human vs Computer**,
 **Computer vs human**, or **Computer vs Computer**. The first player is White;

@@ -49,5 +49,6 @@
   "rulesLink": "Baca aturan",
   "repositoryLink": "Repositori kode sumber",
   "close": "Tutup",
-  "openLinkError": "Tidak dapat membuka tautan. Anda dapat menyalin alamat di bawah."
+  "openLinkError": "Tidak dapat membuka tautan. Anda dapat menyalin alamat di bawah.",
+  "moreBelow": "Gulir untuk melihat lagi"
 }

@@ -49,5 +49,6 @@
   "rulesLink": "阅读规则",
   "repositoryLink": "源代码仓库",
   "close": "关闭",
-  "openLinkError": "无法打开链接。您可以复制下方地址。"
+  "openLinkError": "无法打开链接。您可以复制下方地址。",
+  "moreBelow": "向下滚动查看更多"
 }

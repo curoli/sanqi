@@ -178,4 +178,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get openLinkError => '无法打开链接。您可以复制下方地址。';
+
+  @override
+  String get moreBelow => '向下滚动查看更多';
 }

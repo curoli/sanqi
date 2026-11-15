@@ -411,6 +411,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not open the link. You can copy the address below.'**
   String get openLinkError;
+
+  /// No description provided for @moreBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'More below — scroll'**
+  String get moreBelow;
 }
 
 class _AppLocalizationsDelegate
