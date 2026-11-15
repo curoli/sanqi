@@ -13,9 +13,16 @@ jobs:
   rust:
     name: Rust Checks
     runs-on: ubuntu-latest
+    env:
+      PYO3_PYTHON: python
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Set up Python for workspace tests
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -24,6 +31,9 @@ jobs:
 
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
+        with:
+          # PyO3's cached linker configuration depends on this interpreter.
+          env-vars: "PYO3_PYTHON pythonLocation"
 
       - name: Check formatting
         run: cargo +stable fmt --all --check
