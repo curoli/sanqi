@@ -31,19 +31,19 @@ def character(value, center_x, center_y, fill):
 board = (
     '<defs><clipPath id="board"><rect x="12" y="12" width="488" height="488" rx="24"/></clipPath></defs>'
     '<g clip-path="url(#board)">'
-    '<path fill="#fff" d="M12 12h488v488H12z"/>'
-    '<path fill="#000" d="M256 12h244v244H256zM12 256h244v244H12z"/>'
-    + character("三", 134, 134, "#000")
-    + character("棋", 378, 134, "#fff")
-    + '<circle cx="134" cy="378" r="72" fill="#fff"/>'
-    '<circle cx="134" cy="378" r="61" fill="none" stroke="#000" stroke-width="3"/>'
-    '<circle cx="378" cy="378" r="72" fill="#000"/>'
-    '<circle cx="378" cy="378" r="61" fill="none" stroke="#fff" stroke-width="3"/>'
-    '</g><rect x="12" y="12" width="488" height="488" rx="24" fill="none" stroke="#000" stroke-width="8"/>'
+    '<path fill="#f5e6c8" d="M12 12h488v488H12z"/>'
+    '<path fill="#a06b3b" d="M256 12h244v244H256zM12 256h244v244H12z"/>'
+    + character("三", 134, 134, "#1f1f1f")
+    + character("棋", 378, 134, "#fffdf7")
+    + '<circle cx="134" cy="378" r="72" fill="#fffdf7"/>'
+    '<circle cx="134" cy="378" r="61" fill="none" stroke="#56452f" stroke-width="3"/>'
+    '<circle cx="378" cy="378" r="72" fill="#1f1f1f"/>'
+    '<circle cx="378" cy="378" r="61" fill="none" stroke="#f2eadb" stroke-width="3"/>'
+    '</g><rect x="12" y="12" width="488" height="488" rx="24" fill="none" stroke="#56452f" stroke-width="8"/>'
 )
 logo = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><title>Sanqi: 三棋 and two game pieces on four alternating squares</title>{board}</svg>\n'
 (assets / "sanqi-logo.svg").write_text(logo)
-icon = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#fff"/><g transform="translate(84 84) scale(0.671875)">{board}</g></svg>\n'
+icon = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#f5e6c8"/><g transform="translate(84 84) scale(0.671875)">{board}</g></svg>\n'
 (assets / "sanqi-app-icon.svg").write_text(icon)
 
 
