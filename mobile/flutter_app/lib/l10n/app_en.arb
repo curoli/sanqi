@@ -112,5 +112,32 @@
   "repositoryLink": "Source repository",
   "close": "Close",
   "openLinkError": "Could not open the link. You can copy the address below.",
-  "moreBelow": "More below — scroll"
+  "moreBelow": "More below — scroll",
+  "chooseSkin": "Choose skin",
+  "skinScrollHint": "14 skins · scroll to see them all",
+  "lightSkin": "Light skin",
+  "darkSkin": "Dark skin",
+  "fontLicenses": "Font licenses",
+  "skinSaveError": "Could not save skin preference: {error}",
+  "skinLinen": "Linen",
+  "skinPorcelain": "Porcelain",
+  "skinMint": "Mint",
+  "skinSakura": "Sakura",
+  "skinSorbet": "Sorbet",
+  "skinLagoon": "Lagoon",
+  "skinSunflower": "Sunflower",
+  "skinBlueprint": "Blueprint",
+  "skinArcade": "Arcade",
+  "skinMidnight": "Midnight",
+  "skinGraphite": "Graphite",
+  "skinEmber": "Ember",
+  "skinGilded": "Gilded",
+  "skinAurora": "Aurora",
+  "@skinSaveError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

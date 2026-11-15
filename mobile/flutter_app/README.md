@@ -28,6 +28,41 @@ button stays in the header. A persistent scrollbar and a localized “More below
 button indicate hidden text; tapping the hint scrolls down. The hint disappears
 at the end and updates when the device rotates.
 
+The **palette button** in the header opens the skin chooser. Each entry previews
+its colors, pattern, typography, and button styling. Selecting a skin applies it
+immediately and saves the choice on the device; closing the chooser keeps the
+current skin. The list opens at the current selection and has a persistent
+scrollbar. Skin names and controls are translated into all seven languages.
+Changing skins preserves the game, move selection, computer search, board SVG,
+pieces, board labels, and supporting-pivot markers. Linen is the default.
+
+| Skin | Character | Typeface |
+| --- | --- | --- |
+| Linen | Warm cream and sage, woven diamonds, classical | Lora |
+| Porcelain | Cool ivory and navy, clean grid, modern | Inter |
+| Mint | Fresh green, soft dots, rounded buttons | Nunito |
+| Sakura | Blush pink and plum, delicate circles | Lora |
+| Sorbet | Peach and berry, playful confetti | Nunito |
+| Lagoon | Aqua and deep teal, flowing waves | Inter |
+| Sunflower | Sunny yellow, radiating lines | Nunito |
+| Blueprint | Deep blue and cyan, technical grid | Space Mono |
+| Arcade | Purple and neon lime, pixel outlines | Space Mono |
+| Midnight | Navy and ice blue, quiet stars | Inter |
+| Graphite | Charcoal and silver, restrained diagonals | Inter |
+| Ember | Dark cocoa and amber, warm rings | Lora |
+| Gilded | Ink and gold, formal lattice | Lora |
+| Aurora | Dark teal and mint, flowing ribbons | Nunito |
+
+All six font files (four primary families and two Arabic fallbacks) and their
+licenses are bundled, adding about 2.6 MB before APK compression. No fonts are
+downloaded at runtime. Lora uses Noto Naskh Arabic as its Arabic fallback; other
+families use Noto Sans Arabic. Chinese and other missing glyphs use device font
+fallback. **Font licenses** in the chooser opens Flutter's license page.
+See `assets/fonts/README.md` for pinned upstream sources and checksums. Skins
+live in `lib/app_skin.dart`; geometric patterns are drawn in
+`lib/game_background.dart`. The defined main text and button color pairs meet
+a 4.5:1 contrast ratio, and control borders meet 3:1 against the panel surface.
+
 Use the game-mode dropdown: **Human vs Human**, **Human vs Computer**,
 **Computer vs human**, or **Computer vs Computer**. The first player is White;
 the second is Black. Changing mode starts a new game. The computer moves first
@@ -89,7 +124,7 @@ available screen without scrolling, placing controls below or beside the board
 to maximize its size. Only the latest moves are shown when space is limited;
 Save / restore always contains the complete record. Rust calls are
 asynchronous, controls are disabled while a call/save is outstanding, and errors
-are visible. Preferences store movetext, mode, and language, never Dart-derived
+are visible. Preferences store movetext, mode, language, and skin, never Dart-derived
 game state.
 
 Translations live in `lib/l10n/app_*.arb`; `flutter gen-l10n` regenerates the
@@ -195,6 +230,7 @@ Manual device checklist:
 - Move for White, then Black; tap opponent pieces and invalid destinations.
 - Preview a move, inspect support rings/dots, then play its destination.
 - Rotate the device and test a small screen and large text settings.
+- Change light/dark skins, reopen the chooser, and restart to check persistence.
 - Undo, start a new game, copy a record, and restore it.
 - Paste invalid movetext and check that the existing record survives.
 - Open About, confirm the build metadata, and open the repository and rules in

@@ -193,4 +193,66 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get moreBelow => 'Mehr anzeigen — scrollen';
+
+  @override
+  String get chooseSkin => 'Design wählen';
+
+  @override
+  String get skinScrollHint => '14 Designs · scrollen, um alle zu sehen';
+
+  @override
+  String get lightSkin => 'Helles Design';
+
+  @override
+  String get darkSkin => 'Dunkles Design';
+
+  @override
+  String get fontLicenses => 'Schriftlizenzen';
+
+  @override
+  String skinSaveError(String error) {
+    return 'Design konnte nicht gespeichert werden: $error';
+  }
+
+  @override
+  String get skinLinen => 'Leinen';
+
+  @override
+  String get skinPorcelain => 'Porzellan';
+
+  @override
+  String get skinMint => 'Minze';
+
+  @override
+  String get skinSakura => 'Sakura';
+
+  @override
+  String get skinSorbet => 'Sorbet';
+
+  @override
+  String get skinLagoon => 'Lagune';
+
+  @override
+  String get skinSunflower => 'Sonnenblume';
+
+  @override
+  String get skinBlueprint => 'Blaupause';
+
+  @override
+  String get skinArcade => 'Spielhalle';
+
+  @override
+  String get skinMidnight => 'Mitternacht';
+
+  @override
+  String get skinGraphite => 'Graphit';
+
+  @override
+  String get skinEmber => 'Glut';
+
+  @override
+  String get skinGilded => 'Goldglanz';
+
+  @override
+  String get skinAurora => 'Polarlicht';
 }

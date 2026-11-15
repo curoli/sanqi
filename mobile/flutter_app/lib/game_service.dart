@@ -80,6 +80,8 @@ class RustGameService extends GameService {
 }
 
 abstract class GameStore {
+  Future<String?> loadSkin() async => null;
+  Future<void> saveSkin(String id) async {}
   Future<String?> loadLanguage() async => null;
   Future<void> saveLanguage(String code) async {}
   Future<String?> load();
@@ -89,6 +91,12 @@ abstract class GameStore {
 }
 
 class PreferenceGameStore extends GameStore {
+  static const skinKey = 'sanqi.skin.v1';
+  @override
+  Future<String?> loadSkin() => SharedPreferencesAsync().getString(skinKey);
+  @override
+  Future<void> saveSkin(String id) =>
+      SharedPreferencesAsync().setString(skinKey, id);
   static const languageKey = 'sanqi.language.v1';
   @override
   Future<String?> loadLanguage() =>

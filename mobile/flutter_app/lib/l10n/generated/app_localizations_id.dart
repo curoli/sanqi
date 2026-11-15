@@ -186,4 +186,66 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get moreBelow => 'Gulir untuk melihat lagi';
+
+  @override
+  String get chooseSkin => 'Pilih tema';
+
+  @override
+  String get skinScrollHint => '14 tema · gulir untuk melihat semuanya';
+
+  @override
+  String get lightSkin => 'Tema terang';
+
+  @override
+  String get darkSkin => 'Tema gelap';
+
+  @override
+  String get fontLicenses => 'Lisensi font';
+
+  @override
+  String skinSaveError(String error) {
+    return 'Tidak dapat menyimpan pilihan tema: $error';
+  }
+
+  @override
+  String get skinLinen => 'Linen';
+
+  @override
+  String get skinPorcelain => 'Porselen';
+
+  @override
+  String get skinMint => 'Mint';
+
+  @override
+  String get skinSakura => 'Sakura';
+
+  @override
+  String get skinSorbet => 'Sorbet';
+
+  @override
+  String get skinLagoon => 'Laguna';
+
+  @override
+  String get skinSunflower => 'Bunga Matahari';
+
+  @override
+  String get skinBlueprint => 'Cetak Biru';
+
+  @override
+  String get skinArcade => 'Arkade';
+
+  @override
+  String get skinMidnight => 'Tengah Malam';
+
+  @override
+  String get skinGraphite => 'Grafit';
+
+  @override
+  String get skinEmber => 'Bara';
+
+  @override
+  String get skinGilded => 'Sepuh';
+
+  @override
+  String get skinAurora => 'Aurora';
 }
