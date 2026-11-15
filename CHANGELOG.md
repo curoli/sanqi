@@ -7,6 +7,11 @@ Versioning.
 
 ## [Unreleased]
 
+### Fixed
+
+- Cancel mobile computer turns even when their initial Rust snapshot is still
+  queued when Pause, New Game, Undo, restore, or a mode change occurs.
+
 ### Added
 
 - Responsive mobile layout without scrolling, cycling example moves, recent-move

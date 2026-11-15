@@ -14,7 +14,11 @@ Computer search uses `sanqi-engine` iterative deepening (depth cap 6, 600 ms
 search budget) through the asynchronous Rust bridge, with a thinking indicator.
 New Game, mode changes, and Undo remain available during search. Work runs on a
 detached movetext snapshot; Rust revision checks discard outdated/duplicate
-results. An interrupted search may finish in the background but cannot play
+results. A service cancellation generation is captured before requesting the
+snapshot and checked after the snapshot and search complete. This also cancels
+turns whose initial bridge snapshot is still queued when Pause, New Game, Undo,
+restore, or a mode change occurs. An interrupted search may finish in the
+background but cannot play
 into a replacement game. Search failures expose a retry action.
 
 In computer mode Undo takes back your move and the computer's reply, or just
