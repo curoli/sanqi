@@ -37,5 +37,18 @@
   "saveError": "Spiel aktualisiert, aber Speichern fehlgeschlagen: {error}",
   "updateError": "Spiel konnte nicht aktualisiert werden: {error}",
   "recoveryError": "Spiel konnte nicht aktualisiert werden: {error}. Aktuelles Spiel konnte nicht neu geladen/gespeichert werden: {recoveryError}",
-  "languageSaveError": "Spracheinstellung konnte nicht gespeichert werden: {error}"
+  "languageSaveError": "Spracheinstellung konnte nicht gespeichert werden: {error}",
+  "about": "Über",
+  "aboutTitle": "Über Sanqi",
+  "pronunciation": "Aussprache etwa „san tschi“ (Sānqí).",
+  "slogan": "Das Brettspiel, bei dem die Steine zusammenarbeiten müssen.",
+  "author": "Geschrieben von Oliver A Rübenacker.",
+  "buildDate": "Build-Datum (UTC)",
+  "commitLabel": "Git-Commit",
+  "buildNotRecorded": "Für diesen Build nicht erfasst",
+  "rulesLink": "Spielregeln lesen",
+  "repositoryLink": "Quellcode-Repository",
+  "close": "Schließen",
+  "openLinkError": "Der Link konnte nicht geöffnet werden. Du kannst die Adresse unten kopieren.",
+  "moreBelow": "Mehr anzeigen — scrollen"
 }

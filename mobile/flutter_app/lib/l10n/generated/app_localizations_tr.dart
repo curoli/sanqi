@@ -145,4 +145,44 @@ class AppLocalizationsTr extends AppLocalizations {
   String languageSaveError(String error) {
     return 'Dil tercihi kaydedilemedi: $error';
   }
+
+  @override
+  String get about => 'Hakkında';
+
+  @override
+  String get aboutTitle => 'Sanqi hakkında';
+
+  @override
+  String get pronunciation => 'Yaklaşık “san çi” diye okunur (Sānqí).';
+
+  @override
+  String get slogan => 'Taşların birlikte çalışması gereken masa oyunu.';
+
+  @override
+  String get author => 'Oliver A Rübenacker tarafından yazıldı.';
+
+  @override
+  String get buildDate => 'Derleme tarihi (UTC)';
+
+  @override
+  String get commitLabel => 'Git commit kimliği';
+
+  @override
+  String get buildNotRecorded => 'Bu derleme için kaydedilmedi';
+
+  @override
+  String get rulesLink => 'Kuralları oku';
+
+  @override
+  String get repositoryLink => 'Kaynak kod deposu';
+
+  @override
+  String get close => 'Kapat';
+
+  @override
+  String get openLinkError =>
+      'Bağlantı açılamadı. Aşağıdaki adresi kopyalayabilirsiniz.';
+
+  @override
+  String get moreBelow => 'Devamı için kaydırın';
 }

@@ -99,5 +99,18 @@
         "type": "String"
       }
     }
-  }
+  },
+  "about": "About",
+  "aboutTitle": "About Sanqi",
+  "pronunciation": "Pronounced “sun chee” (Sānqí).",
+  "slogan": "The board game where pieces must work together.",
+  "author": "Written by Oliver A Rübenacker.",
+  "buildDate": "Build date (UTC)",
+  "commitLabel": "Git commit",
+  "buildNotRecorded": "Not recorded for this build",
+  "rulesLink": "Read the rules",
+  "repositoryLink": "Source repository",
+  "close": "Close",
+  "openLinkError": "Could not open the link. You can copy the address below.",
+  "moreBelow": "More below — scroll"
 }

@@ -152,4 +152,45 @@ class AppLocalizationsEs extends AppLocalizations {
   String languageSaveError(String error) {
     return 'No se pudo guardar el idioma: $error';
   }
+
+  @override
+  String get about => 'Acerca de';
+
+  @override
+  String get aboutTitle => 'Acerca de Sanqi';
+
+  @override
+  String get pronunciation => 'Se pronuncia aproximadamente «san chi» (Sānqí).';
+
+  @override
+  String get slogan =>
+      'El juego de mesa en el que las piezas deben trabajar juntas.';
+
+  @override
+  String get author => 'Escrito por Oliver A Rübenacker.';
+
+  @override
+  String get buildDate => 'Fecha de compilación (UTC)';
+
+  @override
+  String get commitLabel => 'Commit de Git';
+
+  @override
+  String get buildNotRecorded => 'No registrado en esta compilación';
+
+  @override
+  String get rulesLink => 'Leer las reglas';
+
+  @override
+  String get repositoryLink => 'Repositorio del código';
+
+  @override
+  String get close => 'Cerrar';
+
+  @override
+  String get openLinkError =>
+      'No se pudo abrir el enlace. Puedes copiar la dirección de abajo.';
+
+  @override
+  String get moreBelow => 'Desplázate para ver más';
 }

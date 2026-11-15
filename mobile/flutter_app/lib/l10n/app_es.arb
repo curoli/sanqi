@@ -37,5 +37,18 @@
   "saveError": "Partida actualizada, pero no se pudo guardar: {error}",
   "updateError": "No se pudo actualizar la partida: {error}",
   "recoveryError": "No se pudo actualizar la partida: {error}. No se pudo actualizar/guardar la partida actual: {recoveryError}",
-  "languageSaveError": "No se pudo guardar el idioma: {error}"
+  "languageSaveError": "No se pudo guardar el idioma: {error}",
+  "about": "Acerca de",
+  "aboutTitle": "Acerca de Sanqi",
+  "pronunciation": "Se pronuncia aproximadamente «san chi» (Sānqí).",
+  "slogan": "El juego de mesa en el que las piezas deben trabajar juntas.",
+  "author": "Escrito por Oliver A Rübenacker.",
+  "buildDate": "Fecha de compilación (UTC)",
+  "commitLabel": "Commit de Git",
+  "buildNotRecorded": "No registrado en esta compilación",
+  "rulesLink": "Leer las reglas",
+  "repositoryLink": "Repositorio del código",
+  "close": "Cerrar",
+  "openLinkError": "No se pudo abrir el enlace. Puedes copiar la dirección de abajo.",
+  "moreBelow": "Desplázate para ver más"
 }

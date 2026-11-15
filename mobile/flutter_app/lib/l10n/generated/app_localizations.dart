@@ -339,6 +339,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save language preference: {error}'**
   String languageSaveError(String error);
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About Sanqi'**
+  String get aboutTitle;
+
+  /// No description provided for @pronunciation.
+  ///
+  /// In en, this message translates to:
+  /// **'Pronounced “sun chee” (Sānqí).'**
+  String get pronunciation;
+
+  /// No description provided for @slogan.
+  ///
+  /// In en, this message translates to:
+  /// **'The board game where pieces must work together.'**
+  String get slogan;
+
+  /// No description provided for @author.
+  ///
+  /// In en, this message translates to:
+  /// **'Written by Oliver A Rübenacker.'**
+  String get author;
+
+  /// No description provided for @buildDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Build date (UTC)'**
+  String get buildDate;
+
+  /// No description provided for @commitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Git commit'**
+  String get commitLabel;
+
+  /// No description provided for @buildNotRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not recorded for this build'**
+  String get buildNotRecorded;
+
+  /// No description provided for @rulesLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the rules'**
+  String get rulesLink;
+
+  /// No description provided for @repositoryLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Source repository'**
+  String get repositoryLink;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @openLinkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the link. You can copy the address below.'**
+  String get openLinkError;
+
+  /// No description provided for @moreBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'More below — scroll'**
+  String get moreBelow;
 }
 
 class _AppLocalizationsDelegate

@@ -151,4 +151,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String languageSaveError(String error) {
     return 'Could not save language preference: $error';
   }
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get aboutTitle => 'About Sanqi';
+
+  @override
+  String get pronunciation => 'Pronounced “sun chee” (Sānqí).';
+
+  @override
+  String get slogan => 'The board game where pieces must work together.';
+
+  @override
+  String get author => 'Written by Oliver A Rübenacker.';
+
+  @override
+  String get buildDate => 'Build date (UTC)';
+
+  @override
+  String get commitLabel => 'Git commit';
+
+  @override
+  String get buildNotRecorded => 'Not recorded for this build';
+
+  @override
+  String get rulesLink => 'Read the rules';
+
+  @override
+  String get repositoryLink => 'Source repository';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get openLinkError =>
+      'Could not open the link. You can copy the address below.';
+
+  @override
+  String get moreBelow => 'More below — scroll';
 }

@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart'
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'about_dialog.dart';
 import 'app_language.dart';
 import 'board.dart';
 import 'game_background.dart';
@@ -564,6 +565,13 @@ class _GameScreenState extends State<GameScreen> {
                   _busy || view.computerTurn || candidates.isEmpty
                       ? null
                       : () => _example(view),
+                ),
+                button(
+                  _l.about,
+                  () => showDialog<void>(
+                    context: context,
+                    builder: (_) => const SanqiAboutDialog(),
+                  ),
                 ),
                 if (view.computerBoth)
                   button(

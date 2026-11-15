@@ -37,5 +37,18 @@
   "saveError": "Permainan diperbarui, tetapi gagal disimpan: {error}",
   "updateError": "Tidak dapat memperbarui permainan: {error}",
   "recoveryError": "Tidak dapat memperbarui permainan: {error}. Tidak dapat memuat ulang/menyimpan permainan saat ini: {recoveryError}",
-  "languageSaveError": "Tidak dapat menyimpan pilihan bahasa: {error}"
+  "languageSaveError": "Tidak dapat menyimpan pilihan bahasa: {error}",
+  "about": "Tentang",
+  "aboutTitle": "Tentang Sanqi",
+  "pronunciation": "Dilafalkan kira-kira “san chi” (Sānqí).",
+  "slogan": "Permainan papan yang mengharuskan bidak-bidak bekerja sama.",
+  "author": "Dibuat oleh Oliver A Rübenacker.",
+  "buildDate": "Tanggal build (UTC)",
+  "commitLabel": "Commit Git",
+  "buildNotRecorded": "Tidak dicatat untuk build ini",
+  "rulesLink": "Baca aturan",
+  "repositoryLink": "Repositori kode sumber",
+  "close": "Tutup",
+  "openLinkError": "Tidak dapat membuka tautan. Anda dapat menyalin alamat di bawah.",
+  "moreBelow": "Gulir untuk melihat lagi"
 }

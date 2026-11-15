@@ -153,4 +153,43 @@ class AppLocalizationsAr extends AppLocalizations {
   String languageSaveError(String error) {
     return 'تعذر حفظ تفضيل اللغة: $error';
   }
+
+  @override
+  String get about => 'حول';
+
+  @override
+  String get aboutTitle => 'حول Sanqi';
+
+  @override
+  String get pronunciation => 'تُنطق تقريبًا «سان تشي» (Sānqí).';
+
+  @override
+  String get slogan => 'لعبة اللوح التي يجب أن تتعاون فيها القطع.';
+
+  @override
+  String get author => 'من تأليف Oliver A Rübenacker.';
+
+  @override
+  String get buildDate => 'تاريخ البناء (UTC)';
+
+  @override
+  String get commitLabel => 'معرّف إيداع Git';
+
+  @override
+  String get buildNotRecorded => 'غير مسجّل لهذا البناء';
+
+  @override
+  String get rulesLink => 'قراءة القواعد';
+
+  @override
+  String get repositoryLink => 'مستودع الشفرة المصدرية';
+
+  @override
+  String get close => 'إغلاق';
+
+  @override
+  String get openLinkError => 'تعذر فتح الرابط. يمكنك نسخ العنوان أدناه.';
+
+  @override
+  String get moreBelow => 'مرّر لعرض المزيد';
 }
