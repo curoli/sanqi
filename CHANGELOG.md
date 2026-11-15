@@ -9,6 +9,8 @@ Versioning.
 
 ### Added
 
+- Four-square Sanqi logo with outlined 三棋 characters and contrasting game
+  pieces, used for Android/iOS icons, native launch screens, app header, and README.
 - Mobile computer opponent with a choice of color, asynchronous time-bounded
   search, thinking/retry UI, saved mode, stale-result protection, and round undo.
 - Private `sanqi-mobile` crate with Rust-owned local game sessions through
