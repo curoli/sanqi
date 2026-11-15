@@ -178,6 +178,29 @@ class FailedImportDuringSearchService extends PendingComputerService {
 
 void main() {
   testWidgets(
+    'Example move works without a selection or with an immobile piece',
+    (tester) async {
+      for (final selected in [null, 1]) {
+        final service = FakeService()..current = snapshot(selected: selected);
+        final store = MemoryStore();
+        await tester.pumpWidget(
+          SanqiApp(createService: () async => service, store: store),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('White starts at the bottom.'), findsNothing);
+        await tester.tap(find.text('Example move'));
+        await tester.pumpAndSettle();
+        expect(service.calls, contains('inspect:a1-b3'));
+        final view = tester.widget<SanqiBoard>(find.byType(SanqiBoard)).view;
+        expect(view.inspectedMove, move);
+        expect(view.supports, isNotEmpty);
+        expect(store.text, '');
+        await tester.pumpWidget(const SizedBox());
+      }
+    },
+  );
+
+  testWidgets(
     'Example move cycles every destination and wraps without playing',
     (tester) async {
       final service = CyclingService();
@@ -420,9 +443,19 @@ void main() {
       final board = tester.getSize(find.byKey(const Key('board')));
       expect(board.width, closeTo(board.height, .01));
       if (size.width > size.height) {
-        expect(board.height, greaterThan(size.height - 80));
+        expect(board.height, closeTo(size.height - 16, .01));
+        expect(find.byType(AppBar), findsNothing);
+        final title = tester.getRect(find.text('Sanqi'));
+        final boardRect = tester.getRect(find.byKey(const Key('board')));
+        expect(title.left, greaterThan(boardRect.right));
+        expect(boardRect.top, closeTo(8, .01));
       } else {
         expect(board.width, greaterThan(size.width - 70));
+        expect(find.byType(AppBar), findsOneWidget);
+        expect(
+          tester.getRect(find.text('Sanqi')).bottom,
+          lessThan(tester.getRect(find.byKey(const Key('board'))).top),
+        );
       }
       final rect = tester.getRect(find.byKey(const Key('board')));
       expect(rect.left, greaterThanOrEqualTo(0));
@@ -447,4 +480,38 @@ void main() {
     }
     await tester.binding.setSurfaceSize(null);
   });
+
+  testWidgets(
+    'landscape board fills safe height around camera and system insets',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(900, 400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(900, 400),
+              padding: EdgeInsets.fromLTRB(32, 12, 24, 20),
+            ),
+            child: GameScreen(
+              createService: () async => FakeService(),
+              store: MemoryStore(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final board = tester.getRect(find.byKey(const Key('board')));
+      expect(board.height, closeTo(400 - 12 - 20 - 16, .01));
+      expect(board.top, closeTo(12 + 8, .01));
+      expect(board.bottom, closeTo(400 - 20 - 8, .01));
+      expect(board.left, greaterThanOrEqualTo(32 + 8));
+      expect(
+        tester.getRect(find.byKey(const Key('controls-panel'))).right,
+        lessThanOrEqualTo(900 - 24 - 8),
+      );
+      expect(find.byType(AppBar), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

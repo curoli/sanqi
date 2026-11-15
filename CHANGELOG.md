@@ -9,11 +9,14 @@ Versioning.
 
 ### Fixed
 
+- Use the full safe height for the mobile board in landscape by placing the
+  header beside it. Example move also works without selecting a movable piece.
 - Cancel mobile computer turns even when their initial Rust snapshot is still
   queued when Pause, New Game, Undo, restore, or a mode change occurs.
 
 ### Added
 
+- Warm geometric mobile background, a bordered control panel, and tinted controls.
 - Responsive mobile layout without scrolling, cycling example moves, recent-move
   display, and Computer vs Computer play with pause/resume.
 - Four-square Sanqi logo with outlined 三棋 characters and contrasting game
