@@ -17,6 +17,13 @@ The board orientation, coordinates, and canonical movetext remain unchanged;
 movetext and support coordinates are displayed left to right. Technical details
 reported by Rust or platform storage may retain their original wording.
 
+**About** opens the app information dialog in the selected language. It shows
+Sanqi's pronunciation, the cooperation slogan, the author Oliver A Rübenacker,
+the UTC build date and full Git commit, and links to this repository and the
+rules in the current language. Links open in the system browser; if opening a
+link fails, its address remains available to copy. Opening About leaves the
+game and any computer search running.
+
 Use the game-mode dropdown: **Human vs Human**, **Human vs Computer**,
 **Computer vs human**, or **Computer vs Computer**. The first player is White;
 the second is Black. Changing mode starts a new game. The computer moves first
@@ -158,9 +165,9 @@ udev rules. Check that it appears as `device`, not `unauthorized`:
 adb devices
 flutter devices
 cd mobile/flutter_app
-flutter run -d DEVICE_ID
+tool/flutter_with_build_info.sh run -d DEVICE_ID
 flutter test integration_test/game_test.dart -d DEVICE_ID
-flutter build apk --debug --target-platform android-arm64
+tool/flutter_with_build_info.sh build apk --debug --target-platform android-arm64
 ```
 
 The debug APK is `build/app/outputs/flutter-apk/app-debug.apk`. Install it with
@@ -169,6 +176,16 @@ also works; choose an ABI matching the Rust target (x86_64 or arm64). No physica
 device is required for widget/host bridge tests. Release signing and store
 submission are intentionally left for a subsequent phase.
 
+Use `tool/flutter_with_build_info.sh` in place of `flutter` for app builds and
+device runs to record the actual Git checkout and UTC build time in About.
+The wrapper accepts the usual Flutter arguments and works from any directory;
+it requires Bash, Git, and Flutter on PATH. It appends `-dirty` to the commit
+when tracked files differ from HEAD. Both Android and iOS CI builds use it.
+Direct `flutter build`/`flutter run` calls still work, but show “Not recorded
+for this build” unless supplied with `--dart-define=SANQI_BUILD_DATE=...` and
+`--dart-define=SANQI_GIT_COMMIT=...`. The app never substitutes its launch time
+for a missing build date.
+
 Manual device checklist:
 
 - Move for White, then Black; tap opponent pieces and invalid destinations.
@@ -176,6 +193,8 @@ Manual device checklist:
 - Rotate the device and test a small screen and large text settings.
 - Undo, start a new game, copy a record, and restore it.
 - Paste invalid movetext and check that the existing record survives.
+- Open About, confirm the build metadata, and open the repository and rules in
+  the selected language in the browser.
 - Close/relaunch the app and confirm that the game resumes correctly.
 
 ## iOS needs macOS and Xcode
@@ -204,9 +223,9 @@ Start an iOS simulator through Xcode (Simulator/Device Hub, depending on the
 Xcode version), then use `flutter devices` and:
 
 ```bash
-flutter run -d DEVICE_ID
+tool/flutter_with_build_info.sh run -d DEVICE_ID
 flutter test integration_test/game_test.dart -d DEVICE_ID
-flutter build ios --simulator --debug
+tool/flutter_with_build_info.sh build ios --simulator --debug
 ```
 
 On macOS, run the pure widget tests with

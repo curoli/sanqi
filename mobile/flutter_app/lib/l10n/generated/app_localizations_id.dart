@@ -145,4 +145,42 @@ class AppLocalizationsId extends AppLocalizations {
   String languageSaveError(String error) {
     return 'Tidak dapat menyimpan pilihan bahasa: $error';
   }
+
+  @override
+  String get about => 'Tentang';
+
+  @override
+  String get aboutTitle => 'Tentang Sanqi';
+
+  @override
+  String get pronunciation => 'Dilafalkan kira-kira “san chi” (Sānqí).';
+
+  @override
+  String get slogan =>
+      'Permainan papan yang mengharuskan bidak-bidak bekerja sama.';
+
+  @override
+  String get author => 'Dibuat oleh Oliver A Rübenacker.';
+
+  @override
+  String get buildDate => 'Tanggal build (UTC)';
+
+  @override
+  String get commitLabel => 'Commit Git';
+
+  @override
+  String get buildNotRecorded => 'Tidak dicatat untuk build ini';
+
+  @override
+  String get rulesLink => 'Baca aturan';
+
+  @override
+  String get repositoryLink => 'Repositori kode sumber';
+
+  @override
+  String get close => 'Tutup';
+
+  @override
+  String get openLinkError =>
+      'Tidak dapat membuka tautan. Anda dapat menyalin alamat di bawah.';
 }

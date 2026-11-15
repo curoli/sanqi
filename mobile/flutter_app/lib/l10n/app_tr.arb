@@ -37,5 +37,17 @@
   "saveError": "Oyun güncellendi ancak kaydedilemedi: {error}",
   "updateError": "Oyun güncellenemedi: {error}",
   "recoveryError": "Oyun güncellenemedi: {error}. Mevcut oyun yenilenemedi/kaydedilemedi: {recoveryError}",
-  "languageSaveError": "Dil tercihi kaydedilemedi: {error}"
+  "languageSaveError": "Dil tercihi kaydedilemedi: {error}",
+  "about": "Hakkında",
+  "aboutTitle": "Sanqi hakkında",
+  "pronunciation": "Yaklaşık “san çi” diye okunur (Sānqí).",
+  "slogan": "Taşların birlikte çalışması gereken masa oyunu.",
+  "author": "Oliver A Rübenacker tarafından yazıldı.",
+  "buildDate": "Derleme tarihi (UTC)",
+  "commitLabel": "Git commit kimliği",
+  "buildNotRecorded": "Bu derleme için kaydedilmedi",
+  "rulesLink": "Kuralları oku",
+  "repositoryLink": "Kaynak kod deposu",
+  "close": "Kapat",
+  "openLinkError": "Bağlantı açılamadı. Aşağıdaki adresi kopyalayabilirsiniz."
 }

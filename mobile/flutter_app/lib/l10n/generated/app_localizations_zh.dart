@@ -142,4 +142,40 @@ class AppLocalizationsZh extends AppLocalizations {
   String languageSaveError(String error) {
     return '无法保存语言设置：$error';
   }
+
+  @override
+  String get about => '关于';
+
+  @override
+  String get aboutTitle => '关于三棋 Sanqi';
+
+  @override
+  String get pronunciation => '三棋，读作 Sānqí。';
+
+  @override
+  String get slogan => '棋子必须协作的棋盘游戏。';
+
+  @override
+  String get author => '作者：Oliver A Rübenacker。';
+
+  @override
+  String get buildDate => '构建日期（UTC）';
+
+  @override
+  String get commitLabel => 'Git 提交';
+
+  @override
+  String get buildNotRecorded => '此构建未记录';
+
+  @override
+  String get rulesLink => '阅读规则';
+
+  @override
+  String get repositoryLink => '源代码仓库';
+
+  @override
+  String get close => '关闭';
+
+  @override
+  String get openLinkError => '无法打开链接。您可以复制下方地址。';
 }

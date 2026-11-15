@@ -38,9 +38,12 @@ jobs:
       - name: Run widget and real bridge tests
         working-directory: mobile/flutter_app
         run: flutter test
+      - name: Verify build metadata wrapper
+        working-directory: mobile/flutter_app
+        run: python3 tool/test_build_info.py
       - name: Build Android APK
         working-directory: mobile/flutter_app
-        run: flutter build apk --debug --target-platform android-arm64
+        run: tool/flutter_with_build_info.sh build apk --debug --target-platform android-arm64
       - name: Verify bundled Rust library
         working-directory: mobile/flutter_app
         run: python3 -c "import zipfile; assert 'lib/arm64-v8a/libsanqi_mobile.so' in zipfile.ZipFile('build/app/outputs/flutter-apk/app-debug.apk').namelist()"
@@ -67,4 +70,4 @@ jobs:
         run: flutter pub get --enforce-lockfile
       - name: Build iOS simulator app
         working-directory: mobile/flutter_app
-        run: flutter build ios --simulator --debug
+        run: tool/flutter_with_build_info.sh build ios --simulator --debug

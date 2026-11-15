@@ -152,4 +152,42 @@ class AppLocalizationsDe extends AppLocalizations {
   String languageSaveError(String error) {
     return 'Spracheinstellung konnte nicht gespeichert werden: $error';
   }
+
+  @override
+  String get about => 'Über';
+
+  @override
+  String get aboutTitle => 'Über Sanqi';
+
+  @override
+  String get pronunciation => 'Aussprache etwa „san tschi“ (Sānqí).';
+
+  @override
+  String get slogan =>
+      'Das Brettspiel, bei dem die Steine zusammenarbeiten müssen.';
+
+  @override
+  String get author => 'Geschrieben von Oliver A Rübenacker.';
+
+  @override
+  String get buildDate => 'Build-Datum (UTC)';
+
+  @override
+  String get commitLabel => 'Git-Commit';
+
+  @override
+  String get buildNotRecorded => 'Für diesen Build nicht erfasst';
+
+  @override
+  String get rulesLink => 'Spielregeln lesen';
+
+  @override
+  String get repositoryLink => 'Quellcode-Repository';
+
+  @override
+  String get close => 'Schließen';
+
+  @override
+  String get openLinkError =>
+      'Der Link konnte nicht geöffnet werden. Du kannst die Adresse unten kopieren.';
 }
