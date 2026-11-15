@@ -355,7 +355,7 @@ class _GameScreenState extends State<GameScreen> {
             semanticsLabel: 'Sanqi logo',
           ),
         ),
-        title: const Text('Sanqi 三棋'),
+        title: const Text('Sanqi'),
       ),
       body: SafeArea(
         child: Column(

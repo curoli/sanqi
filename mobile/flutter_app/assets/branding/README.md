@@ -6,6 +6,9 @@ match `sanqi-render`. The characters use LXGW WenKai Medium outlines for a
 gentle calligraphic style. The characters are paths, not text: no Chinese font is
 needed on the device. `sanqi-logo.png` is a 1024-pixel export for sharing.
 
+Pieces use the board renderer's single stroked circle, including its radius
+and border-width proportions (20/64 and 3/64 of a field respectively).
+
 `sanqi-app-icon.svg` and its opaque RGB PNG export add a cream safe margin so
 rounded launcher masks preserve all four fields. Android density-specific icons,
 iPhone/iPad/App Store icons, and native launch images are generated from these

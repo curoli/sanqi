@@ -1,6 +1,4 @@
-# Sanqi (三棋)
-
-<img src="mobile/flutter_app/assets/branding/sanqi-logo.svg" alt="Sanqi logo: 三棋 and white and black pieces on four alternating board squares" width="192" height="192">
+# <img src="mobile/flutter_app/assets/branding/sanqi-logo.svg" alt="Sanqi logo" width="40" height="40"> Sanqi
 
 Sanqi (三棋, Sānqí) board game engine.
 
