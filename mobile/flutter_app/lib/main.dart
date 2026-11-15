@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'board.dart';
 import 'game_service.dart';
@@ -346,7 +347,16 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     final view = _view;
     return Scaffold(
-      appBar: AppBar(title: const Text('Sanqi 三棋')),
+      appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8),
+          child: SvgPicture.asset(
+            'assets/branding/sanqi-logo.svg',
+            semanticsLabel: 'Sanqi logo',
+          ),
+        ),
+        title: const Text('Sanqi 三棋'),
+      ),
       body: SafeArea(
         child: Column(
           children: [
