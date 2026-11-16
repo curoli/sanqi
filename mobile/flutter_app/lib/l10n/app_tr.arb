@@ -70,5 +70,10 @@
   "skinGraphite": "Grafit",
   "skinEmber": "Köz",
   "skinGilded": "Yaldız",
-  "skinAurora": "Kutup Işığı"
+  "skinAurora": "Kutup Işığı",
+  "moreAbove": "Yukarıda daha var — kaydırın",
+  "settingsBackup": "Ayarları yedekle",
+  "settingsBackupHint": "Kaldırmadan önce bu metni uygulama dışında saklayın. Yeniden yükledikten sonra buraya yapıştırıp geri yükleyin. Yalnızca dil ve görünüm dahildir. Android yedeğinden geri yükleme garanti edilmez.",
+  "settingsRestoreError": "Ayarlar geri yüklenemedi. Yedek metnini kontrol edip yeniden deneyin.",
+  "firstLanguageHint": "Başlamak için dilinizi seçin."
 }

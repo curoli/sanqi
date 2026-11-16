@@ -70,5 +70,10 @@
   "skinGraphite": "Grafito",
   "skinEmber": "Brasa",
   "skinGilded": "Dorado",
-  "skinAurora": "Aurora"
+  "skinAurora": "Aurora",
+  "moreAbove": "Más arriba — desplázate",
+  "settingsBackup": "Respaldar ajustes",
+  "settingsBackupHint": "Copia este texto fuera de la aplicación antes de desinstalarla. Tras reinstalarla, pégalo aquí y restáuralo. Solo incluye idioma y estilo. La copia de Android también podría restaurarlos, pero no está garantizado.",
+  "settingsRestoreError": "No se pudieron restaurar los ajustes. Revisa el texto e inténtalo de nuevo.",
+  "firstLanguageHint": "Elige tu idioma para empezar."
 }

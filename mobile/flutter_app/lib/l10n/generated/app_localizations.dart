@@ -551,6 +551,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Aurora'**
   String get skinAurora;
+
+  /// No description provided for @moreAbove.
+  ///
+  /// In en, this message translates to:
+  /// **'More above — scroll'**
+  String get moreAbove;
+
+  /// No description provided for @settingsBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up settings'**
+  String get settingsBackup;
+
+  /// No description provided for @settingsBackupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy this text somewhere outside the app before uninstalling. After reinstalling, paste it here and restore. Only language and skin are included. Android backup may also restore them, but is not guaranteed.'**
+  String get settingsBackupHint;
+
+  /// No description provided for @settingsRestoreError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not restore settings. Check the backup text and try again.'**
+  String get settingsRestoreError;
+
+  /// No description provided for @firstLanguageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your language to start.'**
+  String get firstLanguageHint;
 }
 
 class _AppLocalizationsDelegate

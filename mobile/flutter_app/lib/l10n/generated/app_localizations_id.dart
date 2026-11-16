@@ -248,4 +248,21 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get skinAurora => 'Aurora';
+
+  @override
+  String get moreAbove => 'Pilihan di atas — gulir';
+
+  @override
+  String get settingsBackup => 'Cadangkan pengaturan';
+
+  @override
+  String get settingsBackupHint =>
+      'Salin teks ini ke luar aplikasi sebelum mencopotnya. Setelah memasang kembali, tempel di sini dan pulihkan. Hanya bahasa dan tema yang disertakan. Pemulihan cadangan Android tidak dijamin.';
+
+  @override
+  String get settingsRestoreError =>
+      'Tidak dapat memulihkan pengaturan. Periksa teks cadangan dan coba lagi.';
+
+  @override
+  String get firstLanguageHint => 'Pilih bahasa untuk memulai.';
 }

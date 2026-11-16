@@ -243,4 +243,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get skinAurora => 'オーロラ';
+
+  @override
+  String get moreAbove => '上にも続きます — スクロール';
+
+  @override
+  String get settingsBackup => '設定のバックアップ';
+
+  @override
+  String get settingsBackupHint =>
+      'アンインストール前にこのテキストをアプリの外に保存してください。再インストール後、ここに貼り付けて復元します。言語とスキンのみが含まれます。Androidのバックアップによる復元は保証されません。';
+
+  @override
+  String get settingsRestoreError => '設定を復元できませんでした。バックアップのテキストを確認して再試行してください。';
+
+  @override
+  String get firstLanguageHint => '開始するには言語を選んでください。';
 }

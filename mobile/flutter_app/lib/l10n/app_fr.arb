@@ -70,5 +70,10 @@
   "skinGraphite": "Graphite",
   "skinEmber": "Braise",
   "skinGilded": "Dorure",
-  "skinAurora": "Aurore"
+  "skinAurora": "Aurore",
+  "moreAbove": "Plus haut — faites défiler",
+  "settingsBackup": "Sauvegarder les réglages",
+  "settingsBackupHint": "Copiez ce texte hors de l’application avant de la désinstaller. Après réinstallation, collez-le ici et restaurez-le. Seuls la langue et le style sont inclus. La restauration par Android n’est pas garantie.",
+  "settingsRestoreError": "Impossible de restaurer les réglages. Vérifiez le texte et réessayez.",
+  "firstLanguageHint": "Choisissez votre langue pour commencer."
 }

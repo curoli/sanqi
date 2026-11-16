@@ -253,4 +253,21 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get skinAurora => 'ध्रुवज्योति';
+
+  @override
+  String get moreAbove => 'ऊपर और विकल्प हैं — स्क्रॉल करें';
+
+  @override
+  String get settingsBackup => 'सेटिंग्स का बैकअप';
+
+  @override
+  String get settingsBackupHint =>
+      'अनइंस्टॉल करने से पहले यह पाठ ऐप के बाहर सहेजें। दोबारा इंस्टॉल करने पर यहाँ पेस्ट करके बहाल करें। इसमें केवल भाषा और रूप हैं। Android बैकअप से बहाली की गारंटी नहीं है।';
+
+  @override
+  String get settingsRestoreError =>
+      'सेटिंग्स बहाल नहीं हो सकीं। बैकअप पाठ जाँचकर फिर कोशिश करें।';
+
+  @override
+  String get firstLanguageHint => 'शुरू करने के लिए भाषा चुनें।';
 }

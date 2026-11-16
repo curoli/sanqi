@@ -139,5 +139,10 @@
         "type": "String"
       }
     }
-  }
+  },
+  "moreAbove": "More above — scroll",
+  "settingsBackup": "Back up settings",
+  "settingsBackupHint": "Copy this text somewhere outside the app before uninstalling. After reinstalling, paste it here and restore. Only language and skin are included. Android backup may also restore them, but is not guaranteed.",
+  "settingsRestoreError": "Could not restore settings. Check the backup text and try again.",
+  "firstLanguageHint": "Choose your language to start."
 }

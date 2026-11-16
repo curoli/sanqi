@@ -11,13 +11,44 @@ Use the globe-and-flag button in the header to choose **🇬🇧 English**,
 **🇪🇸 Español**, **🇹🇷 Türkçe**, **🇮🇳 हिन्दी**, **🇫🇷 Français**,
 **🇧🇩 বাংলা**, **🇵🇹 Português**, **🇵🇰 اردو**, **🇷🇺 Русский**, or
 **🇯🇵 日本語**. The header sits in the side panel in
-landscape. The app initially follows a supported device language, falling back
-to English; an explicit choice is remembered on this device. Changing language
+landscape. Without a valid saved language, the app uses the first supported entry in the
+system's preferred-language list, matching by language code across regional
+variants, and opens the game directly. This automatic default is not saved as an
+explicit choice. If none of the system languages is supported, the app asks the
+user to choose, initially highlighting English. An explicit saved choice takes
+priority over later system-language changes. No location, IP lookup, network
+service, or permission request is used. The language chooser also supports
+settings-backup restore and stays open with a retryable error if saving fails.
+Backup restore and language confirmation share the same onboarding busy guard.
+If Back dismisses a restoring backup dialog, the chooser stays disabled until
+its writes settle; failures remain visible on the chooser and can be retried.
+Changing language
 updates controls, status, dialogs, and error summaries without resetting the
 game, selection, or computer search. Arabic and Urdu use a right-to-left interface.
 The board orientation, coordinates, and canonical movetext remain unchanged;
 movetext and support coordinates are displayed left to right. Technical details
 reported by Rust or platform storage may retain their original wording.
+
+Language and skin choosers have persistent scrollbars and tappable cues for
+choices above and below the viewport. Cues disappear at the corresponding end
+and update after scrolling or rotation. They open at the current selection.
+
+Both chooser headers have a **Back up settings** button (save icon). Copy the
+backup text into a note or file **outside Sanqi before uninstalling**. After
+reinstalling, open that dialog, paste the saved text, and choose Restore. The
+portable, versioned backup contains only the language code and skin ID; it
+does not contain the game. Use Save / restore separately for game movetext.
+Invalid backups are rejected before any settings are applied.
+
+Uninstalling deletes local app data; the app cannot recover settings that have
+already been deleted without a backup. Android backup participation is
+explicitly enabled, but automatic restore depends on device/account settings,
+backup timing and compatible signing identity. No app-managed cloud service is
+introduced. Where possible, install updates over the existing app instead of
+uninstalling (`adb install -r path/to/app.apk`). This requires matching signing
+certificates. GitHub debug builds can use different runner debug keys; if an
+update is rejected, copy settings and movetext before uninstalling. Stable
+release signing remains part of release preparation.
 
 **About** opens the app information dialog in the selected language. It shows
 Sanqi's pronunciation, the cooperation slogan, the author Oliver A Rübenacker,

@@ -251,4 +251,21 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get skinAurora => 'قطبی روشنی';
+
+  @override
+  String get moreAbove => 'اوپر مزید ہیں — اسکرول کریں';
+
+  @override
+  String get settingsBackup => 'ترتیبات کا بیک اپ';
+
+  @override
+  String get settingsBackupHint =>
+      'ان انسٹال کرنے سے پہلے یہ متن ایپ سے باہر محفوظ کریں۔ دوبارہ انسٹال کرنے کے بعد یہاں چسپاں کرکے بحال کریں۔ صرف زبان اور انداز شامل ہیں۔ Android بیک اپ سے بحالی کی ضمانت نہیں ہے۔';
+
+  @override
+  String get settingsRestoreError =>
+      'ترتیبات بحال نہیں ہو سکیں۔ بیک اپ کا متن جانچ کر دوبارہ کوشش کریں۔';
+
+  @override
+  String get firstLanguageHint => 'شروع کرنے کے لیے زبان منتخب کریں۔';
 }

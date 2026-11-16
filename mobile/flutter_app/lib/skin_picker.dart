@@ -3,12 +3,14 @@ import 'dart:math' as math;
 import 'package:material_ui/material_ui.dart';
 
 import 'app_skin.dart';
+import 'choice_scroll_frame.dart';
 import 'game_background.dart';
 import 'l10n/generated/app_localizations.dart';
 
 class SkinPicker extends StatefulWidget {
-  const SkinPicker({super.key, required this.selected});
+  const SkinPicker({super.key, required this.selected, this.onBackup});
   final AppSkin selected;
+  final Future<bool> Function()? onBackup;
 
   @override
   State<SkinPicker> createState() => _SkinPickerState();
@@ -39,7 +41,7 @@ class _SkinPickerState extends State<SkinPicker> {
       insetPadding: const EdgeInsets.all(16),
       child: SizedBox(
         width: 440,
-        height: math.min(640, MediaQuery.sizeOf(context).height * .8),
+        height: math.min(640, MediaQuery.sizeOf(context).height * .9),
         child: Column(
           children: [
             Padding(
@@ -54,6 +56,15 @@ class _SkinPickerState extends State<SkinPicker> {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
+                  if (widget.onBackup != null)
+                    IconButton(
+                      tooltip: l.settingsBackup,
+                      icon: const Icon(Icons.save_outlined),
+                      onPressed: () async {
+                        final restored = await widget.onBackup!();
+                        if (restored && context.mounted) Navigator.pop(context);
+                      },
+                    ),
                   IconButton(
                     tooltip: l.close,
                     onPressed: () => Navigator.pop(context),
@@ -62,21 +73,9 @@ class _SkinPickerState extends State<SkinPicker> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                l.skinScrollHint,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-            const SizedBox(height: 8),
             Expanded(
-              child: Scrollbar(
-                controller: _controller,
-                thumbVisibility: true,
-                trackVisibility: true,
+              child: ChoiceScrollFrame(
+                controller: _controller!,
                 child: ListView.builder(
                   key: const Key('skin-list'),
                   controller: _controller,
