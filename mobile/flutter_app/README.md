@@ -19,6 +19,27 @@ The board orientation, coordinates, and canonical movetext remain unchanged;
 movetext and support coordinates are displayed left to right. Technical details
 reported by Rust or platform storage may retain their original wording.
 
+Language and skin choosers have persistent scrollbars and tappable cues for
+choices above and below the viewport. Cues disappear at the corresponding end
+and update after scrolling or rotation. They open at the current selection.
+
+Both chooser headers have a **Back up settings** button (save icon). Copy the
+backup text into a note or file **outside Sanqi before uninstalling**. After
+reinstalling, open that dialog, paste the saved text, and choose Restore. The
+portable, versioned backup contains only the language code and skin ID; it
+does not contain the game. Use Save / restore separately for game movetext.
+Invalid backups are rejected before any settings are applied.
+
+Uninstalling deletes local app data; the app cannot recover settings that have
+already been deleted without a backup. Android backup participation is
+explicitly enabled, but automatic restore depends on device/account settings,
+backup timing and compatible signing identity. No app-managed cloud service is
+introduced. Where possible, install updates over the existing app instead of
+uninstalling (`adb install -r path/to/app.apk`). This requires matching signing
+certificates. GitHub debug builds can use different runner debug keys; if an
+update is rejected, copy settings and movetext before uninstalling. Stable
+release signing remains part of release preparation.
+
 **About** opens the app information dialog in the selected language. It shows
 Sanqi's pronunciation, the cooperation slogan, the author Oliver A Rübenacker,
 the UTC build date and full Git commit, and links to this repository and the

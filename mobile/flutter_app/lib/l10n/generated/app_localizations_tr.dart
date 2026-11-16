@@ -247,4 +247,18 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get skinAurora => 'Kutup Işığı';
+
+  @override
+  String get moreAbove => 'Yukarıda daha var — kaydırın';
+
+  @override
+  String get settingsBackup => 'Ayarları yedekle';
+
+  @override
+  String get settingsBackupHint =>
+      'Kaldırmadan önce bu metni uygulama dışında saklayın. Yeniden yükledikten sonra buraya yapıştırıp geri yükleyin. Yalnızca dil ve görünüm dahildir. Android yedeğinden geri yükleme garanti edilmez.';
+
+  @override
+  String get settingsRestoreError =>
+      'Ayarlar geri yüklenemedi. Yedek metnini kontrol edip yeniden deneyin.';
 }
