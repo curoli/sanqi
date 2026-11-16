@@ -17,6 +17,8 @@ Versioning.
 
 ### Added
 
+- Directional scrolling cues in language/skin choosers and portable settings
+  backup/restore, so language and skin can be restored after a reinstall.
 - Hindi, French, Bengali, Portuguese, Urdu, Russian, and Japanese UI and rules
   translations, bringing the supported total to fourteen; Urdu uses RTL layout.
 - Fourteen mobile skins with light/dark palettes, geometric backgrounds, button

@@ -256,4 +256,18 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get skinAurora => 'Сияние';
+
+  @override
+  String get moreAbove => 'Выше есть ещё — прокрутите';
+
+  @override
+  String get settingsBackup => 'Сохранить настройки';
+
+  @override
+  String get settingsBackupHint =>
+      'До удаления приложения скопируйте этот текст и сохраните вне приложения. После переустановки вставьте его сюда и восстановите настройки. Включены только язык и оформление. Восстановление из копии Android не гарантируется.';
+
+  @override
+  String get settingsRestoreError =>
+      'Не удалось восстановить настройки. Проверьте текст копии и повторите попытку.';
 }

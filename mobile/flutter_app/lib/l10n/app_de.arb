@@ -70,5 +70,9 @@
   "skinGraphite": "Graphit",
   "skinEmber": "Glut",
   "skinGilded": "Goldglanz",
-  "skinAurora": "Polarlicht"
+  "skinAurora": "Polarlicht",
+  "moreAbove": "Mehr oben — scrollen",
+  "settingsBackup": "Einstellungen sichern",
+  "settingsBackupHint": "Kopiere diesen Text vor dem Deinstallieren an einen Ort außerhalb der App. Nach der Neuinstallation hier einfügen und laden. Enthalten sind nur Sprache und Design. Android-Backups können sie ebenfalls wiederherstellen, sind aber nicht garantiert.",
+  "settingsRestoreError": "Einstellungen konnten nicht geladen werden. Prüfe den Sicherungstext und versuche es erneut."
 }

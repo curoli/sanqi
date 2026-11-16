@@ -70,5 +70,9 @@
   "skinGraphite": "Grafite",
   "skinEmber": "Brasa",
   "skinGilded": "Dourado",
-  "skinAurora": "Aurora"
+  "skinAurora": "Aurora",
+  "moreAbove": "Mais acima — deslize",
+  "settingsBackup": "Guardar definições",
+  "settingsBackupHint": "Copie este texto para fora da aplicação antes de a desinstalar. Após reinstalar, cole-o aqui e restaure. Inclui apenas o idioma e o tema. A recuperação pela cópia do Android não é garantida.",
+  "settingsRestoreError": "Não foi possível restaurar as definições. Verifique o texto e tente novamente."
 }

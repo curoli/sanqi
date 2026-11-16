@@ -253,4 +253,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get skinAurora => 'Aurora';
+
+  @override
+  String get moreAbove => 'More above — scroll';
+
+  @override
+  String get settingsBackup => 'Back up settings';
+
+  @override
+  String get settingsBackupHint =>
+      'Copy this text somewhere outside the app before uninstalling. After reinstalling, paste it here and restore. Only language and skin are included. Android backup may also restore them, but is not guaranteed.';
+
+  @override
+  String get settingsRestoreError =>
+      'Could not restore settings. Check the backup text and try again.';
 }

@@ -70,5 +70,9 @@
   "skinGraphite": "グラファイト",
   "skinEmber": "残り火",
   "skinGilded": "金彩",
-  "skinAurora": "オーロラ"
+  "skinAurora": "オーロラ",
+  "moreAbove": "上にも続きます — スクロール",
+  "settingsBackup": "設定のバックアップ",
+  "settingsBackupHint": "アンインストール前にこのテキストをアプリの外に保存してください。再インストール後、ここに貼り付けて復元します。言語とスキンのみが含まれます。Androidのバックアップによる復元は保証されません。",
+  "settingsRestoreError": "設定を復元できませんでした。バックアップのテキストを確認して再試行してください。"
 }

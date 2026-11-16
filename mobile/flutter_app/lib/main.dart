@@ -15,6 +15,8 @@ import 'board.dart';
 import 'game_background.dart';
 import 'game_service.dart';
 import 'l10n/generated/app_localizations.dart';
+import 'language_picker.dart';
+import 'settings_backup_dialog.dart';
 import 'skin_fonts.dart';
 import 'skin_picker.dart';
 import 'src/rust/api/game.dart';
@@ -374,7 +376,8 @@ class _GameScreenState extends State<GameScreen> {
   Future<void> _chooseSkin() async {
     final skin = await showDialog<AppSkin>(
       context: context,
-      builder: (_) => SkinPicker(selected: AppSkin.of(context)),
+      builder: (_) =>
+          SkinPicker(selected: AppSkin.of(context), onBackup: _settingsBackup),
     );
     if (skin == null || !mounted) return;
     final epoch = ++_skinEpoch;
@@ -396,13 +399,39 @@ class _GameScreenState extends State<GameScreen> {
     visualDensity: VisualDensity.compact,
   );
 
+  Future<bool> _settingsBackup() async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (_) => SettingsBackupDialog(
+          settings: SettingsBackup(
+            AppLanguage.fromCode(_l.localeName) ?? AppLanguage.english,
+            AppSkin.of(context),
+          ),
+          onRestore: (settings) => Future.wait([
+            widget.onLanguageChanged!(settings.language.code),
+            widget.onSkinChanged!(settings.skin),
+          ]).then((_) {}),
+        ),
+      ) ??
+      false;
+
+  Future<void> _chooseLanguage() async {
+    final code = await showDialog<String>(
+      context: context,
+      builder: (_) => LanguagePicker(
+        selected: AppLanguage.fromCode(_l.localeName) ?? AppLanguage.english,
+        onBackup: _settingsBackup,
+      ),
+    );
+    if (code != null && mounted) await _changeLanguage(code);
+  }
+
   Widget _languageSelector() {
     final current = AppLanguage.fromCode(_l.localeName) ?? AppLanguage.english;
-    return PopupMenuButton<String>(
+    return IconButton(
       key: const Key('language-selector'),
       tooltip: _l.language,
-      initialValue: current.code,
-      enabled: widget.onLanguageChanged != null,
+      onPressed: widget.onLanguageChanged == null ? null : _chooseLanguage,
       icon: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -411,19 +440,6 @@ class _GameScreenState extends State<GameScreen> {
           Text(current.flag, style: const TextStyle(fontSize: 18)),
         ],
       ),
-      onSelected: _changeLanguage,
-      itemBuilder: (context) => [
-        for (final language in AppLanguage.values)
-          PopupMenuItem(
-            value: language.code,
-            child: Text(
-              '${language.flag} ${language.name}',
-              textDirection: language.isRtl
-                  ? TextDirection.rtl
-                  : TextDirection.ltr,
-            ),
-          ),
-      ],
     );
   }
 
