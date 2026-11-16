@@ -20,6 +20,9 @@ system-language changes, and the prompt does not reappear while it remains
 valid. No location, IP lookup, network service, or permission request is used
 to suggest a language. The first-launch screen also supports settings-backup
 restore, and stays open with a retryable error if saving the choice fails.
+Backup restore and language confirmation share the same onboarding busy guard.
+If Back dismisses a restoring backup dialog, the chooser stays disabled until
+its writes settle; failures remain visible on the chooser and can be retried.
 Changing language
 updates controls, status, dialogs, and error summaries without resetting the
 game, selection, or computer search. Arabic and Urdu use a right-to-left interface.

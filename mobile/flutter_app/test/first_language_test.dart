@@ -28,6 +28,20 @@ class WaitingLanguageStore extends NewInstallStore {
   }
 }
 
+class ControlledRestoreStore extends SkinStore {
+  ControlledRestoreStore() {
+    code = null;
+  }
+  final writes = <(String, Completer<void>)>[];
+  @override
+  Future<void> saveLanguage(String value) async {
+    final completion = Completer<void>();
+    writes.add((value, completion));
+    await completion.future;
+    code = value;
+  }
+}
+
 Future<void> select(WidgetTester tester, AppLanguage language) async {
   final option = find.text('${language.flag} ${language.name}');
   await tester.ensureVisible(option);
@@ -36,6 +50,87 @@ Future<void> select(WidgetTester tester, AppLanguage language) async {
 }
 
 void main() {
+  for (final failRestore in [false, true]) {
+    testWidgets(
+      'dismissed restore keeps onboarding locked until writes settle (failure=$failRestore)',
+      (tester) async {
+        final store = ControlledRestoreStore();
+        var games = 0;
+        await tester.pumpWidget(
+          SanqiApp(
+            createService: () async {
+              games++;
+              return FakeService();
+            },
+            store: store,
+          ),
+        );
+        await tester.pumpAndSettle();
+        final l = AppLocalizations.of(
+          tester.element(find.byType(LanguagePicker)),
+        )!;
+        await tester.tap(find.byTooltip(l.settingsBackup));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const Key('settings-backup-input')),
+          const SettingsBackup(AppLanguage.german, AppSkin.aurora).encode(),
+        );
+        await tester.tap(find.text(l.restore));
+        await tester.pumpAndSettle();
+        expect(store.writes, hasLength(1));
+        expect(store.writes.first.$1, 'de');
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+        expect(find.byType(SettingsBackupDialog), findsNothing);
+        expect(
+          tester.widget<LanguagePicker>(find.byType(LanguagePicker)).enabled,
+          isFalse,
+        );
+        await select(tester, AppLanguage.english);
+        expect(store.writes, hasLength(1));
+        expect(games, 0);
+        if (!failRestore) {
+          store.writes.first.$2.complete();
+          await tester.pumpAndSettle();
+          expect(games, 1);
+          expect(store.code, 'de');
+          expect(find.text('Neues Spiel'), findsOneWidget);
+        } else {
+          store.writes.first.$2.completeError(StateError('restore disk error'));
+          await tester.pumpAndSettle();
+          expect(games, 0);
+          expect(
+            tester.widget<LanguagePicker>(find.byType(LanguagePicker)).enabled,
+            isTrue,
+          );
+          expect(
+            find.text(
+              lookupAppLocalizations(const Locale('de')).settingsRestoreError,
+            ),
+            findsOneWidget,
+          );
+          await select(tester, AppLanguage.english);
+          expect(store.writes, hasLength(2));
+          expect(games, 0);
+          store.writes[1].$2.completeError(StateError('English save error'));
+          await tester.pumpAndSettle();
+          expect(
+            find.textContaining('Could not save language preference'),
+            findsOneWidget,
+          );
+          expect(games, 0);
+          expect(store.code, isNull);
+          await select(tester, AppLanguage.english);
+          store.writes[2].$2.complete();
+          await tester.pumpAndSettle();
+          expect(games, 1);
+          expect(store.code, 'en');
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   test('suggestion follows preferred system languages, matching regions and falling back to English', () {
     expect(AppLanguage.suggested([]), AppLanguage.english);
     expect(

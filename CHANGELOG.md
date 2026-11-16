@@ -9,6 +9,8 @@ Versioning.
 
 ### Fixed
 
+- Keep first-launch language confirmation locked during settings restore, even
+  when its dialog is dismissed, and retain retryable save errors on the chooser.
 - Use the full safe height for the mobile board in landscape by placing the
   header beside it. Example move cycles all legal moves across every piece,
   regardless of the current selection.

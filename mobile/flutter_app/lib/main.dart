@@ -133,11 +133,31 @@ class _SanqiAppState extends State<SanqiApp> {
             _skin,
           ),
           onRestore: (settings) async {
-            await Future.wait([
-              _setLanguage(settings.language.code),
-              _setSkin(settings.skin),
-            ]);
-            if (mounted) setState(() => _needsLanguageChoice = false);
+            // The write outlives the dialog if Back dismisses it. Keep the
+            // onboarding guard until every restore write has settled.
+            if (_firstLanguageBusy) {
+              throw StateError('Language choice is saving');
+            }
+            setState(() {
+              _firstLanguageBusy = true;
+              _firstLanguageError = null;
+            });
+            try {
+              await Future.wait([
+                _setLanguage(settings.language.code),
+                _setSkin(settings.skin),
+              ]);
+              if (mounted) setState(() => _needsLanguageChoice = false);
+            } catch (_) {
+              if (mounted) {
+                setState(
+                  () => _firstLanguageError = (l) => l.settingsRestoreError,
+                );
+              }
+              rethrow;
+            } finally {
+              if (mounted) setState(() => _firstLanguageBusy = false);
+            }
           },
         ),
       ) ??
