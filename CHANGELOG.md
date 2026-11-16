@@ -17,6 +17,8 @@ Versioning.
 
 ### Added
 
+- Hindi, French, Bengali, Portuguese, Urdu, Russian, and Japanese UI and rules
+  translations, bringing the supported total to fourteen; Urdu uses RTL layout.
 - Fourteen mobile skins with light/dark palettes, geometric backgrounds, button
   styling, and offline fonts; a localized preview chooser saves the selection
   without changing the board, pieces, or game state.

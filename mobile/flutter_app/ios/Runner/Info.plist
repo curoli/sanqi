@@ -15,6 +15,13 @@
 		<string>zh</string>
 		<string>es</string>
 		<string>tr</string>
+		<string>hi</string>
+		<string>fr</string>
+		<string>bn</string>
+		<string>pt</string>
+		<string>ur</string>
+		<string>ru</string>
+		<string>ja</string>
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Sanqi</string>
