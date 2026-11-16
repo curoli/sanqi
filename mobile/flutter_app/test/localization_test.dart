@@ -39,16 +39,17 @@ Future<void> chooseLanguage(WidgetTester tester, AppLanguage language) async {
   for (final option in AppLanguage.values) {
     expect(find.text('${option.flag} ${option.name}'), findsOneWidget);
   }
+  await tester.ensureVisible(find.text('${language.flag} ${language.name}'));
   await tester.tap(find.text('${language.flag} ${language.name}'));
   await tester.pumpAndSettle();
 }
 
 void main() {
-  test('all seven rule languages have complete translation catalogs', () {
+  test('all fourteen rule languages have complete translation catalogs', () {
     final english =
         jsonDecode(File('lib/l10n/app_en.arb').readAsStringSync()) as Map;
     final keys = english.keys.where((key) => !key.startsWith('@')).toSet();
-    expect(AppLanguage.values, hasLength(7));
+    expect(AppLanguage.values, hasLength(14));
     expect(
       AppLocalizations.supportedLocales
           .map((locale) => locale.languageCode)
@@ -98,8 +99,11 @@ void main() {
         SanqiApp(createService: () async => FakeService(), store: store),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Yeni oyun'), findsOneWidget);
-      expect(find.text('Siyah oynar'), findsOneWidget);
+      final restored = lookupAppLocalizations(
+        Locale(AppLanguage.values.last.code),
+      );
+      expect(find.text(restored.newGame), findsOneWidget);
+      expect(find.text(restored.blackToMove), findsOneWidget);
     },
   );
 
@@ -124,9 +128,7 @@ void main() {
           );
           expect(
             Directionality.of(tester.element(board)),
-            language == AppLanguage.arabic
-                ? TextDirection.rtl
-                : TextDirection.ltr,
+            language.isRtl ? TextDirection.rtl : TextDirection.ltr,
           );
           expect(find.text(l.whiteToMove), findsOneWidget);
           expect(find.text(l.newGame), findsOneWidget);
@@ -206,7 +208,17 @@ void main() {
     'device language is used with English fallback for unsupported languages',
     (tester) async {
       addTearDown(tester.platformDispatcher.clearLocalesTestValue);
-      for (final code in ['tr', 'fr']) {
+      for (final code in [
+        'tr',
+        'fr',
+        'hi',
+        'bn',
+        'pt',
+        'ur',
+        'ru',
+        'ja',
+        'it',
+      ]) {
         tester.platformDispatcher.localesTestValue = [Locale(code)];
         await tester.pumpWidget(
           SanqiApp(
@@ -216,7 +228,11 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(
-          find.text(code == 'tr' ? 'Yeni oyun' : 'New Game'),
+          find.text(
+            lookupAppLocalizations(
+              Locale(AppLanguage.fromCode(code)?.code ?? 'en'),
+            ).newGame,
+          ),
           findsOneWidget,
         );
         await tester.pumpWidget(const SizedBox());

@@ -8,11 +8,13 @@ networking or multiplayer services.
 
 Use the globe-and-flag button in the header to choose **🇬🇧 English**,
 **🇩🇪 Deutsch**, **🇮🇩 Bahasa Indonesia**, **🇸🇦 العربية**, **🇨🇳 中文**,
-**🇪🇸 Español**, or **🇹🇷 Türkçe**. The header sits in the side panel in
+**🇪🇸 Español**, **🇹🇷 Türkçe**, **🇮🇳 हिन्दी**, **🇫🇷 Français**,
+**🇧🇩 বাংলা**, **🇵🇹 Português**, **🇵🇰 اردو**, **🇷🇺 Русский**, or
+**🇯🇵 日本語**. The header sits in the side panel in
 landscape. The app initially follows a supported device language, falling back
 to English; an explicit choice is remembered on this device. Changing language
 updates controls, status, dialogs, and error summaries without resetting the
-game, selection, or computer search. Arabic uses a right-to-left interface.
+game, selection, or computer search. Arabic and Urdu use a right-to-left interface.
 The board orientation, coordinates, and canonical movetext remain unchanged;
 movetext and support coordinates are displayed left to right. Technical details
 reported by Rust or platform storage may retain their original wording.
@@ -32,7 +34,7 @@ The **palette button** in the header opens the skin chooser. Each entry previews
 its colors, pattern, typography, and button styling. Selecting a skin applies it
 immediately and saves the choice on the device; closing the chooser keeps the
 current skin. The list opens at the current selection and has a persistent
-scrollbar. Skin names and controls are translated into all seven languages.
+scrollbar. Skin names and controls are translated into all fourteen languages.
 Changing skins preserves the game, move selection, computer search, board SVG,
 pieces, board labels, and supporting-pivot markers. Linen is the default.
 
@@ -128,13 +130,13 @@ are visible. Preferences store movetext, mode, language, and skin, never Dart-de
 game state.
 
 Translations live in `lib/l10n/app_*.arb`; `flutter gen-l10n` regenerates the
-committed typed Dart files in `lib/l10n/generated`. Add text to all seven
+committed typed Dart files in `lib/l10n/generated`. Add text to all fourteen
 catalogs, using placeholders and ICU plurals for dynamic messages. The app uses
 the localization delegates exported by `material_ui` and `cupertino_ui`, plus
 Flutter's widget delegate. Flutter 3.50's generator still emits references to
 the legacy Material/Cupertino delegates in its unused convenience list; the
 generated header suppresses that specific deprecation diagnostic. App analysis
-still covers the generated translations. iOS advertises all seven locales in
+still covers the generated translations. iOS advertises all fourteen locales in
 `Runner/Info.plist`.
 
 In landscape the logo and title move into the side panel, so the board fills

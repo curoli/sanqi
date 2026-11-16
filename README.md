@@ -8,10 +8,17 @@ Here are the rules of Sanqi in
 [Indonesian 🇮🇩](docs/rules/sanqi-id.md),
 [Arabic 🇸🇦](docs/rules/sanqi-ar.md),
 [Chinese 🇨🇳](docs/rules/sanqi-zh.md),
-[Spanish 🇪🇸](docs/rules/sanqi-es.md), and
-[Turkish 🇹🇷](docs/rules/sanqi-tr.md).
+[Spanish 🇪🇸](docs/rules/sanqi-es.md),
+[Turkish 🇹🇷](docs/rules/sanqi-tr.md),
+[Hindi 🇮🇳](docs/rules/sanqi-hi.md),
+[French 🇫🇷](docs/rules/sanqi-fr.md),
+[Bengali 🇧🇩](docs/rules/sanqi-bn.md),
+[Portuguese 🇵🇹](docs/rules/sanqi-pt.md),
+[Urdu 🇵🇰](docs/rules/sanqi-ur.md),
+[Russian 🇷🇺](docs/rules/sanqi-ru.md), and
+[Japanese 🇯🇵](docs/rules/sanqi-ja.md).
 
-The mobile app supports these seven interface languages through its flag selector.
+The mobile app supports these fourteen interface languages through its flag selector.
 
 ## Development
 

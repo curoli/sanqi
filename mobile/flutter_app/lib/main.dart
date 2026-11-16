@@ -401,6 +401,7 @@ class _GameScreenState extends State<GameScreen> {
     return PopupMenuButton<String>(
       key: const Key('language-selector'),
       tooltip: _l.language,
+      initialValue: current.code,
       enabled: widget.onLanguageChanged != null,
       icon: Row(
         mainAxisSize: MainAxisSize.min,
@@ -417,7 +418,7 @@ class _GameScreenState extends State<GameScreen> {
             value: language.code,
             child: Text(
               '${language.flag} ${language.name}',
-              textDirection: language == AppLanguage.arabic
+              textDirection: language.isRtl
                   ? TextDirection.rtl
                   : TextDirection.ltr,
             ),
