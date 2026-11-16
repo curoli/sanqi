@@ -50,6 +50,18 @@ Future<void> select(WidgetTester tester, AppLanguage language) async {
 }
 
 void main() {
+  setUp(() {
+    // Exercise onboarding only when no system language is supported.
+    TestWidgetsFlutterBinding.ensureInitialized()
+        .platformDispatcher
+        .localesTestValue = [
+      const Locale('it'),
+    ];
+  });
+  tearDown(() {
+    TestWidgetsFlutterBinding.ensureInitialized().platformDispatcher
+        .clearLocalesTestValue();
+  });
   for (final failRestore in [false, true]) {
     testWidgets(
       'dismissed restore keeps onboarding locked until writes settle (failure=$failRestore)',
@@ -131,10 +143,10 @@ void main() {
     );
   }
 
-  test('suggestion follows preferred system languages, matching regions and falling back to English', () {
-    expect(AppLanguage.suggested([]), AppLanguage.english);
+  test('system language matching follows preference order and regions', () {
+    expect(AppLanguage.supportedSystemLanguage([]), isNull);
     expect(
-      AppLanguage.suggested([
+      AppLanguage.supportedSystemLanguage([
         const Locale('it'),
         const Locale('fr', 'CA'),
         const Locale('de'),
@@ -142,20 +154,26 @@ void main() {
       AppLanguage.french,
     );
     expect(
-      AppLanguage.suggested([const Locale('xx'), const Locale('it')]),
-      AppLanguage.english,
+      AppLanguage.supportedSystemLanguage([
+        const Locale('xx'),
+        const Locale('it'),
+      ]),
+      isNull,
     );
     for (final language in AppLanguage.values) {
-      expect(AppLanguage.suggested([Locale(language.code, 'XX')]), language);
+      expect(
+        AppLanguage.supportedSystemLanguage([Locale(language.code, 'XX')]),
+        language,
+      );
     }
   });
 
   testWidgets(
-    'first launch asks without auto-saving or starting a game; choice persists',
+    'unsupported system language asks without auto-saving; choice persists',
     (tester) async {
       tester.platformDispatcher.localesTestValue = [
         const Locale('it'),
-        const Locale('fr', 'CA'),
+        const Locale('xx'),
       ];
       addTearDown(tester.platformDispatcher.clearLocalesTestValue);
       final store = NewInstallStore();
@@ -170,11 +188,11 @@ void main() {
       final picker = tester.widget<LanguagePicker>(
         find.byKey(const Key('first-language-choice')),
       );
-      expect(picker.selected, AppLanguage.french);
+      expect(picker.selected, AppLanguage.english);
       expect(picker.firstLaunch, isTrue);
       expect(store.code, isNull);
       expect(created, 0);
-      expect(find.byTooltip('Fermer'), findsNothing);
+      expect(find.byTooltip('Close'), findsNothing);
       await select(tester, AppLanguage.english);
       expect(store.code, 'en');
       expect(created, 1);
@@ -185,6 +203,36 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('first-language-choice')), findsNothing);
       expect(find.text('New Game'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'ordered regional system match opens game without saving an explicit choice',
+    (tester) async {
+      tester.platformDispatcher.localesTestValue = [
+        const Locale('it'),
+        const Locale('fr', 'CA'),
+        const Locale('de'),
+      ];
+      final store = NewInstallStore();
+      await tester.pumpWidget(
+        SanqiApp(createService: () async => FakeService(), store: store),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(LanguagePicker), findsNothing);
+      expect(find.text('Nouvelle partie'), findsOneWidget);
+      expect(store.code, isNull);
+      await tester.pumpWidget(const SizedBox());
+      tester.platformDispatcher.localesTestValue = [const Locale('ja')];
+      await tester.pumpWidget(
+        SanqiApp(createService: () async => FakeService(), store: store),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        Localizations.localeOf(tester.element(find.byType(GameScreen)))
+            .languageCode,
+        'ja',
+      );
     },
   );
 
@@ -223,34 +271,32 @@ void main() {
     },
   );
 
-  testWidgets(
-    'all suggested languages fit first-launch landscape with larger text',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(568, 320));
-      tester.platformDispatcher.textScaleFactorTestValue = 1.6;
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-      addTearDown(tester.platformDispatcher.clearLocalesTestValue);
-      for (final language in AppLanguage.values) {
-        tester.platformDispatcher.localesTestValue = [Locale(language.code)];
-        final store = NewInstallStore();
-        await tester.pumpWidget(
-          SanqiApp(createService: () async => FakeService(), store: store),
-        );
-        await tester.pumpAndSettle();
-        expect(find.byKey(const Key('first-language-choice')), findsOneWidget);
-        expect(
-          Directionality.of(tester.element(find.byType(LanguagePicker))),
-          language.isRtl ? TextDirection.rtl : TextDirection.ltr,
-        );
-        await select(tester, language);
-        expect(store.code, language.code);
-        expect(find.byType(GameScreen), findsOneWidget);
-        expect(tester.takeException(), isNull, reason: language.code);
-        await tester.pumpWidget(const SizedBox());
-      }
-    },
-  );
+  testWidgets('all supported system languages open the game with larger text', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(568, 320));
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+    for (final language in AppLanguage.values) {
+      tester.platformDispatcher.localesTestValue = [Locale(language.code)];
+      final store = NewInstallStore();
+      await tester.pumpWidget(
+        SanqiApp(createService: () async => FakeService(), store: store),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('first-language-choice')), findsNothing);
+      expect(
+        Directionality.of(tester.element(find.byType(GameScreen))),
+        language.isRtl ? TextDirection.rtl : TextDirection.ltr,
+      );
+      expect(store.code, isNull);
+      expect(find.byType(GameScreen), findsOneWidget);
+      expect(tester.takeException(), isNull, reason: language.code);
+      await tester.pumpWidget(const SizedBox());
+    }
+  });
 
   testWidgets(
     'settings backup can restore both preferences before choosing a language',

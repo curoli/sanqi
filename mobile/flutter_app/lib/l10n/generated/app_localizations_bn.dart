@@ -262,6 +262,5 @@ class AppLocalizationsBn extends AppLocalizations {
       'সেটিংস পুনরুদ্ধার করা যায়নি। ব্যাকআপের লেখা যাচাই করে আবার চেষ্টা করুন।';
 
   @override
-  String get firstLanguageHint =>
-      'শুরু করতে ভাষা বেছে নিন। চিহ্নিত ভাষাটি আপনার ডিভাইসের সেটিংস অনুযায়ী প্রস্তাবিত।';
+  String get firstLanguageHint => 'শুরু করতে ভাষা বেছে নিন।';
 }

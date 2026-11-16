@@ -579,7 +579,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstLanguageHint.
   ///
   /// In en, this message translates to:
-  /// **'Choose your language to start. The highlighted option is suggested from your device settings.'**
+  /// **'Choose your language to start.'**
   String get firstLanguageHint;
 }
 

@@ -272,6 +272,5 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось восстановить настройки. Проверьте текст копии и повторите попытку.';
 
   @override
-  String get firstLanguageHint =>
-      'Выберите язык для начала. Выделенный вариант предложен на основе настроек устройства.';
+  String get firstLanguageHint => 'Выберите язык для начала.';
 }

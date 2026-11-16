@@ -258,5 +258,5 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsRestoreError => '設定を復元できませんでした。バックアップのテキストを確認して再試行してください。';
 
   @override
-  String get firstLanguageHint => '開始するには言語を選んでください。ハイライトされた言語は端末の設定に基づく候補です。';
+  String get firstLanguageHint => '開始するには言語を選んでください。';
 }

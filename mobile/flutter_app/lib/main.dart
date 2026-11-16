@@ -92,14 +92,14 @@ class _SanqiAppState extends State<SanqiApp> {
     }
     if (mounted && !_languageChosen) {
       setState(() {
-        final suggestion =
-            language ??
-            AppLanguage.suggested(
-              WidgetsBinding.instance.platformDispatcher.locales,
-            );
-        _locale = Locale(suggestion.code);
+        final systemLanguage = AppLanguage.supportedSystemLanguage(
+          WidgetsBinding.instance.platformDispatcher.locales,
+        );
+        _locale = Locale(
+          (language ?? systemLanguage ?? AppLanguage.english).code,
+        );
         _languageReady = true;
-        _needsLanguageChoice = language == null;
+        _needsLanguageChoice = language == null && systemLanguage == null;
       });
     }
   }

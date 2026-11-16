@@ -227,19 +227,20 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(find.byKey(const Key('first-language-choice')), findsOneWidget);
         final suggested = AppLanguage.fromCode(code) ?? AppLanguage.english;
-        expect(
-          Localizations.localeOf(
-            tester.element(find.byKey(const Key('first-language-choice'))),
-          ).languageCode,
-          suggested.code,
-        );
-        await tester.ensureVisible(
-          find.text('${suggested.flag} ${suggested.name}'),
-        );
-        await tester.tap(find.text('${suggested.flag} ${suggested.name}'));
-        await tester.pumpAndSettle();
+        if (AppLanguage.fromCode(code) == null) {
+          expect(
+            find.byKey(const Key('first-language-choice')),
+            findsOneWidget,
+          );
+          await tester.ensureVisible(
+            find.text('${suggested.flag} ${suggested.name}'),
+          );
+          await tester.tap(find.text('${suggested.flag} ${suggested.name}'));
+          await tester.pumpAndSettle();
+        } else {
+          expect(find.byKey(const Key('first-language-choice')), findsNothing);
+        }
         expect(
           find.text(lookupAppLocalizations(Locale(suggested.code)).newGame),
           findsOneWidget,

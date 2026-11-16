@@ -21,12 +21,12 @@ enum AppLanguage {
   final String flag;
   final String name;
   bool get isRtl => this == arabic || this == urdu;
-  static AppLanguage suggested(Iterable<Locale> locales) {
+  static AppLanguage? supportedSystemLanguage(Iterable<Locale> locales) {
     for (final locale in locales) {
       final language = fromCode(locale.languageCode);
       if (language != null) return language;
     }
-    return english;
+    return null;
   }
 
   static AppLanguage? fromCode(String? code) {
