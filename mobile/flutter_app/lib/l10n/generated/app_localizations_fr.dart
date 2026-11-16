@@ -269,4 +269,8 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get settingsRestoreError =>
       'Impossible de restaurer les réglages. Vérifiez le texte et réessayez.';
+
+  @override
+  String get firstLanguageHint =>
+      'Choisissez votre langue pour commencer. L’option en surbrillance est suggérée selon les réglages de votre appareil.';
 }

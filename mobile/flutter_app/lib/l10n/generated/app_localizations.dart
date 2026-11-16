@@ -575,6 +575,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not restore settings. Check the backup text and try again.'**
   String get settingsRestoreError;
+
+  /// No description provided for @firstLanguageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your language to start. The highlighted option is suggested from your device settings.'**
+  String get firstLanguageHint;
 }
 
 class _AppLocalizationsDelegate

@@ -11,8 +11,19 @@ Use the globe-and-flag button in the header to choose **🇬🇧 English**,
 **🇪🇸 Español**, **🇹🇷 Türkçe**, **🇮🇳 हिन्दी**, **🇫🇷 Français**,
 **🇧🇩 বাংলা**, **🇵🇹 Português**, **🇵🇰 اردو**, **🇷🇺 Русский**, or
 **🇯🇵 日本語**. The header sits in the side panel in
-landscape. The app initially follows a supported device language, falling back
-to English; an explicit choice is remembered on this device. Changing language
+landscape. On first launch without a valid saved language, the app asks which
+language to use before opening the game. It suggests the first supported entry
+in the system's preferred-language list, matching by language code across
+regional variants; English is the fallback. The suggestion is not saved until
+the user explicitly selects a language. A saved choice takes priority over later
+system-language changes, and the prompt does not reappear while it remains
+valid. No location, IP lookup, network service, or permission request is used
+to suggest a language. The first-launch screen also supports settings-backup
+restore, and stays open with a retryable error if saving the choice fails.
+Backup restore and language confirmation share the same onboarding busy guard.
+If Back dismisses a restoring backup dialog, the chooser stays disabled until
+its writes settle; failures remain visible on the chooser and can be retried.
+Changing language
 updates controls, status, dialogs, and error summaries without resetting the
 game, selection, or computer search. Arabic and Urdu use a right-to-left interface.
 The board orientation, coordinates, and canonical movetext remain unchanged;

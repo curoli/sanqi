@@ -77,6 +77,8 @@ class FakeService extends GameService {
 }
 
 class MemoryStore extends GameStore {
+  @override
+  Future<String?> loadLanguage() async => 'en';
   String? text;
   String? mode;
   @override

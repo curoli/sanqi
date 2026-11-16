@@ -268,4 +268,8 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get settingsRestoreError =>
       'تعذرت استعادة الإعدادات. تحقق من نص النسخة الاحتياطية وحاول مجددًا.';
+
+  @override
+  String get firstLanguageHint =>
+      'اختر لغتك للبدء. الخيار المميز مقترح من إعدادات جهازك.';
 }
