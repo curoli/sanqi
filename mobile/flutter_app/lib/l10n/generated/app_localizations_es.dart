@@ -269,4 +269,8 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settingsRestoreError =>
       'No se pudieron restaurar los ajustes. Revisa el texto e inténtalo de nuevo.';
+
+  @override
+  String get firstLanguageHint =>
+      'Elige tu idioma para empezar. La opción resaltada se sugiere según los ajustes del dispositivo.';
 }

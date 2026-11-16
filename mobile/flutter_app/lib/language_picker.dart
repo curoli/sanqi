@@ -11,9 +11,17 @@ class LanguagePicker extends StatefulWidget {
     super.key,
     required this.selected,
     required this.onBackup,
+    this.firstLaunch = false,
+    this.onSelected,
+    this.enabled = true,
+    this.error,
   });
   final AppLanguage selected;
   final Future<bool> Function() onBackup;
+  final bool firstLaunch;
+  final ValueChanged<String>? onSelected;
+  final bool enabled;
+  final String? error;
   @override
   State<LanguagePicker> createState() => _LanguagePickerState();
 }
@@ -61,19 +69,45 @@ class _LanguagePickerState extends State<LanguagePicker> {
                   IconButton(
                     tooltip: l.settingsBackup,
                     icon: const Icon(Icons.save_outlined),
-                    onPressed: () async {
-                      final restored = await widget.onBackup();
-                      if (restored && context.mounted) Navigator.pop(context);
-                    },
+                    onPressed: !widget.enabled
+                        ? null
+                        : () async {
+                            final restored = await widget.onBackup();
+                            if (restored &&
+                                context.mounted &&
+                                !widget.firstLaunch) {
+                              Navigator.pop(context);
+                            }
+                          },
                   ),
-                  IconButton(
-                    tooltip: l.close,
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
+                  if (!widget.firstLaunch)
+                    IconButton(
+                      tooltip: l.close,
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
                 ],
               ),
             ),
+            if (widget.firstLaunch)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  l.firstLanguageHint,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            if (widget.error != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  widget.error!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
             Expanded(
               child: ChoiceScrollFrame(
                 controller: _controller!,
@@ -99,7 +133,15 @@ class _LanguagePickerState extends State<LanguagePicker> {
                             trailing: language == widget.selected
                                 ? const Icon(Icons.check)
                                 : null,
-                            onTap: () => Navigator.pop(context, language.code),
+                            onTap: !widget.enabled
+                                ? null
+                                : () {
+                                    if (widget.onSelected != null) {
+                                      widget.onSelected!(language.code);
+                                    } else {
+                                      Navigator.pop(context, language.code);
+                                    }
+                                  },
                           ),
                         ),
                     ],

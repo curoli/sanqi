@@ -269,4 +269,8 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get settingsRestoreError =>
       'Einstellungen konnten nicht geladen werden. Prüfe den Sicherungstext und versuche es erneut.';
+
+  @override
+  String get firstLanguageHint =>
+      'Wähle deine Sprache zum Starten. Die markierte Sprache wird anhand deiner Geräteeinstellungen vorgeschlagen.';
 }

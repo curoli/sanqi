@@ -50,7 +50,11 @@ class _SanqiAppState extends State<SanqiApp> {
   AppSkin _skin = AppSkin.linen;
   bool _skinChosen = false;
   Future<void> _skinWrites = Future.value();
-  Locale? _locale;
+  Locale _locale = const Locale('en');
+  bool _languageReady = false;
+  bool _needsLanguageChoice = false;
+  bool _firstLanguageBusy = false;
+  String Function(AppLocalizations)? _firstLanguageError;
   bool _languageChosen = false;
   Future<void> _languageWrites = Future.value();
 
@@ -79,16 +83,65 @@ class _SanqiAppState extends State<SanqiApp> {
   }
 
   Future<void> _loadLanguage() async {
+    AppLanguage? language;
     try {
-      final language = AppLanguage.fromCode(await widget.store.loadLanguage());
-      if (mounted && !_languageChosen && language != null) {
-        setState(() => _locale = Locale(language.code));
-      }
+      language = AppLanguage.fromCode(await widget.store.loadLanguage());
     } catch (error) {
       // A failed preference read leaves the device locale (or English fallback).
       debugPrint('Could not load language preference: $error');
     }
+    if (mounted && !_languageChosen) {
+      setState(() {
+        final suggestion =
+            language ??
+            AppLanguage.suggested(
+              WidgetsBinding.instance.platformDispatcher.locales,
+            );
+        _locale = Locale(suggestion.code);
+        _languageReady = true;
+        _needsLanguageChoice = language == null;
+      });
+    }
   }
+
+  Future<void> _confirmFirstLanguage(String code) async {
+    if (_firstLanguageBusy) return;
+    setState(() {
+      _firstLanguageBusy = true;
+      _firstLanguageError = null;
+    });
+    try {
+      await _setLanguage(code);
+      if (mounted) setState(() => _needsLanguageChoice = false);
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () => _firstLanguageError = (l) => l.languageSaveError('$error'),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _firstLanguageBusy = false);
+    }
+  }
+
+  Future<bool> _restoreFirstSettings(BuildContext context) async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (_) => SettingsBackupDialog(
+          settings: SettingsBackup(
+            AppLanguage.fromCode(_locale.languageCode)!,
+            _skin,
+          ),
+          onRestore: (settings) async {
+            await Future.wait([
+              _setLanguage(settings.language.code),
+              _setSkin(settings.skin),
+            ]);
+            if (mounted) setState(() => _needsLanguageChoice = false);
+          },
+        ),
+      ) ??
+      false;
 
   Future<void> _setLanguage(String code) {
     _languageChosen = true;
@@ -124,12 +177,35 @@ class _SanqiAppState extends State<SanqiApp> {
               .copyWith(systemNavigationBarColor: _skin.background),
       child: child!,
     ),
-    home: GameScreen(
-      createService: widget.createService,
-      store: widget.store,
-      onLanguageChanged: _setLanguage,
-      onSkinChanged: _setSkin,
-    ),
+    home: !_languageReady
+        ? const Scaffold(body: Center(child: Text('Sanqi')))
+        : _needsLanguageChoice
+        ? Builder(
+            builder: (context) => Scaffold(
+              body: CustomPaint(
+                painter: GameBackground(skin: _skin),
+                child: SafeArea(
+                  child: LanguagePicker(
+                    key: const Key('first-language-choice'),
+                    firstLaunch: true,
+                    selected: AppLanguage.fromCode(_locale.languageCode)!,
+                    enabled: !_firstLanguageBusy,
+                    onSelected: _confirmFirstLanguage,
+                    error: _firstLanguageError?.call(
+                      AppLocalizations.of(context)!,
+                    ),
+                    onBackup: () => _restoreFirstSettings(context),
+                  ),
+                ),
+              ),
+            ),
+          )
+        : GameScreen(
+            createService: widget.createService,
+            store: widget.store,
+            onLanguageChanged: _setLanguage,
+            onSkinChanged: _setSkin,
+          ),
   );
 }
 

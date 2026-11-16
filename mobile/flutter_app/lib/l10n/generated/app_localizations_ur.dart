@@ -265,4 +265,8 @@ class AppLocalizationsUr extends AppLocalizations {
   @override
   String get settingsRestoreError =>
       'ترتیبات بحال نہیں ہو سکیں۔ بیک اپ کا متن جانچ کر دوبارہ کوشش کریں۔';
+
+  @override
+  String get firstLanguageHint =>
+      'شروع کرنے کے لیے زبان منتخب کریں۔ نمایاں انتخاب آپ کے آلے کی ترتیبات کی بنیاد پر تجویز کیا گیا ہے۔';
 }

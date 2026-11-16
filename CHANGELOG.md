@@ -17,6 +17,8 @@ Versioning.
 
 ### Added
 
+- First-launch language confirmation with a permission-free suggestion from
+  system language preferences, English fallback, and remembered explicit choices.
 - Directional scrolling cues in language/skin choosers and portable settings
   backup/restore, so language and skin can be restored after a reinstall.
 - Hindi, French, Bengali, Portuguese, Urdu, Russian, and Japanese UI and rules

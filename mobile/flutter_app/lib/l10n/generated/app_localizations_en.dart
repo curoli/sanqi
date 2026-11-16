@@ -267,4 +267,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsRestoreError =>
       'Could not restore settings. Check the backup text and try again.';
+
+  @override
+  String get firstLanguageHint =>
+      'Choose your language to start. The highlighted option is suggested from your device settings.';
 }

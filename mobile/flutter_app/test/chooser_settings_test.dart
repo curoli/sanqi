@@ -178,7 +178,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(store.code, isNull);
+    expect(store.code, 'en');
     expect(store.savedSkins, isEmpty);
     expect(currentSkin(tester), AppSkin.linen);
   });

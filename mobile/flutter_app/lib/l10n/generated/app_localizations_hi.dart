@@ -267,4 +267,8 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get settingsRestoreError =>
       'सेटिंग्स बहाल नहीं हो सकीं। बैकअप पाठ जाँचकर फिर कोशिश करें।';
+
+  @override
+  String get firstLanguageHint =>
+      'शुरू करने के लिए भाषा चुनें। चिह्नित विकल्प आपके डिवाइस की सेटिंग्स के अनुसार सुझाया गया है।';
 }

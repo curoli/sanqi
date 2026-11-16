@@ -261,4 +261,8 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get settingsRestoreError =>
       'Ayarlar geri yüklenemedi. Yedek metnini kontrol edip yeniden deneyin.';
+
+  @override
+  String get firstLanguageHint =>
+      'Başlamak için dilinizi seçin. Vurgulanan seçenek cihaz ayarlarınıza göre önerilir.';
 }

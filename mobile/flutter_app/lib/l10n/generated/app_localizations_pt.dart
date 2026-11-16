@@ -269,4 +269,8 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get settingsRestoreError =>
       'Não foi possível restaurar as definições. Verifique o texto e tente novamente.';
+
+  @override
+  String get firstLanguageHint =>
+      'Escolha o idioma para começar. A opção destacada é sugerida pelas definições do dispositivo.';
 }

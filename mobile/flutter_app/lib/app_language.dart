@@ -1,3 +1,5 @@
+import 'dart:ui' show Locale;
+
 enum AppLanguage {
   english('en', '🇬🇧', 'English'),
   german('de', '🇩🇪', 'Deutsch'),
@@ -19,6 +21,13 @@ enum AppLanguage {
   final String flag;
   final String name;
   bool get isRtl => this == arabic || this == urdu;
+  static AppLanguage suggested(Iterable<Locale> locales) {
+    for (final locale in locales) {
+      final language = fromCode(locale.languageCode);
+      if (language != null) return language;
+    }
+    return english;
+  }
 
   static AppLanguage? fromCode(String? code) {
     for (final language in values) {

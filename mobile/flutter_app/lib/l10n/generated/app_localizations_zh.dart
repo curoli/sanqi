@@ -256,4 +256,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsRestoreError => '无法恢复设置。请检查备份文本后重试。';
+
+  @override
+  String get firstLanguageHint => '请选择语言以开始。高亮选项根据设备设置推荐。';
 }

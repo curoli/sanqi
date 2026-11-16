@@ -262,4 +262,8 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get settingsRestoreError =>
       'Tidak dapat memulihkan pengaturan. Periksa teks cadangan dan coba lagi.';
+
+  @override
+  String get firstLanguageHint =>
+      'Pilih bahasa untuk memulai. Pilihan yang disorot disarankan dari pengaturan perangkat.';
 }
