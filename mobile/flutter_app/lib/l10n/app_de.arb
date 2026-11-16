@@ -75,5 +75,5 @@
   "settingsBackup": "Einstellungen sichern",
   "settingsBackupHint": "Kopiere diesen Text vor dem Deinstallieren an einen Ort außerhalb der App. Nach der Neuinstallation hier einfügen und laden. Enthalten sind nur Sprache und Design. Android-Backups können sie ebenfalls wiederherstellen, sind aber nicht garantiert.",
   "settingsRestoreError": "Einstellungen konnten nicht geladen werden. Prüfe den Sicherungstext und versuche es erneut.",
-  "firstLanguageHint": "Wähle deine Sprache zum Starten. Die markierte Sprache wird anhand deiner Geräteeinstellungen vorgeschlagen."
+  "firstLanguageHint": "Wähle deine Sprache zum Starten."
 }

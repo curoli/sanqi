@@ -11,15 +11,14 @@ Use the globe-and-flag button in the header to choose **🇬🇧 English**,
 **🇪🇸 Español**, **🇹🇷 Türkçe**, **🇮🇳 हिन्दी**, **🇫🇷 Français**,
 **🇧🇩 বাংলা**, **🇵🇹 Português**, **🇵🇰 اردو**, **🇷🇺 Русский**, or
 **🇯🇵 日本語**. The header sits in the side panel in
-landscape. On first launch without a valid saved language, the app asks which
-language to use before opening the game. It suggests the first supported entry
-in the system's preferred-language list, matching by language code across
-regional variants; English is the fallback. The suggestion is not saved until
-the user explicitly selects a language. A saved choice takes priority over later
-system-language changes, and the prompt does not reappear while it remains
-valid. No location, IP lookup, network service, or permission request is used
-to suggest a language. The first-launch screen also supports settings-backup
-restore, and stays open with a retryable error if saving the choice fails.
+landscape. Without a valid saved language, the app uses the first supported entry in the
+system's preferred-language list, matching by language code across regional
+variants, and opens the game directly. This automatic default is not saved as an
+explicit choice. If none of the system languages is supported, the app asks the
+user to choose, initially highlighting English. An explicit saved choice takes
+priority over later system-language changes. No location, IP lookup, network
+service, or permission request is used. The language chooser also supports
+settings-backup restore and stays open with a retryable error if saving fails.
 Backup restore and language confirmation share the same onboarding busy guard.
 If Back dismisses a restoring backup dialog, the chooser stays disabled until
 its writes settle; failures remain visible on the chooser and can be retried.

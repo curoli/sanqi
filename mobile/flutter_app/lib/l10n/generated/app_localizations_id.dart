@@ -264,6 +264,5 @@ class AppLocalizationsId extends AppLocalizations {
       'Tidak dapat memulihkan pengaturan. Periksa teks cadangan dan coba lagi.';
 
   @override
-  String get firstLanguageHint =>
-      'Pilih bahasa untuk memulai. Pilihan yang disorot disarankan dari pengaturan perangkat.';
+  String get firstLanguageHint => 'Pilih bahasa untuk memulai.';
 }
