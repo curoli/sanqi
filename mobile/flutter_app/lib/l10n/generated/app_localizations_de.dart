@@ -255,4 +255,21 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get skinAurora => 'Polarlicht';
+
+  @override
+  String get moreAbove => 'Mehr oben — scrollen';
+
+  @override
+  String get settingsBackup => 'Einstellungen sichern';
+
+  @override
+  String get settingsBackupHint =>
+      'Kopiere diesen Text vor dem Deinstallieren an einen Ort außerhalb der App. Nach der Neuinstallation hier einfügen und laden. Enthalten sind nur Sprache und Design. Android-Backups können sie ebenfalls wiederherstellen, sind aber nicht garantiert.';
+
+  @override
+  String get settingsRestoreError =>
+      'Einstellungen konnten nicht geladen werden. Prüfe den Sicherungstext und versuche es erneut.';
+
+  @override
+  String get firstLanguageHint => 'Wähle deine Sprache zum Starten.';
 }

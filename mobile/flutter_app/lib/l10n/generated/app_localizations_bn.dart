@@ -246,4 +246,21 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get skinAurora => 'মেরুজ্যোতি';
+
+  @override
+  String get moreAbove => 'উপরে আরও আছে — স্ক্রল করুন';
+
+  @override
+  String get settingsBackup => 'সেটিংসের ব্যাকআপ';
+
+  @override
+  String get settingsBackupHint =>
+      'আনইনস্টল করার আগে এই লেখা অ্যাপের বাইরে সংরক্ষণ করুন। পুনরায় ইনস্টল করে এখানে পেস্ট করে পুনরুদ্ধার করুন। শুধু ভাষা ও সাজ অন্তর্ভুক্ত। Android ব্যাকআপ থেকে পুনরুদ্ধারের নিশ্চয়তা নেই।';
+
+  @override
+  String get settingsRestoreError =>
+      'সেটিংস পুনরুদ্ধার করা যায়নি। ব্যাকআপের লেখা যাচাই করে আবার চেষ্টা করুন।';
+
+  @override
+  String get firstLanguageHint => 'শুরু করতে ভাষা বেছে নিন।';
 }

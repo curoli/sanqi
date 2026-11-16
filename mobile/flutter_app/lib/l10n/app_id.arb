@@ -70,5 +70,10 @@
   "skinGraphite": "Grafit",
   "skinEmber": "Bara",
   "skinGilded": "Sepuh",
-  "skinAurora": "Aurora"
+  "skinAurora": "Aurora",
+  "moreAbove": "Pilihan di atas — gulir",
+  "settingsBackup": "Cadangkan pengaturan",
+  "settingsBackupHint": "Salin teks ini ke luar aplikasi sebelum mencopotnya. Setelah memasang kembali, tempel di sini dan pulihkan. Hanya bahasa dan tema yang disertakan. Pemulihan cadangan Android tidak dijamin.",
+  "settingsRestoreError": "Tidak dapat memulihkan pengaturan. Periksa teks cadangan dan coba lagi.",
+  "firstLanguageHint": "Pilih bahasa untuk memulai."
 }

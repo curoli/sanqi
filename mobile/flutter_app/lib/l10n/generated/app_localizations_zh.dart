@@ -243,4 +243,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get skinAurora => '极光';
+
+  @override
+  String get moreAbove => '上方还有选项 — 滚动查看';
+
+  @override
+  String get settingsBackup => '备份设置';
+
+  @override
+  String get settingsBackupHint =>
+      '卸载前请将此文本复制到应用之外保存。重新安装后，在此粘贴并恢复。仅包含语言和皮肤。Android 备份也可能恢复设置，但无法保证。';
+
+  @override
+  String get settingsRestoreError => '无法恢复设置。请检查备份文本后重试。';
+
+  @override
+  String get firstLanguageHint => '请选择语言以开始。';
 }

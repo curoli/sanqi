@@ -55,6 +55,11 @@ Future<void> chooseSkin(WidgetTester tester, AppSkin skin) async {
       matching: find.byType(Scrollable),
     ),
   );
+  await Scrollable.ensureVisible(
+    tester.element(find.byKey(Key('skin-${skin.name}'))),
+    alignment: .5,
+  );
+  await tester.pumpAndSettle();
   await tester.tap(find.byKey(Key('skin-${skin.name}')));
   await tester.pumpAndSettle();
 }

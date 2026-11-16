@@ -13,7 +13,7 @@ import 'game_screen_test.dart'
     show FakeService, MemoryStore, PendingComputerService, snapshot, tapSquare;
 
 class LanguageStore extends MemoryStore {
-  String? code;
+  String? code = 'en';
   bool failNextWrite = false;
   @override
   Future<String?> loadLanguage() async => code;
@@ -227,12 +227,22 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        final suggested = AppLanguage.fromCode(code) ?? AppLanguage.english;
+        if (AppLanguage.fromCode(code) == null) {
+          expect(
+            find.byKey(const Key('first-language-choice')),
+            findsOneWidget,
+          );
+          await tester.ensureVisible(
+            find.text('${suggested.flag} ${suggested.name}'),
+          );
+          await tester.tap(find.text('${suggested.flag} ${suggested.name}'));
+          await tester.pumpAndSettle();
+        } else {
+          expect(find.byKey(const Key('first-language-choice')), findsNothing);
+        }
         expect(
-          find.text(
-            lookupAppLocalizations(
-              Locale(AppLanguage.fromCode(code)?.code ?? 'en'),
-            ).newGame,
-          ),
+          find.text(lookupAppLocalizations(Locale(suggested.code)).newGame),
           findsOneWidget,
         );
         await tester.pumpWidget(const SizedBox());
@@ -267,21 +277,21 @@ void main() {
     },
   );
 
-  testWidgets(
-    'late preference read cannot override an explicit language choice',
-    (tester) async {
-      final store = DelayedLanguageStore();
-      await tester.pumpWidget(
-        SanqiApp(createService: () async => FakeService(), store: store),
-      );
-      await tester.pumpAndSettle();
-      await chooseLanguage(tester, AppLanguage.spanish);
-      store.loaded.complete('de');
-      await tester.pumpAndSettle();
-      expect(find.text('Nueva partida'), findsOneWidget);
-      expect(store.code, 'es');
-    },
-  );
+  testWidgets('saved preference finishes loading before deciding to ask', (
+    tester,
+  ) async {
+    final store = DelayedLanguageStore();
+    await tester.pumpWidget(
+      SanqiApp(createService: () async => FakeService(), store: store),
+    );
+    await tester.pump();
+    expect(find.byType(GameScreen), findsNothing);
+    expect(find.byKey(const Key('first-language-choice')), findsNothing);
+    store.loaded.complete('de');
+    await tester.pumpAndSettle();
+    expect(find.text('Neues Spiel'), findsOneWidget);
+    expect(find.byKey(const Key('first-language-choice')), findsNothing);
+  });
 
   testWidgets(
     'failed language save leaves translation active and later writes work',

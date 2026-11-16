@@ -15,6 +15,8 @@ import 'board.dart';
 import 'game_background.dart';
 import 'game_service.dart';
 import 'l10n/generated/app_localizations.dart';
+import 'language_picker.dart';
+import 'settings_backup_dialog.dart';
 import 'skin_fonts.dart';
 import 'skin_picker.dart';
 import 'src/rust/api/game.dart';
@@ -48,7 +50,11 @@ class _SanqiAppState extends State<SanqiApp> {
   AppSkin _skin = AppSkin.linen;
   bool _skinChosen = false;
   Future<void> _skinWrites = Future.value();
-  Locale? _locale;
+  Locale _locale = const Locale('en');
+  bool _languageReady = false;
+  bool _needsLanguageChoice = false;
+  bool _firstLanguageBusy = false;
+  String Function(AppLocalizations)? _firstLanguageError;
   bool _languageChosen = false;
   Future<void> _languageWrites = Future.value();
 
@@ -77,16 +83,85 @@ class _SanqiAppState extends State<SanqiApp> {
   }
 
   Future<void> _loadLanguage() async {
+    AppLanguage? language;
     try {
-      final language = AppLanguage.fromCode(await widget.store.loadLanguage());
-      if (mounted && !_languageChosen && language != null) {
-        setState(() => _locale = Locale(language.code));
-      }
+      language = AppLanguage.fromCode(await widget.store.loadLanguage());
     } catch (error) {
       // A failed preference read leaves the device locale (or English fallback).
       debugPrint('Could not load language preference: $error');
     }
+    if (mounted && !_languageChosen) {
+      setState(() {
+        final systemLanguage = AppLanguage.supportedSystemLanguage(
+          WidgetsBinding.instance.platformDispatcher.locales,
+        );
+        _locale = Locale(
+          (language ?? systemLanguage ?? AppLanguage.english).code,
+        );
+        _languageReady = true;
+        _needsLanguageChoice = language == null && systemLanguage == null;
+      });
+    }
   }
+
+  Future<void> _confirmFirstLanguage(String code) async {
+    if (_firstLanguageBusy) return;
+    setState(() {
+      _firstLanguageBusy = true;
+      _firstLanguageError = null;
+    });
+    try {
+      await _setLanguage(code);
+      if (mounted) setState(() => _needsLanguageChoice = false);
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () => _firstLanguageError = (l) => l.languageSaveError('$error'),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _firstLanguageBusy = false);
+    }
+  }
+
+  Future<bool> _restoreFirstSettings(BuildContext context) async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (_) => SettingsBackupDialog(
+          settings: SettingsBackup(
+            AppLanguage.fromCode(_locale.languageCode)!,
+            _skin,
+          ),
+          onRestore: (settings) async {
+            // The write outlives the dialog if Back dismisses it. Keep the
+            // onboarding guard until every restore write has settled.
+            if (_firstLanguageBusy) {
+              throw StateError('Language choice is saving');
+            }
+            setState(() {
+              _firstLanguageBusy = true;
+              _firstLanguageError = null;
+            });
+            try {
+              await Future.wait([
+                _setLanguage(settings.language.code),
+                _setSkin(settings.skin),
+              ]);
+              if (mounted) setState(() => _needsLanguageChoice = false);
+            } catch (_) {
+              if (mounted) {
+                setState(
+                  () => _firstLanguageError = (l) => l.settingsRestoreError,
+                );
+              }
+              rethrow;
+            } finally {
+              if (mounted) setState(() => _firstLanguageBusy = false);
+            }
+          },
+        ),
+      ) ??
+      false;
 
   Future<void> _setLanguage(String code) {
     _languageChosen = true;
@@ -122,12 +197,35 @@ class _SanqiAppState extends State<SanqiApp> {
               .copyWith(systemNavigationBarColor: _skin.background),
       child: child!,
     ),
-    home: GameScreen(
-      createService: widget.createService,
-      store: widget.store,
-      onLanguageChanged: _setLanguage,
-      onSkinChanged: _setSkin,
-    ),
+    home: !_languageReady
+        ? const Scaffold(body: Center(child: Text('Sanqi')))
+        : _needsLanguageChoice
+        ? Builder(
+            builder: (context) => Scaffold(
+              body: CustomPaint(
+                painter: GameBackground(skin: _skin),
+                child: SafeArea(
+                  child: LanguagePicker(
+                    key: const Key('first-language-choice'),
+                    firstLaunch: true,
+                    selected: AppLanguage.fromCode(_locale.languageCode)!,
+                    enabled: !_firstLanguageBusy,
+                    onSelected: _confirmFirstLanguage,
+                    error: _firstLanguageError?.call(
+                      AppLocalizations.of(context)!,
+                    ),
+                    onBackup: () => _restoreFirstSettings(context),
+                  ),
+                ),
+              ),
+            ),
+          )
+        : GameScreen(
+            createService: widget.createService,
+            store: widget.store,
+            onLanguageChanged: _setLanguage,
+            onSkinChanged: _setSkin,
+          ),
   );
 }
 
@@ -374,7 +472,8 @@ class _GameScreenState extends State<GameScreen> {
   Future<void> _chooseSkin() async {
     final skin = await showDialog<AppSkin>(
       context: context,
-      builder: (_) => SkinPicker(selected: AppSkin.of(context)),
+      builder: (_) =>
+          SkinPicker(selected: AppSkin.of(context), onBackup: _settingsBackup),
     );
     if (skin == null || !mounted) return;
     final epoch = ++_skinEpoch;
@@ -396,13 +495,39 @@ class _GameScreenState extends State<GameScreen> {
     visualDensity: VisualDensity.compact,
   );
 
+  Future<bool> _settingsBackup() async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (_) => SettingsBackupDialog(
+          settings: SettingsBackup(
+            AppLanguage.fromCode(_l.localeName) ?? AppLanguage.english,
+            AppSkin.of(context),
+          ),
+          onRestore: (settings) => Future.wait([
+            widget.onLanguageChanged!(settings.language.code),
+            widget.onSkinChanged!(settings.skin),
+          ]).then((_) {}),
+        ),
+      ) ??
+      false;
+
+  Future<void> _chooseLanguage() async {
+    final code = await showDialog<String>(
+      context: context,
+      builder: (_) => LanguagePicker(
+        selected: AppLanguage.fromCode(_l.localeName) ?? AppLanguage.english,
+        onBackup: _settingsBackup,
+      ),
+    );
+    if (code != null && mounted) await _changeLanguage(code);
+  }
+
   Widget _languageSelector() {
     final current = AppLanguage.fromCode(_l.localeName) ?? AppLanguage.english;
-    return PopupMenuButton<String>(
+    return IconButton(
       key: const Key('language-selector'),
       tooltip: _l.language,
-      initialValue: current.code,
-      enabled: widget.onLanguageChanged != null,
+      onPressed: widget.onLanguageChanged == null ? null : _chooseLanguage,
       icon: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -411,19 +536,6 @@ class _GameScreenState extends State<GameScreen> {
           Text(current.flag, style: const TextStyle(fontSize: 18)),
         ],
       ),
-      onSelected: _changeLanguage,
-      itemBuilder: (context) => [
-        for (final language in AppLanguage.values)
-          PopupMenuItem(
-            value: language.code,
-            child: Text(
-              '${language.flag} ${language.name}',
-              textDirection: language.isRtl
-                  ? TextDirection.rtl
-                  : TextDirection.ltr,
-            ),
-          ),
-      ],
     );
   }
 

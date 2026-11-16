@@ -254,4 +254,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get skinAurora => 'شفق';
+
+  @override
+  String get moreAbove => 'المزيد بالأعلى — مرّر';
+
+  @override
+  String get settingsBackup => 'نسخ الإعدادات احتياطيًا';
+
+  @override
+  String get settingsBackupHint =>
+      'انسخ هذا النص إلى مكان خارج التطبيق قبل إلغاء تثبيته. بعد إعادة التثبيت، الصقه هنا واستعد الإعدادات. يتضمن اللغة والمظهر فقط. قد تستعيد نسخة Android الاحتياطية الإعدادات، لكن ذلك غير مضمون.';
+
+  @override
+  String get settingsRestoreError =>
+      'تعذرت استعادة الإعدادات. تحقق من نص النسخة الاحتياطية وحاول مجددًا.';
+
+  @override
+  String get firstLanguageHint => 'اختر لغتك للبدء.';
 }
