@@ -237,12 +237,13 @@ fn best_move_with_table(
     table: &mut TranspositionTable,
     deadline: Option<Instant>,
     stats: &mut SearchStats,
+    root_seed: Option<u64>,
 ) -> Option<SearchResult> {
     if search_expired(deadline) {
         return None;
     }
     let tt_move = table.get(position).and_then(|entry| entry.best_move);
-    let moves = ordered_moves(position, tt_move, stats);
+    let moves = ordered_root_moves(position, tt_move, stats, root_seed);
     if moves.is_empty() {
         return None;
     }
@@ -351,7 +352,30 @@ pub fn analyze_iterative(
     analyze(position, max_depth, Some(time_budget))
 }
 
+/// Like [`analyze_iterative`], with seeded variation in equally prioritized root
+/// moves. Evaluation and tactical ordering are unchanged; the seed breaks move
+/// ordering ties instead of adding noise to scores. Identical seeds reproduce
+/// the ordering, though a wall-clock deadline can still affect search depth.
+/// Existing deterministic search entry points remain unchanged.
+pub fn analyze_iterative_varied(
+    position: &Position,
+    max_depth: u8,
+    time_budget: Duration,
+    seed: u64,
+) -> AnalysisResult {
+    analyze_with_seed(position, max_depth, Some(time_budget), Some(seed))
+}
+
 fn analyze(position: &Position, max_depth: u8, time_budget: Option<Duration>) -> AnalysisResult {
+    analyze_with_seed(position, max_depth, time_budget, None)
+}
+
+fn analyze_with_seed(
+    position: &Position,
+    max_depth: u8,
+    time_budget: Option<Duration>,
+    root_seed: Option<u64>,
+) -> AnalysisResult {
     let search_started = Instant::now();
     let deadline = time_budget.and_then(|budget| Instant::now().checked_add(budget));
     let mut table = TranspositionTable::default();
@@ -365,7 +389,7 @@ fn analyze(position: &Position, max_depth: u8, time_budget: Option<Duration>) ->
         for depth in 1..=max_depth {
             let depth_started = Instant::now();
             let Some(result) =
-                best_move_with_table(position, depth, &mut table, deadline, &mut stats)
+                best_move_with_table(position, depth, &mut table, deadline, &mut stats, root_seed)
             else {
                 stats.depth_timings.push(DepthTiming {
                     depth,
@@ -391,7 +415,7 @@ fn analyze(position: &Position, max_depth: u8, time_budget: Option<Duration>) ->
         }
     } else {
         let depth_started = Instant::now();
-        best = best_move_with_table(position, max_depth, &mut table, None, &mut stats);
+        best = best_move_with_table(position, max_depth, &mut table, None, &mut stats, root_seed);
         stats.depth_timings.push(DepthTiming {
             depth: max_depth,
             elapsed: depth_started.elapsed(),
@@ -403,7 +427,7 @@ fn analyze(position: &Position, max_depth: u8, time_budget: Option<Duration>) ->
     }
 
     if best.is_none() && legal_moves_exist {
-        let fallback = cheap_fallback(position, &table);
+        let fallback = cheap_fallback(position, &table, root_seed);
         stats.total_time = search_started.elapsed();
         return AnalysisResult {
             best: fallback,
@@ -415,10 +439,14 @@ fn analyze(position: &Position, max_depth: u8, time_budget: Option<Duration>) ->
     AnalysisResult { best, stats }
 }
 
-fn cheap_fallback(position: &Position, table: &TranspositionTable) -> Option<SearchResult> {
+fn cheap_fallback(
+    position: &Position,
+    table: &TranspositionTable,
+    root_seed: Option<u64>,
+) -> Option<SearchResult> {
     let tt_move = table.get(position).and_then(|entry| entry.best_move);
     let mut stats = SearchStats::default();
-    let mv = ordered_moves(position, tt_move, &mut stats)
+    let mv = ordered_root_moves(position, tt_move, &mut stats, root_seed)
         .into_iter()
         .next()?;
     Some(SearchResult {
@@ -639,6 +667,32 @@ fn quiescence(
     Some(alpha)
 }
 
+// Keep the transposition-table move, captures, and positional ordering intact.
+// Only equally prioritized moves get different, reproducible tie priorities.
+fn ordered_root_moves(
+    position: &Position,
+    tt_move: Option<Move>,
+    stats: &mut SearchStats,
+    seed: Option<u64>,
+) -> Vec<Move> {
+    let mut moves = ordered_moves(position, tt_move, stats);
+    if let Some(seed) = seed {
+        moves.sort_by_key(|mv| {
+            let id = u64::from(mv.from.index()) * 64 + u64::from(mv.to.index());
+            // SplitMix64's mixing function: a stable ordering key, not cryptography.
+            let mut priority = (seed ^ id).wrapping_add(0x9e3779b97f4a7c15);
+            priority = (priority ^ (priority >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
+            priority = (priority ^ (priority >> 27)).wrapping_mul(0x94d049bb133111eb);
+            priority ^= priority >> 31;
+            (
+                std::cmp::Reverse(move_ordering_score(position, *mv, tt_move)),
+                priority,
+            )
+        });
+    }
+    moves
+}
+
 fn ordered_moves(position: &Position, tt_move: Option<Move>, stats: &mut SearchStats) -> Vec<Move> {
     let mut moves = legal_moves_counted(position, stats);
     moves.sort_by_key(|mv| move_ordering_score(position, *mv, tt_move));
@@ -809,6 +863,87 @@ mod tests {
     use super::*;
 
     #[test]
+    fn seeded_openings_vary_without_changing_the_best_score() {
+        let position = Position::initial();
+        let expected = best_move(&position, 1).expect("best move");
+        let mut choices = std::collections::HashSet::new();
+        for seed in 0..16 {
+            let result = analyze_with_seed(&position, 1, None, Some(seed))
+                .best
+                .expect("seeded move");
+            assert_eq!(result.score, expected.score);
+            assert!(position.legal_moves().contains(&result.best_move));
+            assert_eq!(result.principal_variation.first(), Some(&result.best_move));
+            let repeated = analyze_with_seed(&position, 1, None, Some(seed))
+                .best
+                .expect("repeat");
+            assert_eq!(result, repeated);
+            choices.insert(result.best_move);
+        }
+        assert!(
+            choices.len() > 1,
+            "seeds must produce different opening moves"
+        );
+        assert_eq!(best_move(&position, 1).expect("deterministic"), expected);
+    }
+
+    #[test]
+    fn varied_search_keeps_winning_captures() {
+        let mut position = Position::empty(Color::White);
+        for square in ["a1", "a2", "b2"] {
+            position.set_piece(Color::White, square.parse().expect("square"));
+        }
+        for square in ["b3", "h8"] {
+            position.set_piece(Color::Black, square.parse().expect("square"));
+        }
+        let capture = "a1-b3".parse().expect("capture");
+        for seed in 0..16 {
+            let result = analyze_with_seed(&position, 1, None, Some(seed))
+                .best
+                .expect("winning move");
+            assert_eq!(result.best_move, capture);
+            assert_eq!(result.score, WIN_SCORE);
+        }
+    }
+
+    #[test]
+    fn varied_timeout_fallback_is_legal_and_varies() {
+        let position = Position::initial();
+        let mut choices = std::collections::HashSet::new();
+        for seed in 0..16 {
+            let result = analyze_iterative_varied(&position, 6, Duration::ZERO, seed)
+                .best
+                .expect("fallback move");
+            assert_eq!(result.depth, 0);
+            assert!(position.legal_moves().contains(&result.best_move));
+            choices.insert(result.best_move);
+        }
+        assert!(choices.len() > 1);
+        assert!(
+            analyze_iterative_varied(&Position::empty(Color::White), 6, Duration::ZERO, 1,)
+                .best
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn varied_ordering_keeps_transposition_and_tactical_priorities() {
+        let position = Position::initial();
+        let preferred = position.legal_moves()[0];
+        let mut stats = SearchStats::default();
+        for seed in 0..16 {
+            let moves = ordered_root_moves(&position, Some(preferred), &mut stats, Some(seed));
+            assert_eq!(moves.first(), Some(&preferred));
+            for pair in moves.windows(2) {
+                assert!(
+                    move_ordering_score(&position, pair[0], Some(preferred))
+                        >= move_ordering_score(&position, pair[1], Some(preferred))
+                );
+            }
+        }
+    }
+
+    #[test]
     fn engine_finds_a_legal_move() {
         let position = Position::initial();
         let result = best_move(&position, 1).expect("move");
@@ -911,7 +1046,7 @@ mod tests {
         let mut table = TranspositionTable::default();
         let mut stats = SearchStats::default();
         let result =
-            best_move_with_table(&position, 2, &mut table, None, &mut stats).expect("move");
+            best_move_with_table(&position, 2, &mut table, None, &mut stats, None).expect("move");
         let entry = table.get(&position).expect("table entry");
         assert_eq!(entry.depth, 2);
         assert_eq!(entry.best_move, Some(result.best_move));

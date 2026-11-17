@@ -1,3 +1,5 @@
+use std::hash::BuildHasher;
+
 use flutter_rust_bridge::frb;
 use sanqi_core::{Color, Game, Move, Outcome, Square};
 
@@ -54,11 +56,16 @@ pub fn find_computer_move(movetext: String) -> Result<Option<String>, String> {
     if position.outcome().is_some() {
         return Ok(None);
     }
-    Ok(
-        sanqi_engine::analyze_iterative(position, 6, std::time::Duration::from_millis(600))
-            .best
-            .map(|result| result.best_move.to_string()),
+    Ok(sanqi_engine::analyze_iterative_varied(
+        position,
+        6,
+        std::time::Duration::from_millis(600),
+        // Fresh standard-library randomized hashing seeds each search without
+        // clocks, shared mutable RNG state, or an additional dependency.
+        std::collections::hash_map::RandomState::new().hash_one(()),
     )
+    .best
+    .map(|result| result.best_move.to_string()))
 }
 
 fn move_view(mv: Move) -> MobileMove {
