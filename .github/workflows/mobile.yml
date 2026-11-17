@@ -41,6 +41,9 @@ jobs:
       - name: Verify build metadata wrapper
         working-directory: mobile/flutter_app
         run: python3 tool/test_build_info.py
+      - name: Test Android release tooling
+        working-directory: mobile/flutter_app
+        run: python3 tool/test_android_release.py
       - name: Build Android APK
         working-directory: mobile/flutter_app
         run: tool/flutter_with_build_info.sh build apk --debug --target-platform android-arm64
@@ -53,6 +56,9 @@ jobs:
           name: sanqi-android-debug
           path: mobile/flutter_app/build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
+
+  android-release:
+    uses: ./.github/workflows/android-release.yml
 
   ios:
     runs-on: macos-15

@@ -1,0 +1,108 @@
+name: Android release
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: 'Unique, increasing Google Play version code (for example 1)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      SANQI_BUILD_NUMBER: ${{ inputs.build_number || '1' }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Set signing file location
+        run: echo "SANQI_ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/sanqi-upload.jks" >> "$GITHUB_ENV"
+      - name: Validate version code
+        shell: bash
+        run: |
+          [[ "$SANQI_BUILD_NUMBER" =~ ^[1-9][0-9]{0,8}$ ]] || {
+            echo 'Use a positive version code of at most nine digits.' >&2
+            exit 1
+          }
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Set up Android SDK and verification tools
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools build-tools;36.0.0'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.50.0'
+          channel: stable
+          cache: true
+      - name: Fetch Flutter dependencies
+        working-directory: mobile/flutter_app
+        run: flutter pub get --enforce-lockfile
+      - name: Check missing signing credentials are rejected
+        if: github.event_name != 'workflow_dispatch'
+        working-directory: mobile/flutter_app
+        shell: bash
+        run: |
+          if tool/flutter_with_build_info.sh build appbundle --release > "$RUNNER_TEMP/unsigned-build.log" 2>&1; then
+            echo 'A release build unexpectedly succeeded without signing credentials.' >&2
+            exit 1
+          fi
+          if ! grep -Fq 'Release signing requires SANQI_ANDROID_KEYSTORE_PATH' "$RUNNER_TEMP/unsigned-build.log"; then
+            cat "$RUNNER_TEMP/unsigned-build.log"
+            exit 1
+          fi
+      - name: Load private upload key (manual release only)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          SANQI_ANDROID_KEYSTORE_BASE64: ${{ secrets.SANQI_ANDROID_KEYSTORE_BASE64 }}
+          SANQI_ANDROID_STORE_PASSWORD: ${{ secrets.SANQI_ANDROID_STORE_PASSWORD }}
+          SANQI_ANDROID_KEY_ALIAS: ${{ secrets.SANQI_ANDROID_KEY_ALIAS }}
+          SANQI_ANDROID_KEY_PASSWORD: ${{ secrets.SANQI_ANDROID_KEY_PASSWORD }}
+        run: python3 mobile/flutter_app/tool/prepare_android_signing.py
+      - name: Create disposable signing key (CI only)
+        if: github.event_name != 'workflow_dispatch'
+        shell: bash
+        run: |
+          umask 077
+          keytool -genkeypair -noprompt -keystore "$SANQI_ANDROID_KEYSTORE_PATH" \
+            -storetype JKS -alias ci-only -keyalg RSA -keysize 2048 -validity 2 \
+            -storepass ci-only-password -keypass ci-only-password \
+            -dname 'CN=Sanqi disposable CI key'
+          echo 'SANQI_ANDROID_STORE_PASSWORD=ci-only-password' >> "$GITHUB_ENV"
+          echo 'SANQI_ANDROID_KEY_ALIAS=ci-only' >> "$GITHUB_ENV"
+          echo 'SANQI_ANDROID_KEY_PASSWORD=ci-only-password' >> "$GITHUB_ENV"
+      - name: Build signed app bundle and APK
+        working-directory: mobile/flutter_app
+        run: |
+          tool/flutter_with_build_info.sh build appbundle --release --build-number="$SANQI_BUILD_NUMBER"
+          tool/flutter_with_build_info.sh build apk --release --build-number="$SANQI_BUILD_NUMBER"
+      - name: Verify signatures and native libraries
+        working-directory: mobile/flutter_app
+        shell: bash
+        run: |
+          sanqi_tools="$ANDROID_HOME/build-tools/36.0.0"
+          "$sanqi_tools/apksigner" verify --verbose --print-certs build/app/outputs/flutter-apk/app-release.apk
+          "$sanqi_tools/zipalign" -c -P 16 -v 4 build/app/outputs/flutter-apk/app-release.apk
+          LC_ALL=C jarsigner -verify build/app/outputs/bundle/release/app-release.aab | tee "$RUNNER_TEMP/bundle-signature.txt"
+          grep -Fq 'jar verified.' "$RUNNER_TEMP/bundle-signature.txt"
+          python3 tool/verify_android_release.py
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sanqi-android-${{ github.event_name == 'workflow_dispatch' && 'release' || 'signing-check' }}
+          path: |
+            mobile/flutter_app/build/app/outputs/bundle/release/app-release.aab
+            mobile/flutter_app/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
+      - name: Remove signing key
+        if: always()
+        shell: bash
+        run: rm -f -- "$SANQI_ANDROID_KEYSTORE_PATH"
