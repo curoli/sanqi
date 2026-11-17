@@ -4,6 +4,25 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Release credentials come from the environment, never from source control.
+val uploadStorePath = providers.environmentVariable("SANQI_ANDROID_KEYSTORE_PATH").orNull
+val uploadStorePassword = providers.environmentVariable("SANQI_ANDROID_STORE_PASSWORD").orNull
+val uploadKeyAlias = providers.environmentVariable("SANQI_ANDROID_KEY_ALIAS").orNull
+val uploadKeyPassword = providers.environmentVariable("SANQI_ANDROID_KEY_PASSWORD").orNull
+val hasUploadSigning = listOf(
+    uploadStorePath, uploadStorePassword, uploadKeyAlias, uploadKeyPassword,
+).all { !it.isNullOrEmpty() }
+// Inspect the resolved graph so aggregate tasks such as `build` are guarded too.
+gradle.taskGraph.whenReady {
+    if (allTasks.any { it.name.contains("release", ignoreCase = true) } && !hasUploadSigning) {
+        throw GradleException(
+            "Release signing requires SANQI_ANDROID_KEYSTORE_PATH, " +
+                "SANQI_ANDROID_STORE_PASSWORD, SANQI_ANDROID_KEY_ALIAS, and " +
+                "SANQI_ANDROID_KEY_PASSWORD. See docs/android-release.md.",
+        )
+    }
+}
+
 android {
     namespace = "com.curoli.flutter_app"
     compileSdk = flutter.compileSdkVersion
@@ -15,7 +34,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.curoli.sanqi"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -29,11 +47,21 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (hasUploadSigning) {
+            create("upload") {
+                storeFile = file(uploadStorePath!!)
+                storePassword = uploadStorePassword
+                keyAlias = uploadKeyAlias
+                keyPassword = uploadKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Missing credentials must never silently produce a debug-signed release.
+            signingConfig = signingConfigs.findByName("upload")
         }
     }
 }

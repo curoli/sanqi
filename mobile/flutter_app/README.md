@@ -1,7 +1,7 @@
 # Sanqi mobile prototype
 
 Human and computer Sanqi for Android (API 24+) and iOS (15+). This is a
-development prototype, not a signed store release. There are no accounts,
+development prototype; it has not been published to the stores. There are no accounts,
 networking or multiplayer services.
 
 ## Play
@@ -47,8 +47,8 @@ backup timing and compatible signing identity. No app-managed cloud service is
 introduced. Where possible, install updates over the existing app instead of
 uninstalling (`adb install -r path/to/app.apk`). This requires matching signing
 certificates. GitHub debug builds can use different runner debug keys; if an
-update is rejected, copy settings and movetext before uninstalling. Stable
-release signing remains part of release preparation.
+update is rejected, copy settings and movetext before uninstalling. For stable signing and release artifacts, see
+[Signed Android releases](docs/android-release.md).
 
 **About** opens the app information dialog in the selected language. It shows
 Sanqi's pronunciation, the cooperation slogan, the author Oliver A Rübenacker,
@@ -245,8 +245,9 @@ tool/flutter_with_build_info.sh build apk --debug --target-platform android-arm6
 The debug APK is `build/app/outputs/flutter-apk/app-debug.apk`. Install it with
 `adb install -r build/app/outputs/flutter-apk/app-debug.apk`. An Android emulator
 also works; choose an ABI matching the Rust target (x86_64 or arm64). No physical
-device is required for widget/host bridge tests. Release signing and store
-submission are intentionally left for a subsequent phase.
+device is required for widget/host bridge tests. For signed release APKs, Play app bundles, and the private upload-key setup, see
+[Signed Android releases](docs/android-release.md). Store submission remains a
+manual step in Play Console.
 
 Use `tool/flutter_with_build_info.sh` in place of `flutter` for app builds and
 device runs to record the actual Git checkout and UTC build time in About.
@@ -327,7 +328,11 @@ vendored Cargokit license. Existing CLI/Python APIs are unchanged.
 ## CI and validation limits
 
 The Mobile workflow analyzes the app, runs widget and real Linux bridge tests,
-and builds an Android arm64 debug APK. A separate macOS job builds an unsigned
+and builds an Android arm64 debug APK. A reusable Android release workflow also
+builds signed release APK/AAB artifacts with a disposable CI key and verifies
+signatures, native library packaging, and 16 KB alignment. Its manual run uses
+private upload-key secrets for distributable artifacts; see the release guide.
+A separate macOS job builds an unsigned
 iOS simulator app. The existing workspace CI tests every
 Rust crate and the minimum compiler; existing Python wheel tests remain intact.
 The on-device smoke test requires an attached device/emulator. iOS builds and
