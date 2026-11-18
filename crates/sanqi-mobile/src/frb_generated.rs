@@ -681,10 +681,12 @@ fn wire__crate__api__game__find_computer_move_impl(
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_movetext = <String>::sse_decode(&mut deserializer);
+            let api_strength = <crate::api::game::ComputerStrength>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, String>((move || {
-                    let output_ok = crate::api::game::find_computer_move(api_movetext)?;
+                    let output_ok =
+                        crate::api::game::find_computer_move(api_movetext, api_strength)?;
                     Ok(output_ok)
                 })())
             }
@@ -735,6 +737,19 @@ impl SseDecode for bool {
     }
 }
 
+impl SseDecode for crate::api::game::ComputerStrength {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::game::ComputerStrength::Standard,
+            1 => crate::api::game::ComputerStrength::Strong,
+            2 => crate::api::game::ComputerStrength::Expert,
+            _ => unreachable!("Invalid variant for ComputerStrength: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for crate::api::game::GameView {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -767,6 +782,13 @@ impl SseDecode for crate::api::game::GameView {
             movetext: var_movetext,
             can_undo: var_canUndo,
         };
+    }
+}
+
+impl SseDecode for i32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_i32::<NativeEndian>().unwrap()
     }
 }
 
@@ -902,13 +924,6 @@ impl SseDecode for usize {
     }
 }
 
-impl SseDecode for i32 {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        deserializer.cursor.read_i32::<NativeEndian>().unwrap()
-    }
-}
-
 fn pde_ffi_dispatcher_primary_impl(
     func_id: i32,
     port: flutter_rust_bridge::for_generated::MessagePort,
@@ -979,6 +994,28 @@ impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<MobileGame>> for MobileGame {
     }
 }
 
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::game::ComputerStrength {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Standard => 0.into_dart(),
+            Self::Strong => 1.into_dart(),
+            Self::Expert => 2.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::game::ComputerStrength
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::game::ComputerStrength>
+    for crate::api::game::ComputerStrength
+{
+    fn into_into_dart(self) -> crate::api::game::ComputerStrength {
+        self
+    }
+}
 // Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::game::GameView {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
@@ -1078,6 +1115,23 @@ impl SseEncode for bool {
     }
 }
 
+impl SseEncode for crate::api::game::ComputerStrength {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::game::ComputerStrength::Standard => 0,
+                crate::api::game::ComputerStrength::Strong => 1,
+                crate::api::game::ComputerStrength::Expert => 2,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
 impl SseEncode for crate::api::game::GameView {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -1094,6 +1148,13 @@ impl SseEncode for crate::api::game::GameView {
         <Vec<crate::api::game::SupportView>>::sse_encode(self.supports, serializer);
         <String>::sse_encode(self.movetext, serializer);
         <bool>::sse_encode(self.can_undo, serializer);
+    }
+}
+
+impl SseEncode for i32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_i32::<NativeEndian>(self).unwrap();
     }
 }
 
@@ -1209,13 +1270,6 @@ impl SseEncode for usize {
             .cursor
             .write_u64::<NativeEndian>(self as _)
             .unwrap();
-    }
-}
-
-impl SseEncode for i32 {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        serializer.cursor.write_i32::<NativeEndian>(self).unwrap();
     }
 }
 

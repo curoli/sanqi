@@ -270,4 +270,16 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get firstLanguageHint => 'शुरू करने के लिए भाषा चुनें।';
+
+  @override
+  String get computerStrength => 'कंप्यूटर का स्तर';
+
+  @override
+  String get strengthStandard => 'सामान्य';
+
+  @override
+  String get strengthStrong => 'मज़बूत';
+
+  @override
+  String get strengthExpert => 'विशेषज्ञ';
 }

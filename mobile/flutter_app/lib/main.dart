@@ -254,6 +254,7 @@ class _GameScreenState extends State<GameScreen> {
   String Function(AppLocalizations)? _error;
   String Function(AppLocalizations)? _languageError;
   String Function(AppLocalizations)? _skinError;
+  String Function(AppLocalizations)? _strengthError;
   int _skinEpoch = 0;
   int _languageEpoch = 0;
   AppLocalizations get _l =>
@@ -263,6 +264,8 @@ class _GameScreenState extends State<GameScreen> {
   bool _thinking = false;
   int _searchEpoch = 0;
   bool _computerPaused = false;
+  ComputerStrength _strength = ComputerStrength.standard;
+  bool _savingStrength = false;
 
   @override
   void initState() {
@@ -294,6 +297,11 @@ class _GameScreenState extends State<GameScreen> {
       } catch (error) {
         _error = (l) => l.restoreSavedError('$error');
       }
+      try {
+        _strength = await widget.store.loadStrength();
+      } catch (error) {
+        _error ??= (l) => l.restoreSavedError('$error');
+      }
       if (mounted) setState(() => _view = view);
     } catch (error) {
       if (mounted) setState(() => _error = (l) => l.openError('$error'));
@@ -317,7 +325,7 @@ class _GameScreenState extends State<GameScreen> {
     var advanced = false;
     setState(() => _thinking = true);
     try {
-      final view = await service.computerTurn();
+      final view = await service.computerTurn(strength: _strength);
       if (!mounted || epoch != _searchEpoch) return;
       if (view == null) {
         setState(() => _error = (l) => l.computerNoMove);
@@ -539,6 +547,48 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  String _strengthLabel(ComputerStrength strength) => switch (strength) {
+    ComputerStrength.standard => _l.strengthStandard,
+    ComputerStrength.strong => _l.strengthStrong,
+    ComputerStrength.expert => _l.strengthExpert,
+  };
+
+  Future<void> _changeStrength(ComputerStrength strength) async {
+    if (_savingStrength || (strength == _strength && _strengthError == null)) {
+      return;
+    }
+    setState(() {
+      _strength = strength;
+      _strengthError = null;
+      _savingStrength = true;
+    });
+    try {
+      await widget.store.saveStrength(strength);
+    } catch (error) {
+      if (mounted) {
+        setState(() => _strengthError = (l) => l.saveError('$error'));
+      }
+    } finally {
+      if (mounted) setState(() => _savingStrength = false);
+    }
+  }
+
+  Widget _strengthSelector() => PopupMenuButton<ComputerStrength>(
+    key: const Key('computer-strength'),
+    tooltip: '${_l.computerStrength} · ${_strengthLabel(_strength)}',
+    enabled: !_savingStrength,
+    icon: const Icon(Icons.speed),
+    onSelected: _changeStrength,
+    itemBuilder: (_) => [
+      for (final strength in ComputerStrength.values)
+        CheckedPopupMenuItem(
+          value: strength,
+          checked: strength == _strength,
+          child: Text(_strengthLabel(strength)),
+        ),
+    ],
+  );
+
   Widget _controls(
     GameView view,
     double width,
@@ -637,69 +687,77 @@ class _GameScreenState extends State<GameScreen> {
           ),
           SizedBox(
             height: 44,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: skin.button,
-                border: Border.all(color: skin.border),
-                borderRadius: BorderRadius.circular(skin.radius),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    key: const Key('game-mode'),
-                    value: view.computerBoth
-                        ? 'Computer'
-                        : view.humanColor ?? 'Local',
-                    isExpanded: true,
-                    dropdownColor: skin.surface,
-                    items: [
-                      DropdownMenuItem(
-                        value: 'Local',
-                        child: Text(
-                          _l.humanHuman,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'White',
-                        child: Text(
-                          _l.humanComputer,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Black',
-                        child: Text(
-                          _l.computerHuman,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Computer',
-                        child: Text(
-                          _l.computerComputer,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                    onChanged: _busy
-                        ? null
-                        : (value) {
-                            _computerPaused = false;
-                            _act(
-                              (service) => service.startGame(
-                                value == 'Local' ? null : value,
+            child: Row(
+              children: [
+                Expanded(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: skin.button,
+                      border: Border.all(color: skin.border),
+                      borderRadius: BorderRadius.circular(skin.radius),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          key: const Key('game-mode'),
+                          value: view.computerBoth
+                              ? 'Computer'
+                              : view.humanColor ?? 'Local',
+                          isExpanded: true,
+                          dropdownColor: skin.surface,
+                          items: [
+                            DropdownMenuItem(
+                              value: 'Local',
+                              child: Text(
+                                _l.humanHuman,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                            );
-                          },
+                            ),
+                            DropdownMenuItem(
+                              value: 'White',
+                              child: Text(
+                                _l.humanComputer,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Black',
+                              child: Text(
+                                _l.computerHuman,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Computer',
+                              child: Text(
+                                _l.computerComputer,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                          onChanged: _busy
+                              ? null
+                              : (value) {
+                                  _computerPaused = false;
+                                  _act(
+                                    (service) => service.startGame(
+                                      value == 'Local' ? null : value,
+                                    ),
+                                  );
+                                },
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                if (view.computerBoth || view.humanColor != null)
+                  _strengthSelector(),
+              ],
             ),
           ),
           SizedBox(
@@ -849,7 +907,7 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     final view = _view;
-    final error = _error ?? _languageError ?? _skinError;
+    final error = _error ?? _languageError ?? _skinError ?? _strengthError;
     final skin = AppSkin.of(context);
     return LayoutBuilder(
       builder: (context, screen) {

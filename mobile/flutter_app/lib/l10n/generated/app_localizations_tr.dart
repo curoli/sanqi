@@ -264,4 +264,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get firstLanguageHint => 'Başlamak için dilinizi seçin.';
+
+  @override
+  String get computerStrength => 'Bilgisayar gücü';
+
+  @override
+  String get strengthStandard => 'Standart';
+
+  @override
+  String get strengthStrong => 'Güçlü';
+
+  @override
+  String get strengthExpert => 'Uzman';
 }

@@ -273,4 +273,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get firstLanguageHint => 'Выберите язык для начала.';
+
+  @override
+  String get computerStrength => 'Сила компьютера';
+
+  @override
+  String get strengthStandard => 'Стандарт';
+
+  @override
+  String get strengthStrong => 'Сильный';
+
+  @override
+  String get strengthExpert => 'Эксперт';
 }

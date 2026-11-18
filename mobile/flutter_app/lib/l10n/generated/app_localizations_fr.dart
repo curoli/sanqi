@@ -272,4 +272,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get firstLanguageHint => 'Choisissez votre langue pour commencer.';
+
+  @override
+  String get computerStrength => 'Niveau de l’ordinateur';
+
+  @override
+  String get strengthStandard => 'Standard';
+
+  @override
+  String get strengthStrong => 'Fort';
+
+  @override
+  String get strengthExpert => 'Expert';
 }

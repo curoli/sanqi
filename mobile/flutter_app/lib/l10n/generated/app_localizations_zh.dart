@@ -259,4 +259,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get firstLanguageHint => '请选择语言以开始。';
+
+  @override
+  String get computerStrength => '电脑棋力';
+
+  @override
+  String get strengthStandard => '标准';
+
+  @override
+  String get strengthStrong => '强';
+
+  @override
+  String get strengthExpert => '专家';
 }

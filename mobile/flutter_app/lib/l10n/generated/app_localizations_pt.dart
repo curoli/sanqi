@@ -272,4 +272,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get firstLanguageHint => 'Escolha o idioma para começar.';
+
+  @override
+  String get computerStrength => 'Nível do computador';
+
+  @override
+  String get strengthStandard => 'Padrão';
+
+  @override
+  String get strengthStrong => 'Forte';
+
+  @override
+  String get strengthExpert => 'Especialista';
 }

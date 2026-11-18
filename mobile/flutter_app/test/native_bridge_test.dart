@@ -33,7 +33,10 @@ void main() {
       expect((await game.undo()).svg, initial.svg);
       final opening = await game.startGame(humanColor: 'Black');
       expect(opening.computerTurn, isTrue);
-      final reply = await findComputerMove(movetext: opening.movetext);
+      final reply = await findComputerMove(
+        movetext: opening.movetext,
+        strength: ComputerStrength.strong,
+      );
       expect(reply, isNotNull);
       final playedOpening = await game.applyComputerMove(
         expectedRevision: opening.revision,

@@ -81,6 +81,11 @@ class MemoryStore extends GameStore {
   Future<String?> loadLanguage() async => 'en';
   String? text;
   String? mode;
+  ComputerStrength strength = ComputerStrength.standard;
+  @override
+  Future<ComputerStrength> loadStrength() async => strength;
+  @override
+  Future<void> saveStrength(ComputerStrength value) async => strength = value;
   @override
   Future<String?> loadHumanColor() async => mode;
   @override
@@ -100,7 +105,9 @@ class PendingComputerService extends FakeService {
     computerTurn: humanColor == 'Black',
   );
   @override
-  Future<GameView?> computerTurn() {
+  Future<GameView?> computerTurn({
+    ComputerStrength strength = ComputerStrength.standard,
+  }) {
     searches++;
     return reply.future;
   }
@@ -133,6 +140,7 @@ class CyclingService extends FakeService {
 
 class WatchingService extends FakeService {
   final replies = <Completer<GameView?>>[];
+  final strengths = <ComputerStrength>[];
   @override
   Future<GameView> undo() async {
     calls.add('undo');
@@ -145,8 +153,11 @@ class WatchingService extends FakeService {
     computerTurn: mode == 'Computer',
   );
   @override
-  Future<GameView?> computerTurn() {
+  Future<GameView?> computerTurn({
+    ComputerStrength strength = ComputerStrength.standard,
+  }) {
     final reply = Completer<GameView?>();
+    strengths.add(strength);
     replies.add(reply);
     return reply.future;
   }
@@ -166,12 +177,14 @@ Future<void> tapSquare(WidgetTester tester, int square) async {
 
 class FailedImportDuringSearchService extends PendingComputerService {
   @override
-  Future<GameView?> computerTurn() {
+  Future<GameView?> computerTurn({
+    ComputerStrength strength = ComputerStrength.standard,
+  }) {
     if (!current.computerTurn) {
       searches++;
       return Future.value(null);
     }
-    return super.computerTurn();
+    return super.computerTurn(strength: strength);
   }
 
   @override
@@ -238,6 +251,55 @@ void main() {
       }
     },
   );
+
+  testWidgets('strength controls the next search and survives reopening', (
+    tester,
+  ) async {
+    final store = MemoryStore()..mode = 'Computer';
+    final service = WatchingService();
+    await tester.pumpWidget(
+      SanqiApp(createService: () async => service, store: store),
+    );
+    await tester.pumpAndSettle();
+    final selector = find.byKey(const Key('computer-strength'));
+    expect(service.strengths, [ComputerStrength.standard]);
+
+    await tester.tap(selector);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is CheckedPopupMenuItem<ComputerStrength> &&
+            widget.value == ComputerStrength.expert,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(store.strength, ComputerStrength.expert);
+    expect(service.strengths, [ComputerStrength.standard]);
+
+    service.current = snapshot(
+      played: true,
+      computerBoth: true,
+      computerTurn: true,
+    );
+    service.replies.single.complete(service.current);
+    await tester.pumpAndSettle();
+    expect(service.strengths, [
+      ComputerStrength.standard,
+      ComputerStrength.expert,
+    ]);
+    expect(store.text, '1. a1-b3');
+
+    await tester.pumpWidget(const SizedBox());
+    final reopened = WatchingService();
+    await tester.pumpWidget(
+      SanqiApp(createService: () async => reopened, store: store..text = null),
+    );
+    await tester.pumpAndSettle();
+    expect(reopened.strengths, [ComputerStrength.expert]);
+    expect(find.byTooltip('Computer strength · Expert'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+  });
 
   testWidgets(
     'computer spectators advance both sides and can pause stale search',

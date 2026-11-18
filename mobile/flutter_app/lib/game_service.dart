@@ -10,18 +10,25 @@ abstract class GameService {
   Future<GameView> newGame();
   Future<GameView> restore(String movetext);
   Future<GameView> startGame(String? humanColor) => newGame();
-  Future<GameView?> computerTurn() async => null;
+  Future<GameView?> computerTurn({
+    ComputerStrength strength = ComputerStrength.standard,
+  }) async => null;
   Future<GameView> cancelSearch() => view();
 }
 
 class RustGameService extends GameService {
   RustGameService(
     this.game, {
-    Future<String?> Function(String movetext)? findMove,
-  }) : _findMove = findMove ?? ((record) => findComputerMove(movetext: record));
+    Future<String?> Function(String movetext, ComputerStrength strength)?
+    findMove,
+  }) : _findMove =
+           findMove ??
+           ((record, strength) =>
+               findComputerMove(movetext: record, strength: strength));
 
   final MobileGame game;
-  final Future<String?> Function(String movetext) _findMove;
+  final Future<String?> Function(String movetext, ComputerStrength strength)
+  _findMove;
   int _searchGeneration = 0;
 
   @override
@@ -64,12 +71,14 @@ class RustGameService extends GameService {
   }
 
   @override
-  Future<GameView?> computerTurn() async {
+  Future<GameView?> computerTurn({
+    ComputerStrength strength = ComputerStrength.standard,
+  }) async {
     final generation = _searchGeneration;
     final snapshot = await game.view();
     if (generation != _searchGeneration) return null;
     if (!snapshot.computerTurn) return snapshot;
-    final move = await _findMove(snapshot.movetext);
+    final move = await _findMove(snapshot.movetext, strength);
     if (generation != _searchGeneration) return null;
     if (move == null) return null;
     return game.applyComputerMove(
@@ -80,6 +89,8 @@ class RustGameService extends GameService {
 }
 
 abstract class GameStore {
+  Future<ComputerStrength> loadStrength() async => ComputerStrength.standard;
+  Future<void> saveStrength(ComputerStrength strength) async {}
   Future<String?> loadSkin() async => null;
   Future<void> saveSkin(String id) async {}
   Future<String?> loadLanguage() async => null;
@@ -91,6 +102,21 @@ abstract class GameStore {
 }
 
 class PreferenceGameStore extends GameStore {
+  static const strengthKey = 'sanqi.computerStrength.v1';
+
+  @override
+  Future<ComputerStrength> loadStrength() async {
+    final saved = await SharedPreferencesAsync().getString(strengthKey);
+    return ComputerStrength.values.firstWhere(
+      (strength) => strength.name == saved,
+      orElse: () => ComputerStrength.standard,
+    );
+  }
+
+  @override
+  Future<void> saveStrength(ComputerStrength strength) =>
+      SharedPreferencesAsync().setString(strengthKey, strength.name);
+
   static const skinKey = 'sanqi.skin.v1';
   @override
   Future<String?> loadSkin() => SharedPreferencesAsync().getString(skinKey);

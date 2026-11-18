@@ -8,13 +8,18 @@ import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `color_name`, `move_view`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`
 
 Future<MobileGame> createGame() =>
     RustLib.instance.api.crateApiGameCreateGame();
 
-Future<String?> findComputerMove({required String movetext}) =>
-    RustLib.instance.api.crateApiGameFindComputerMove(movetext: movetext);
+Future<String?> findComputerMove({
+  required String movetext,
+  required ComputerStrength strength,
+}) => RustLib.instance.api.crateApiGameFindComputerMove(
+  movetext: movetext,
+  strength: strength,
+);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MobileGame>>
 abstract class MobileGame implements RustOpaqueInterface {
@@ -48,6 +53,8 @@ abstract class MobileGame implements RustOpaqueInterface {
 
   Future<GameView> view();
 }
+
+enum ComputerStrength { standard, strong, expert }
 
 class GameView {
   final bool computerBoth;

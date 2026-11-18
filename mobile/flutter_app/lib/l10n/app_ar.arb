@@ -75,5 +75,9 @@
   "settingsBackup": "نسخ الإعدادات احتياطيًا",
   "settingsBackupHint": "انسخ هذا النص إلى مكان خارج التطبيق قبل إلغاء تثبيته. بعد إعادة التثبيت، الصقه هنا واستعد الإعدادات. يتضمن اللغة والمظهر فقط. قد تستعيد نسخة Android الاحتياطية الإعدادات، لكن ذلك غير مضمون.",
   "settingsRestoreError": "تعذرت استعادة الإعدادات. تحقق من نص النسخة الاحتياطية وحاول مجددًا.",
-  "firstLanguageHint": "اختر لغتك للبدء."
+  "firstLanguageHint": "اختر لغتك للبدء.",
+  "computerStrength": "قوة الكمبيوتر",
+  "strengthStandard": "عادي",
+  "strengthStrong": "قوي",
+  "strengthExpert": "خبير"
 }
