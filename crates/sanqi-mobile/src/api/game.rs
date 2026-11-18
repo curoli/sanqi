@@ -50,16 +50,31 @@ pub fn create_game() -> MobileGame {
     MobileGame::new()
 }
 
-pub fn find_computer_move(movetext: String) -> Result<Option<String>, String> {
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ComputerStrength {
+    Standard,
+    Strong,
+    Expert,
+}
+
+pub fn find_computer_move(
+    movetext: String,
+    strength: ComputerStrength,
+) -> Result<Option<String>, String> {
     let game = Game::from_movetext(&movetext).map_err(|error| error.to_string())?;
     let position = game.current_position();
     if position.outcome().is_some() {
         return Ok(None);
     }
+    let (depth, milliseconds) = match strength {
+        ComputerStrength::Standard => (6, 600),
+        ComputerStrength::Strong => (8, 2_000),
+        ComputerStrength::Expert => (10, 5_000),
+    };
     Ok(sanqi_engine::analyze_iterative_varied(
         position,
-        6,
-        std::time::Duration::from_millis(600),
+        depth,
+        std::time::Duration::from_millis(milliseconds),
         // Fresh standard-library randomized hashing seeds each search without
         // clocks, shared mutable RNG state, or an additional dependency.
         std::collections::hash_map::RandomState::new().hash_one(()),
@@ -321,7 +336,7 @@ mod tests {
         let before = session.start_game(Some("Black".to_owned())).expect("mode");
         assert!(before.computer_turn);
         assert_eq!(session.tap(0).expect("blocked tap").movetext, "");
-        let reply = find_computer_move(before.movetext)
+        let reply = find_computer_move(before.movetext, ComputerStrength::Standard)
             .expect("search")
             .expect("move");
         assert!(
@@ -350,7 +365,7 @@ mod tests {
         session.tap(mv.from).expect("select");
         let pending = session.tap(mv.to).expect("human move");
         assert!(pending.computer_turn);
-        let reply = find_computer_move(pending.movetext.clone())
+        let reply = find_computer_move(pending.movetext.clone(), ComputerStrength::Standard)
             .expect("search")
             .expect("reply");
         let played = session

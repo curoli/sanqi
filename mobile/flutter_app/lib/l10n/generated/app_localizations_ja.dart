@@ -259,4 +259,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get firstLanguageHint => '開始するには言語を選んでください。';
+
+  @override
+  String get computerStrength => 'コンピューターの強さ';
+
+  @override
+  String get strengthStandard => '標準';
+
+  @override
+  String get strengthStrong => '強い';
+
+  @override
+  String get strengthExpert => '上級';
 }

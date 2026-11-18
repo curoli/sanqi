@@ -263,4 +263,16 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get firstLanguageHint => 'শুরু করতে ভাষা বেছে নিন।';
+
+  @override
+  String get computerStrength => 'কম্পিউটারের শক্তি';
+
+  @override
+  String get strengthStandard => 'সাধারণ';
+
+  @override
+  String get strengthStrong => 'শক্তিশালী';
+
+  @override
+  String get strengthExpert => 'বিশেষজ্ঞ';
 }

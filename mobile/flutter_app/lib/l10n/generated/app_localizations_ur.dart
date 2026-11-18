@@ -268,4 +268,16 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get firstLanguageHint => 'شروع کرنے کے لیے زبان منتخب کریں۔';
+
+  @override
+  String get computerStrength => 'کمپیوٹر کی طاقت';
+
+  @override
+  String get strengthStandard => 'معیاری';
+
+  @override
+  String get strengthStrong => 'مضبوط';
+
+  @override
+  String get strengthExpert => 'ماہر';
 }

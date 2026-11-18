@@ -80,7 +80,7 @@ void main() {
         var searches = 0;
         final service = RustGameService(
           game,
-          findMove: (_) async {
+          findMove: (_, _) async {
             searches++;
             return 'a1-b3';
           },
@@ -110,7 +110,7 @@ void main() {
     final result = Completer<String?>();
     final service = RustGameService(
       game,
-      findMove: (_) {
+      findMove: (_, _) {
         started.complete();
         return result.future;
       },

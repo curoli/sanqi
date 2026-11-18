@@ -125,7 +125,10 @@ abstract class RustLibApi extends BaseApi {
 
   Future<MobileGame> crateApiGameCreateGame();
 
-  Future<String?> crateApiGameFindComputerMove({required String movetext});
+  Future<String?> crateApiGameFindComputerMove({
+    required String movetext,
+    required ComputerStrength strength,
+  });
 
   RustArcIncrementStrongCountFnType
   get rust_arc_increment_strong_count_MobileGame;
@@ -585,12 +588,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "create_game", argNames: []);
 
   @override
-  Future<String?> crateApiGameFindComputerMove({required String movetext}) {
+  Future<String?> crateApiGameFindComputerMove({
+    required String movetext,
+    required ComputerStrength strength,
+  }) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(movetext, serializer);
+          sse_encode_computer_strength(strength, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -603,7 +610,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_String,
         ),
         constMeta: kCrateApiGameFindComputerMoveConstMeta,
-        argValues: [movetext],
+        argValues: [movetext, strength],
         apiImpl: this,
       ),
     );
@@ -612,7 +619,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiGameFindComputerMoveConstMeta =>
       const TaskConstMeta(
         debugName: "find_computer_move",
-        argNames: ["movetext"],
+        argNames: ["movetext", "strength"],
       );
 
   RustArcIncrementStrongCountFnType
@@ -684,6 +691,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ComputerStrength dco_decode_computer_strength(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ComputerStrength.values[raw as int];
+  }
+
+  @protected
   GameView dco_decode_game_view(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -704,6 +717,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       movetext: dco_decode_String(arr[11]),
       canUndo: dco_decode_bool(arr[12]),
     );
+  }
+
+  @protected
+  int dco_decode_i_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
   }
 
   @protected
@@ -873,6 +892,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  ComputerStrength sse_decode_computer_strength(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return ComputerStrength.values[inner];
+  }
+
+  @protected
   GameView sse_decode_game_view(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_computerBoth = sse_decode_bool(deserializer);
@@ -905,6 +931,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       movetext: var_movetext,
       canUndo: var_canUndo,
     );
+  }
+
+  @protected
+  int sse_decode_i_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getInt32();
   }
 
   @protected
@@ -1027,12 +1059,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  int sse_decode_i_32(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getInt32();
-  }
-
-  @protected
   void
   sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMobileGame(
     MobileGame self,
@@ -1112,6 +1138,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_computer_strength(
+    ComputerStrength self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
   void sse_encode_game_view(GameView self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_bool(self.computerBoth, serializer);
@@ -1127,6 +1162,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_list_support_view(self.supports, serializer);
     sse_encode_String(self.movetext, serializer);
     sse_encode_bool(self.canUndo, serializer);
+  }
+
+  @protected
+  void sse_encode_i_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putInt32(self);
   }
 
   @protected
@@ -1240,12 +1281,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_usize(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putBigUint64(self);
-  }
-
-  @protected
-  void sse_encode_i_32(int self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putInt32(self);
   }
 }
 

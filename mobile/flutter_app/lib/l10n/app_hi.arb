@@ -75,5 +75,9 @@
   "settingsBackup": "सेटिंग्स का बैकअप",
   "settingsBackupHint": "अनइंस्टॉल करने से पहले यह पाठ ऐप के बाहर सहेजें। दोबारा इंस्टॉल करने पर यहाँ पेस्ट करके बहाल करें। इसमें केवल भाषा और रूप हैं। Android बैकअप से बहाली की गारंटी नहीं है।",
   "settingsRestoreError": "सेटिंग्स बहाल नहीं हो सकीं। बैकअप पाठ जाँचकर फिर कोशिश करें।",
-  "firstLanguageHint": "शुरू करने के लिए भाषा चुनें।"
+  "firstLanguageHint": "शुरू करने के लिए भाषा चुनें।",
+  "computerStrength": "कंप्यूटर का स्तर",
+  "strengthStandard": "सामान्य",
+  "strengthStrong": "मज़बूत",
+  "strengthExpert": "विशेषज्ञ"
 }

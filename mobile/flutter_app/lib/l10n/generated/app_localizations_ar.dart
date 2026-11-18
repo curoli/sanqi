@@ -271,4 +271,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get firstLanguageHint => 'اختر لغتك للبدء.';
+
+  @override
+  String get computerStrength => 'قوة الكمبيوتر';
+
+  @override
+  String get strengthStandard => 'عادي';
+
+  @override
+  String get strengthStrong => 'قوي';
+
+  @override
+  String get strengthExpert => 'خبير';
 }

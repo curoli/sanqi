@@ -581,6 +581,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose your language to start.'**
   String get firstLanguageHint;
+
+  /// No description provided for @computerStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Computer strength'**
+  String get computerStrength;
+
+  /// No description provided for @strengthStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get strengthStandard;
+
+  /// No description provided for @strengthStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong'**
+  String get strengthStrong;
+
+  /// No description provided for @strengthExpert.
+  ///
+  /// In en, this message translates to:
+  /// **'Expert'**
+  String get strengthExpert;
 }
 
 class _AppLocalizationsDelegate

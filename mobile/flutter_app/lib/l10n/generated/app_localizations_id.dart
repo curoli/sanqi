@@ -265,4 +265,16 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get firstLanguageHint => 'Pilih bahasa untuk memulai.';
+
+  @override
+  String get computerStrength => 'Kekuatan komputer';
+
+  @override
+  String get strengthStandard => 'Standar';
+
+  @override
+  String get strengthStrong => 'Kuat';
+
+  @override
+  String get strengthExpert => 'Ahli';
 }

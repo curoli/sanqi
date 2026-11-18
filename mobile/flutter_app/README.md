@@ -100,8 +100,11 @@ Use the game-mode dropdown: **Human vs Human**, **Human vs Computer**,
 **Computer vs human**, or **Computer vs Computer**. The first player is White;
 the second is Black. Changing mode starts a new game. The computer moves first
 when you play Black. The board always keeps White at the bottom.
-Computer search uses `sanqi-engine` iterative deepening (depth cap 6, 600 ms
-search budget) through the asynchronous Rust bridge, with a thinking indicator.
+Computer search uses `sanqi-engine` iterative deepening through the asynchronous
+Rust bridge, with a thinking indicator. In a computer game, open the speedometer
+menu beside the mode selector to choose Standard (up to 600 ms, depth 6),
+Strong (2 seconds, depth 8), or Expert (5 seconds, depth 10). Standard is the
+default. The device remembers your choice and uses it from the next search.
 Every computer turn uses a fresh randomized seed to vary ties in the engine's
 root move ordering. This applies to both human/computer and computer/computer
 play, including after New Game or a restart. Evaluation scores and tactical
