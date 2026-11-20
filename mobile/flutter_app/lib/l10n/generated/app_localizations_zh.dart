@@ -271,4 +271,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get strengthExpert => '专家';
+
+  @override
+  String get feedbackOff => '走棋提醒已关闭';
+
+  @override
+  String get feedbackSound => '走棋提醒：仅声音';
+
+  @override
+  String get feedbackVibration => '走棋提醒：仅振动';
+
+  @override
+  String get feedbackBoth => '走棋提醒：声音和振动';
 }

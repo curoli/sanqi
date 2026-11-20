@@ -79,5 +79,9 @@
   "computerStrength": "Niveau de l’ordinateur",
   "strengthStandard": "Standard",
   "strengthStrong": "Fort",
-  "strengthExpert": "Expert"
+  "strengthExpert": "Expert",
+  "feedbackOff": "Alertes de coup désactivées",
+  "feedbackSound": "Alertes de coup : son seul",
+  "feedbackVibration": "Alertes de coup : vibration seule",
+  "feedbackBoth": "Alertes de coup : son et vibration"
 }

@@ -79,5 +79,9 @@
   "computerStrength": "قوة الكمبيوتر",
   "strengthStandard": "عادي",
   "strengthStrong": "قوي",
-  "strengthExpert": "خبير"
+  "strengthExpert": "خبير",
+  "feedbackOff": "تنبيهات النقلات متوقفة",
+  "feedbackSound": "تنبيهات النقلات: صوت فقط",
+  "feedbackVibration": "تنبيهات النقلات: اهتزاز فقط",
+  "feedbackBoth": "تنبيهات النقلات: صوت واهتزاز"
 }

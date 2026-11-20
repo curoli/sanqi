@@ -271,4 +271,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get strengthExpert => '上級';
+
+  @override
+  String get feedbackOff => '着手の通知はオフ';
+
+  @override
+  String get feedbackSound => '着手の通知：音のみ';
+
+  @override
+  String get feedbackVibration => '着手の通知：振動のみ';
+
+  @override
+  String get feedbackBoth => '着手の通知：音と振動';
 }

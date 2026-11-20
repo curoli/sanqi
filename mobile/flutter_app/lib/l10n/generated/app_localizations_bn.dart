@@ -275,4 +275,16 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get strengthExpert => 'বিশেষজ্ঞ';
+
+  @override
+  String get feedbackOff => 'চালের সংকেত বন্ধ';
+
+  @override
+  String get feedbackSound => 'চালের সংকেত: শুধু শব্দ';
+
+  @override
+  String get feedbackVibration => 'চালের সংকেত: শুধু কম্পন';
+
+  @override
+  String get feedbackBoth => 'চালের সংকেত: শব্দ ও কম্পন';
 }

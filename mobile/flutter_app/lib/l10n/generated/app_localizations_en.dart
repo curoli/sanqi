@@ -282,4 +282,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get strengthExpert => 'Expert';
+
+  @override
+  String get feedbackOff => 'Move alerts off';
+
+  @override
+  String get feedbackSound => 'Move alerts: sound only';
+
+  @override
+  String get feedbackVibration => 'Move alerts: vibration only';
+
+  @override
+  String get feedbackBoth => 'Move alerts: sound and vibration';
 }

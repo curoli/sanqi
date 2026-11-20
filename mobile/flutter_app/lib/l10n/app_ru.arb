@@ -79,5 +79,9 @@
   "computerStrength": "Сила компьютера",
   "strengthStandard": "Стандарт",
   "strengthStrong": "Сильный",
-  "strengthExpert": "Эксперт"
+  "strengthExpert": "Эксперт",
+  "feedbackOff": "Оповещения о ходах выключены",
+  "feedbackSound": "Оповещения о ходах: только звук",
+  "feedbackVibration": "Оповещения о ходах: только вибрация",
+  "feedbackBoth": "Оповещения о ходах: звук и вибрация"
 }

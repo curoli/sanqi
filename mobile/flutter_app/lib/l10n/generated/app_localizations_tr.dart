@@ -276,4 +276,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get strengthExpert => 'Uzman';
+
+  @override
+  String get feedbackOff => 'Hamle bildirimleri kapalı';
+
+  @override
+  String get feedbackSound => 'Hamle bildirimleri: yalnızca ses';
+
+  @override
+  String get feedbackVibration => 'Hamle bildirimleri: yalnızca titreşim';
+
+  @override
+  String get feedbackBoth => 'Hamle bildirimleri: ses ve titreşim';
 }

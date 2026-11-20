@@ -79,5 +79,9 @@
   "computerStrength": "コンピューターの強さ",
   "strengthStandard": "標準",
   "strengthStrong": "強い",
-  "strengthExpert": "上級"
+  "strengthExpert": "上級",
+  "feedbackOff": "着手の通知はオフ",
+  "feedbackSound": "着手の通知：音のみ",
+  "feedbackVibration": "着手の通知：振動のみ",
+  "feedbackBoth": "着手の通知：音と振動"
 }

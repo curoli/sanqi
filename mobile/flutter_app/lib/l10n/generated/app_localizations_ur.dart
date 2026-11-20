@@ -280,4 +280,16 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get strengthExpert => 'ماہر';
+
+  @override
+  String get feedbackOff => 'چال کی اطلاعات بند ہیں';
+
+  @override
+  String get feedbackSound => 'چال کی اطلاعات: صرف آواز';
+
+  @override
+  String get feedbackVibration => 'چال کی اطلاعات: صرف وائبریشن';
+
+  @override
+  String get feedbackBoth => 'چال کی اطلاعات: آواز اور وائبریشن';
 }

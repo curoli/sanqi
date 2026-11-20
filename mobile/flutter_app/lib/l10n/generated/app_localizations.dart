@@ -605,6 +605,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Expert'**
   String get strengthExpert;
+
+  /// No description provided for @feedbackOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Move alerts off'**
+  String get feedbackOff;
+
+  /// No description provided for @feedbackSound.
+  ///
+  /// In en, this message translates to:
+  /// **'Move alerts: sound only'**
+  String get feedbackSound;
+
+  /// No description provided for @feedbackVibration.
+  ///
+  /// In en, this message translates to:
+  /// **'Move alerts: vibration only'**
+  String get feedbackVibration;
+
+  /// No description provided for @feedbackBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Move alerts: sound and vibration'**
+  String get feedbackBoth;
 }
 
 class _AppLocalizationsDelegate

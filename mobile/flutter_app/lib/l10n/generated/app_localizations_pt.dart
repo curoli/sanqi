@@ -284,4 +284,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get strengthExpert => 'Especialista';
+
+  @override
+  String get feedbackOff => 'Avisos de jogada desativados';
+
+  @override
+  String get feedbackSound => 'Avisos de jogada: só som';
+
+  @override
+  String get feedbackVibration => 'Avisos de jogada: só vibração';
+
+  @override
+  String get feedbackBoth => 'Avisos de jogada: som e vibração';
 }

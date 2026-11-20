@@ -16,6 +16,7 @@ import 'game_background.dart';
 import 'game_service.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'language_picker.dart';
+import 'move_feedback.dart';
 import 'settings_backup_dialog.dart';
 import 'skin_fonts.dart';
 import 'skin_picker.dart';
@@ -266,6 +267,9 @@ class _GameScreenState extends State<GameScreen> {
   bool _computerPaused = false;
   ComputerStrength _strength = ComputerStrength.standard;
   bool _savingStrength = false;
+  MoveFeedback _feedback = MoveFeedback.off;
+  bool _savingFeedback = false;
+  String Function(AppLocalizations)? _feedbackError;
 
   @override
   void initState() {
@@ -302,6 +306,11 @@ class _GameScreenState extends State<GameScreen> {
       } catch (error) {
         _error ??= (l) => l.restoreSavedError('$error');
       }
+      try {
+        _feedback = await widget.store.loadMoveFeedback();
+      } catch (error) {
+        _feedbackError = (l) => l.restoreSavedError('$error');
+      }
       if (mounted) setState(() => _view = view);
     } catch (error) {
       if (mounted) setState(() => _error = (l) => l.openError('$error'));
@@ -309,6 +318,21 @@ class _GameScreenState extends State<GameScreen> {
       if (mounted) setState(() => _busy = false);
     }
     _maybeComputer();
+  }
+
+  void _announceMove(GameView next) {
+    final previous = _view;
+    if (previous == null ||
+        previous.sideToMove == next.sideToMove ||
+        next.movetext.length <= previous.movetext.length ||
+        (previous.movetext.isNotEmpty &&
+            !next.movetext.startsWith('${previous.movetext} '))) {
+      return;
+    }
+    final gameOver = previous.winner == null && next.winner != null;
+    if (gameOver || previous.computerTurn) {
+      _feedback.play(gameOver: gameOver);
+    }
   }
 
   Future<void> _maybeComputer() async {
@@ -331,6 +355,7 @@ class _GameScreenState extends State<GameScreen> {
         setState(() => _error = (l) => l.computerNoMove);
         return;
       }
+      _announceMove(view);
       setState(() {
         _view = view;
         _busy = true;
@@ -355,7 +380,10 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
-  Future<bool> _act(Future<GameView> Function(GameService) action) async {
+  Future<bool> _act(
+    Future<GameView> Function(GameService) action, {
+    bool announceMove = false,
+  }) async {
     final service = _service;
     if (_busy || service == null) return false;
     _searchEpoch++;
@@ -367,6 +395,7 @@ class _GameScreenState extends State<GameScreen> {
     try {
       final view = await action(service);
       if (!mounted) return false;
+      if (announceMove) _announceMove(view);
       setState(() => _view = view);
       try {
         await widget.store.saveHumanColor(
@@ -384,6 +413,7 @@ class _GameScreenState extends State<GameScreen> {
       try {
         final current = await service.view();
         if (!mounted) return false;
+        if (_view?.computerTurn ?? false) _announceMove(current);
         setState(() => _view = current);
         await widget.store.saveHumanColor(
           current.computerBoth ? 'Computer' : current.humanColor,
@@ -589,6 +619,38 @@ class _GameScreenState extends State<GameScreen> {
     ],
   );
 
+  Future<void> _cycleFeedback() async {
+    if (_savingFeedback) return;
+    setState(() {
+      _feedback = _feedback.next;
+      _savingFeedback = true;
+      _feedbackError = null;
+    });
+    try {
+      await widget.store.saveMoveFeedback(_feedback);
+    } catch (error) {
+      if (mounted) {
+        setState(() => _feedbackError = (l) => l.saveError('$error'));
+      }
+    } finally {
+      if (mounted) setState(() => _savingFeedback = false);
+    }
+  }
+
+  Widget _feedbackSelector() => IconButton(
+    key: const Key('move-feedback'),
+    iconSize: 28,
+    enableFeedback: false,
+    tooltip: switch (_feedback) {
+      MoveFeedback.off => _l.feedbackOff,
+      MoveFeedback.soundOnly => _l.feedbackSound,
+      MoveFeedback.vibrationOnly => _l.feedbackVibration,
+      MoveFeedback.both => _l.feedbackBoth,
+    },
+    onPressed: _savingFeedback ? null : _cycleFeedback,
+    icon: MoveFeedbackIcon(_feedback),
+  );
+
   Widget _controls(
     GameView view,
     double width,
@@ -757,6 +819,7 @@ class _GameScreenState extends State<GameScreen> {
                 ),
                 if (view.computerBoth || view.humanColor != null)
                   _strengthSelector(),
+                _feedbackSelector(),
               ],
             ),
           ),
@@ -810,7 +873,10 @@ class _GameScreenState extends State<GameScreen> {
                         ? null
                         : () {
                             _computerPaused = !_computerPaused;
-                            _act((service) => service.cancelSearch());
+                            _act(
+                              (service) => service.cancelSearch(),
+                              announceMove: true,
+                            );
                           },
                   ),
               ],
@@ -907,7 +973,12 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     final view = _view;
-    final error = _error ?? _languageError ?? _skinError ?? _strengthError;
+    final error =
+        _error ??
+        _languageError ??
+        _skinError ??
+        _strengthError ??
+        _feedbackError;
     final skin = AppSkin.of(context);
     return LayoutBuilder(
       builder: (context, screen) {
@@ -988,8 +1059,10 @@ class _GameScreenState extends State<GameScreen> {
                                       !_busy &&
                                       !view.computerTurn &&
                                       view.winner == null,
-                                  onTap: (square) =>
-                                      _act((service) => service.tap(square)),
+                                  onTap: (square) => _act(
+                                    (service) => service.tap(square),
+                                    announceMove: true,
+                                  ),
                                   onInspect: (move) =>
                                       _act((service) => service.inspect(move)),
                                 ),

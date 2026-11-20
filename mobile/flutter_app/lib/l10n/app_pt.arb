@@ -79,5 +79,9 @@
   "computerStrength": "Nível do computador",
   "strengthStandard": "Padrão",
   "strengthStrong": "Forte",
-  "strengthExpert": "Especialista"
+  "strengthExpert": "Especialista",
+  "feedbackOff": "Avisos de jogada desativados",
+  "feedbackSound": "Avisos de jogada: só som",
+  "feedbackVibration": "Avisos de jogada: só vibração",
+  "feedbackBoth": "Avisos de jogada: som e vibração"
 }

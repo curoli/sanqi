@@ -284,4 +284,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get strengthExpert => 'Experte';
+
+  @override
+  String get feedbackOff => 'Zugmeldungen aus';
+
+  @override
+  String get feedbackSound => 'Zugmeldungen: nur Ton';
+
+  @override
+  String get feedbackVibration => 'Zugmeldungen: nur Vibration';
+
+  @override
+  String get feedbackBoth => 'Zugmeldungen: Ton und Vibration';
 }

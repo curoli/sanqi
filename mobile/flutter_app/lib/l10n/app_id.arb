@@ -79,5 +79,9 @@
   "computerStrength": "Kekuatan komputer",
   "strengthStandard": "Standar",
   "strengthStrong": "Kuat",
-  "strengthExpert": "Ahli"
+  "strengthExpert": "Ahli",
+  "feedbackOff": "Notifikasi langkah nonaktif",
+  "feedbackSound": "Notifikasi langkah: suara saja",
+  "feedbackVibration": "Notifikasi langkah: getaran saja",
+  "feedbackBoth": "Notifikasi langkah: suara dan getaran"
 }

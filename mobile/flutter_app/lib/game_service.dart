@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'move_feedback.dart';
 import 'src/rust/api/game.dart';
 
 abstract class GameService {
@@ -89,6 +90,9 @@ class RustGameService extends GameService {
 }
 
 abstract class GameStore {
+  Future<MoveFeedback> loadMoveFeedback() async => MoveFeedback.off;
+  Future<void> saveMoveFeedback(MoveFeedback mode) async {}
+
   Future<ComputerStrength> loadStrength() async => ComputerStrength.standard;
   Future<void> saveStrength(ComputerStrength strength) async {}
   Future<String?> loadSkin() async => null;
@@ -102,6 +106,21 @@ abstract class GameStore {
 }
 
 class PreferenceGameStore extends GameStore {
+  static const _feedbackKey = 'sanqi.moveFeedback.v1';
+
+  @override
+  Future<MoveFeedback> loadMoveFeedback() async {
+    final value = await SharedPreferencesAsync().getString(_feedbackKey);
+    return MoveFeedback.values.firstWhere(
+      (mode) => mode.name == value,
+      orElse: () => MoveFeedback.off,
+    );
+  }
+
+  @override
+  Future<void> saveMoveFeedback(MoveFeedback mode) =>
+      SharedPreferencesAsync().setString(_feedbackKey, mode.name);
+
   static const strengthKey = 'sanqi.computerStrength.v1';
 
   @override

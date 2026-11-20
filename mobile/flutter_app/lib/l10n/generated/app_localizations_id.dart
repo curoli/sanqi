@@ -277,4 +277,16 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get strengthExpert => 'Ahli';
+
+  @override
+  String get feedbackOff => 'Notifikasi langkah nonaktif';
+
+  @override
+  String get feedbackSound => 'Notifikasi langkah: suara saja';
+
+  @override
+  String get feedbackVibration => 'Notifikasi langkah: getaran saja';
+
+  @override
+  String get feedbackBoth => 'Notifikasi langkah: suara dan getaran';
 }

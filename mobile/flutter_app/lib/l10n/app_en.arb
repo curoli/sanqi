@@ -148,5 +148,9 @@
   "computerStrength": "Computer strength",
   "strengthStandard": "Standard",
   "strengthStrong": "Strong",
-  "strengthExpert": "Expert"
+  "strengthExpert": "Expert",
+  "feedbackOff": "Move alerts off",
+  "feedbackSound": "Move alerts: sound only",
+  "feedbackVibration": "Move alerts: vibration only",
+  "feedbackBoth": "Move alerts: sound and vibration"
 }

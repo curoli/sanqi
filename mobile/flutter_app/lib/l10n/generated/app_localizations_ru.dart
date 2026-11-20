@@ -285,4 +285,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get strengthExpert => 'Эксперт';
+
+  @override
+  String get feedbackOff => 'Оповещения о ходах выключены';
+
+  @override
+  String get feedbackSound => 'Оповещения о ходах: только звук';
+
+  @override
+  String get feedbackVibration => 'Оповещения о ходах: только вибрация';
+
+  @override
+  String get feedbackBoth => 'Оповещения о ходах: звук и вибрация';
 }

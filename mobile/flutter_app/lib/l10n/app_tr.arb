@@ -79,5 +79,9 @@
   "computerStrength": "Bilgisayar gücü",
   "strengthStandard": "Standart",
   "strengthStrong": "Güçlü",
-  "strengthExpert": "Uzman"
+  "strengthExpert": "Uzman",
+  "feedbackOff": "Hamle bildirimleri kapalı",
+  "feedbackSound": "Hamle bildirimleri: yalnızca ses",
+  "feedbackVibration": "Hamle bildirimleri: yalnızca titreşim",
+  "feedbackBoth": "Hamle bildirimleri: ses ve titreşim"
 }

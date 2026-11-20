@@ -79,5 +79,9 @@
   "computerStrength": "电脑棋力",
   "strengthStandard": "标准",
   "strengthStrong": "强",
-  "strengthExpert": "专家"
+  "strengthExpert": "专家",
+  "feedbackOff": "走棋提醒已关闭",
+  "feedbackSound": "走棋提醒：仅声音",
+  "feedbackVibration": "走棋提醒：仅振动",
+  "feedbackBoth": "走棋提醒：声音和振动"
 }

@@ -79,5 +79,9 @@
   "computerStrength": "Computerstärke",
   "strengthStandard": "Standard",
   "strengthStrong": "Stark",
-  "strengthExpert": "Experte"
+  "strengthExpert": "Experte",
+  "feedbackOff": "Zugmeldungen aus",
+  "feedbackSound": "Zugmeldungen: nur Ton",
+  "feedbackVibration": "Zugmeldungen: nur Vibration",
+  "feedbackBoth": "Zugmeldungen: Ton und Vibration"
 }
