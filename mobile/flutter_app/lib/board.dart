@@ -19,6 +19,19 @@ int? squareAt(Offset point, double side) {
   return (7 - row) * 8 + file;
 }
 
+// GameView contains Rust's canonical movetext, with the latest move at the end.
+final _lastMovePattern = RegExp(r'\b([a-h])([1-8])-([a-h])([1-8])$');
+
+(int, int)? _lastComputerSquares(GameView view) {
+  // After a move, sideToMove names the other player, including at game over.
+  if (!view.computerBoth && view.humanColor != view.sideToMove) return null;
+  final match = _lastMovePattern.firstMatch(view.movetext);
+  if (match == null) return null;
+  int square(int file, int rank) =>
+      (int.parse(match[rank]!) - 1) * 8 + match[file]!.codeUnitAt(0) - 97;
+  return (square(1, 2), square(3, 4));
+}
+
 class SanqiBoard extends StatelessWidget {
   const SanqiBoard({
     super.key,
@@ -38,6 +51,7 @@ class SanqiBoard extends StatelessWidget {
     final moves = view.legalMoves
         .where((move) => move.from == view.selected)
         .toList();
+    final lastComputer = _lastComputerSquares(view);
     return AspectRatio(
       aspectRatio: 1,
       child: LayoutBuilder(
@@ -85,7 +99,28 @@ class SanqiBoard extends StatelessWidget {
                     button: true,
                     selected: view.selected == square,
                     onTap: enabled ? () => onTap(square) : null,
-                    child: const SizedBox.expand(),
+                    child:
+                        square == lastComputer?.$1 || square == lastComputer?.$2
+                        ? IgnorePointer(
+                            child: Padding(
+                              padding: const EdgeInsets.all(2),
+                              child: DecoratedBox(
+                                key: Key(
+                                  square == lastComputer?.$1
+                                      ? 'computer-move-from'
+                                      : 'computer-move-to',
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: const Color(0xFF331251),
+                                    width: square == lastComputer?.$1 ? 2 : 4,
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ),
+                          )
+                        : const SizedBox.expand(),
                   ),
                 ),
             ],
