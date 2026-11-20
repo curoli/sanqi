@@ -647,7 +647,7 @@ class _GameScreenState extends State<GameScreen> {
       MoveFeedback.vibrationOnly => _l.feedbackVibration,
       MoveFeedback.both => _l.feedbackBoth,
     },
-    onPressed: _view == null || _savingFeedback ? null : _cycleFeedback,
+    onPressed: _savingFeedback ? null : _cycleFeedback,
     icon: MoveFeedbackIcon(_feedback),
   );
 
@@ -704,7 +704,6 @@ class _GameScreenState extends State<GameScreen> {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
-                  _feedbackSelector(),
                   _languageSelector(),
                   _skinSelector(),
                 ],
@@ -820,6 +819,7 @@ class _GameScreenState extends State<GameScreen> {
                 ),
                 if (view.computerBoth || view.humanColor != null)
                   _strengthSelector(),
+                _feedbackSelector(),
               ],
             ),
           ),
@@ -996,11 +996,7 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                   ),
                   title: const Text('Sanqi'),
-                  actions: [
-                    _feedbackSelector(),
-                    _languageSelector(),
-                    _skinSelector(),
-                  ],
+                  actions: [_languageSelector(), _skinSelector()],
                 ),
           body: CustomPaint(
             painter: GameBackground(skin: skin),
