@@ -315,6 +315,10 @@ void main() {
       await tester.tap(find.text('Computer vs Computer').last);
       await tester.pumpAndSettle();
       expect(service.replies, hasLength(1));
+      final from = find.byKey(const Key('computer-move-from'));
+      final to = find.byKey(const Key('computer-move-to'));
+      expect(from, findsNothing);
+      expect(to, findsNothing);
       expect(store.mode, 'Computer');
       service.current = snapshot(
         played: true,
@@ -325,6 +329,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(service.replies, hasLength(2));
       expect(store.text, '1. a1-b3');
+      final board = tester.getRect(find.byKey(const Key('board')));
+      expect(squareAt(tester.getCenter(from) - board.topLeft, board.width), 0);
+      expect(squareAt(tester.getCenter(to) - board.topLeft, board.width), 17);
       await tester.tap(find.text('Pause'));
       await tester.pumpAndSettle();
       expect(find.text('Paused'), findsOneWidget);
@@ -337,6 +344,8 @@ void main() {
       await tester.tap(find.text('Undo'));
       await tester.pumpAndSettle();
       expect(service.calls, contains('undo'));
+      expect(from, findsNothing);
+      expect(to, findsNothing);
       expect(service.replies, hasLength(2));
       await tester.tap(find.text('Resume'));
       await tester.pumpAndSettle();
@@ -460,6 +469,8 @@ void main() {
       await tapSquare(tester, 17);
       expect(find.text('Black to move'), findsOneWidget);
       expect(store.text, '1. a1-b3');
+      expect(find.byKey(const Key('computer-move-from')), findsNothing);
+      expect(find.byKey(const Key('computer-move-to')), findsNothing);
       await tester.ensureVisible(find.text('Undo'));
       await tester.tap(find.text('Undo'));
       await tester.pumpAndSettle();
