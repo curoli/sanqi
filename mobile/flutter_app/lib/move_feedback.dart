@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+const _audio = MethodChannel('com.curoli.sanqi/move_feedback');
+
 enum MoveFeedback {
   off(sound: false, vibration: false),
   soundOnly(sound: true, vibration: false),
@@ -21,13 +23,8 @@ enum MoveFeedback {
     if (lifecycle != null && lifecycle != AppLifecycleState.resumed) return;
     if (vibration) unawaited(_tryFeedback(HapticFeedback.vibrate));
     if (sound) {
-      unawaited(
-        _tryFeedback(
-          () => const MethodChannel(
-            'com.curoli.sanqi/move_feedback',
-          ).invokeMethod<void>(gameOver ? 'gameOver' : 'move'),
-        ),
-      );
+      final event = gameOver ? 'gameOver' : 'move';
+      unawaited(_tryFeedback(() => _audio.invokeMethod<void>(event)));
     }
   }
 }
