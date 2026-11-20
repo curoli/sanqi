@@ -284,4 +284,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get strengthExpert => 'Experto';
+
+  @override
+  String get feedbackOff => 'Avisos de jugada desactivados';
+
+  @override
+  String get feedbackSound => 'Avisos de jugada: solo sonido';
+
+  @override
+  String get feedbackVibration => 'Avisos de jugada: solo vibración';
+
+  @override
+  String get feedbackBoth => 'Avisos de jugada: sonido y vibración';
 }

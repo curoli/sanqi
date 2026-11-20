@@ -283,4 +283,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get strengthExpert => 'خبير';
+
+  @override
+  String get feedbackOff => 'تنبيهات النقلات متوقفة';
+
+  @override
+  String get feedbackSound => 'تنبيهات النقلات: صوت فقط';
+
+  @override
+  String get feedbackVibration => 'تنبيهات النقلات: اهتزاز فقط';
+
+  @override
+  String get feedbackBoth => 'تنبيهات النقلات: صوت واهتزاز';
 }

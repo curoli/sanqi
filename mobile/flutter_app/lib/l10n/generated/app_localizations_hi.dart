@@ -282,4 +282,16 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get strengthExpert => 'विशेषज्ञ';
+
+  @override
+  String get feedbackOff => 'चाल की सूचनाएँ बंद हैं';
+
+  @override
+  String get feedbackSound => 'चाल की सूचनाएँ: केवल ध्वनि';
+
+  @override
+  String get feedbackVibration => 'चाल की सूचनाएँ: केवल कंपन';
+
+  @override
+  String get feedbackBoth => 'चाल की सूचनाएँ: ध्वनि और कंपन';
 }

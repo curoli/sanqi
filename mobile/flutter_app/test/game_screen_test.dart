@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_app/board.dart';
 import 'package:flutter_app/game_service.dart';
 import 'package:flutter_app/main.dart';
+import 'package:flutter_app/move_feedback.dart';
 import 'package:flutter_app/src/rust/api/game.dart';
 
 const move = MobileMove(from: 0, to: 17, notation: 'a1-b3');
@@ -19,6 +21,7 @@ GameView snapshot({
   List<MobileMove>? moves,
   MobileMove? inspected,
   String? record,
+  String? winner,
 }) => GameView(
   revision: BigInt.zero,
   computerBoth: computerBoth,
@@ -26,6 +29,7 @@ GameView snapshot({
   humanColor: humanColor,
   svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#f5e6c8"/></svg>',
   sideToMove: played ? 'Black' : 'White',
+  winner: winner,
   selected: selected,
   legalMoves: moves ?? (played ? [] : [move]),
   inspectedMove: inspected ?? (preview ? move : null),
@@ -39,6 +43,7 @@ GameView snapshot({
 class FakeService extends GameService {
   GameView current = snapshot();
   final calls = <String>[];
+  String? winnerAfterTap;
 
   @override
   Future<GameView> view() async => current;
@@ -47,7 +52,7 @@ class FakeService extends GameService {
     calls.add('tap:$square');
     return current = square == 0
         ? snapshot(selected: 0)
-        : snapshot(played: true);
+        : snapshot(played: true, winner: winnerAfterTap);
   }
 
   @override
@@ -81,6 +86,11 @@ class MemoryStore extends GameStore {
   Future<String?> loadLanguage() async => 'en';
   String? text;
   String? mode;
+  MoveFeedback feedback = MoveFeedback.off;
+  @override
+  Future<MoveFeedback> loadMoveFeedback() async => feedback;
+  @override
+  Future<void> saveMoveFeedback(MoveFeedback value) async => feedback = value;
   ComputerStrength strength = ComputerStrength.standard;
   @override
   Future<ComputerStrength> loadStrength() async => strength;
@@ -299,6 +309,95 @@ void main() {
     expect(reopened.strengths, [ComputerStrength.expert]);
     expect(find.byTooltip('Computer strength · Expert'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('move alerts cycle, persist, and announce each event once', (
+    tester,
+  ) async {
+    final store = MemoryStore()..mode = 'Computer';
+    final service = WatchingService();
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    const audio = MethodChannel('com.curoli.sanqi/move_feedback');
+    final sounds = <String>[];
+    var vibrations = 0;
+    messenger.setMockMethodCallHandler(audio, (call) async {
+      sounds.add(call.method);
+      return null;
+    });
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'HapticFeedback.vibrate') vibrations++;
+      return null;
+    });
+    addTearDown(() {
+      messenger.setMockMethodCallHandler(audio, null);
+      messenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    await tester.pumpWidget(
+      SanqiApp(createService: () async => service, store: store),
+    );
+    await tester.pumpAndSettle();
+    final toggle = find.byKey(const Key('move-feedback'));
+    expect(find.byTooltip('Move alerts off'), findsOneWidget);
+    for (final mode in [
+      MoveFeedback.soundOnly,
+      MoveFeedback.vibrationOnly,
+      MoveFeedback.both,
+      MoveFeedback.off,
+      MoveFeedback.soundOnly,
+      MoveFeedback.vibrationOnly,
+      MoveFeedback.both,
+    ]) {
+      await tester.tap(toggle);
+      await tester.pumpAndSettle();
+      expect(store.feedback, mode);
+    }
+    expect(sounds, isEmpty);
+    expect(vibrations, 0);
+
+    service.current = snapshot(
+      played: true,
+      computerBoth: true,
+      computerTurn: true,
+    );
+    service.replies.first.complete(service.current);
+    await tester.pumpAndSettle();
+    expect(sounds, ['move']);
+    expect(vibrations, 1);
+
+    service.current = snapshot(
+      computerBoth: true,
+      winner: 'Black',
+      record: '1. a1-b3 h8-d6',
+    );
+    service.replies.last.complete(service.current);
+    await tester.pumpAndSettle();
+    expect(sounds, ['move', 'gameOver']);
+    expect(vibrations, 2);
+
+    await tester.pumpWidget(const SizedBox());
+    store.text = null;
+    await tester.pumpWidget(
+      SanqiApp(createService: () async => WatchingService(), store: store),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Move alerts: sound and vibration'), findsOneWidget);
+    expect(sounds, ['move', 'gameOver']);
+    expect(vibrations, 2);
+
+    await tester.pumpWidget(const SizedBox());
+    store.mode = null;
+    final local = FakeService()..winnerAfterTap = 'White';
+    await tester.pumpWidget(
+      SanqiApp(createService: () async => local, store: store),
+    );
+    await tester.pumpAndSettle();
+    await tapSquare(tester, 0);
+    expect(sounds, ['move', 'gameOver']);
+    await tapSquare(tester, 17);
+    expect(sounds, ['move', 'gameOver', 'gameOver']);
+    expect(vibrations, 3);
   });
 
   testWidgets(

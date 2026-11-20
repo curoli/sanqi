@@ -79,5 +79,9 @@
   "computerStrength": "কম্পিউটারের শক্তি",
   "strengthStandard": "সাধারণ",
   "strengthStrong": "শক্তিশালী",
-  "strengthExpert": "বিশেষজ্ঞ"
+  "strengthExpert": "বিশেষজ্ঞ",
+  "feedbackOff": "চালের সংকেত বন্ধ",
+  "feedbackSound": "চালের সংকেত: শুধু শব্দ",
+  "feedbackVibration": "চালের সংকেত: শুধু কম্পন",
+  "feedbackBoth": "চালের সংকেত: শব্দ ও কম্পন"
 }

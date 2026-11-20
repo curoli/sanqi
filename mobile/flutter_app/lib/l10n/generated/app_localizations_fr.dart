@@ -284,4 +284,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get strengthExpert => 'Expert';
+
+  @override
+  String get feedbackOff => 'Alertes de coup désactivées';
+
+  @override
+  String get feedbackSound => 'Alertes de coup : son seul';
+
+  @override
+  String get feedbackVibration => 'Alertes de coup : vibration seule';
+
+  @override
+  String get feedbackBoth => 'Alertes de coup : son et vibration';
 }

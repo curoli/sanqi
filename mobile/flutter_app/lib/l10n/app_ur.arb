@@ -79,5 +79,9 @@
   "computerStrength": "کمپیوٹر کی طاقت",
   "strengthStandard": "معیاری",
   "strengthStrong": "مضبوط",
-  "strengthExpert": "ماہر"
+  "strengthExpert": "ماہر",
+  "feedbackOff": "چال کی اطلاعات بند ہیں",
+  "feedbackSound": "چال کی اطلاعات: صرف آواز",
+  "feedbackVibration": "چال کی اطلاعات: صرف وائبریشن",
+  "feedbackBoth": "چال کی اطلاعات: آواز اور وائبریشن"
 }

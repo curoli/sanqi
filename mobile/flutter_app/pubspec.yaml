@@ -30,6 +30,7 @@ flutter:
   assets:
     - assets/branding/sanqi-logo.svg
     - assets/branding/FONT-LICENSE.txt
+    - assets/sounds/
     - assets/fonts/licenses/
   fonts:
     - family: Inter
