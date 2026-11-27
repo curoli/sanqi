@@ -251,7 +251,10 @@ tool/flutter_with_build_info.sh build apk --debug --target-platform android-arm6
 ```
 
 The debug APK is `build/app/outputs/flutter-apk/app-debug.apk`. Install it with
-`adb install -r build/app/outputs/flutter-apk/app-debug.apk`. An Android emulator
+`adb install -r build/app/outputs/flutter-apk/app-debug.apk`. Android installs debug builds as
+`com.curoli.sanqi.dev`, with a DEV badge on the launcher icon and a debug label
+in About. Release builds use `com.curoli.sanqi`. Both can be installed together
+and have separate app data. An Android emulator
 also works; choose an ABI matching the Rust target (x86_64 or arm64). No physical
 device is required for widget/host bridge tests. For signed release APKs, Play app bundles, and the private upload-key setup, see
 [Signed Android releases](docs/android-release.md). Store submission remains a

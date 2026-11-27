@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import subprocess
+import tempfile
 import sys
 
 from fontTools.pens.boundsPen import BoundsPen
@@ -63,9 +64,23 @@ subprocess.run([
     "-colorspace", "sRGB", "-alpha", "on", "-depth", "8",
     f'PNG32:{assets / "sanqi-google-play-icon.png"}',
 ], check=True)
+# Use outlined letters so the badge is independent of installed fonts.
+dev_badge = (
+    '<rect x="166" y="365" width="180" height="77" rx="16" fill="#38271f" '
+    'stroke="#f5e6c8" stroke-width="6"/>'
+    '<path d="M192 384h22l12 10v20l-12 10h-22z M203 394v20h8l4-4v-12l-4-4z '
+    'M238 384h34v10h-23v5h20v10h-20v5h23v10h-34z '
+    'M281 384h12l10 26 10-26h12l-16 40h-12z" fill="#fffdf7" fill-rule="evenodd"/>'
+)
+dev_icon = icon.replace("</svg>", dev_badge + "</svg>")
 for density, size in {"mdpi": 48, "hdpi": 72, "xhdpi": 96, "xxhdpi": 144, "xxxhdpi": 192}.items():
     export(assets / "sanqi-app-icon.svg", root / f"mobile/flutter_app/android/app/src/main/res/mipmap-{density}/ic_launcher.png", size)
     export(assets / "sanqi-logo.svg", root / f"mobile/flutter_app/android/app/src/main/res/mipmap-{density}/launch_logo.png", size * 3)
+    with tempfile.TemporaryDirectory() as temp:
+        source = Path(temp) / "sanqi-app-icon.svg"
+        source.write_text(dev_icon)
+        output = root / f"mobile/flutter_app/android/app/src/debug/res/mipmap-{density}/ic_launcher.png"
+        export(source, output, size)
 catalog = root / "mobile/flutter_app/ios/Runner/Assets.xcassets/AppIcon.appiconset"
 for entry in json.loads((catalog / "Contents.json").read_text())["images"]:
     size = round(float(entry["size"].split("x")[0]) * float(entry["scale"].removesuffix("x")))

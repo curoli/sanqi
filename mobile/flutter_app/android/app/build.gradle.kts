@@ -59,6 +59,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".dev"
+        }
+
         release {
             // Missing credentials must never silently produce a debug-signed release.
             signingConfig = signingConfigs.findByName("upload")

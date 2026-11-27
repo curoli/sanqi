@@ -168,6 +168,7 @@ void main() {
             return true;
           },
         );
+        expect(find.text('Debug build'), findsOneWidget);
         final date = tester.widget<SelectableText>(
           find.byKey(const Key('build-date')),
         );

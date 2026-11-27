@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -112,6 +113,13 @@ class _SanqiAboutDialogState extends State<SanqiAboutDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (kDebugMode) ...[
+                          Text(
+                            'Debug build',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 12),
+                        ],
                         Text(l.pronunciation),
                         const SizedBox(height: 12),
                         Text(
