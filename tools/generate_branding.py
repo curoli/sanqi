@@ -58,6 +58,11 @@ def export(source, output, size):
 
 export(assets / "sanqi-logo.svg", assets / "sanqi-logo.png", 1024)
 export(assets / "sanqi-app-icon.svg", assets / "sanqi-app-icon.png", 1024)
+subprocess.run([
+    "magick", str(assets / "sanqi-app-icon.png"), "-resize", "512x512",
+    "-colorspace", "sRGB", "-alpha", "on", "-depth", "8",
+    f'PNG32:{assets / "sanqi-google-play-icon.png"}',
+], check=True)
 for density, size in {"mdpi": 48, "hdpi": 72, "xhdpi": 96, "xxhdpi": 144, "xxxhdpi": 192}.items():
     export(assets / "sanqi-app-icon.svg", root / f"mobile/flutter_app/android/app/src/main/res/mipmap-{density}/ic_launcher.png", size)
     export(assets / "sanqi-logo.svg", root / f"mobile/flutter_app/android/app/src/main/res/mipmap-{density}/launch_logo.png", size * 3)
