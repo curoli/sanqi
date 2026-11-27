@@ -31,7 +31,12 @@ jobs:
         run: flutter pub get --enforce-lockfile
       - name: Check Dart formatting
         working-directory: mobile/flutter_app
-        run: dart format --output=none --set-exit-if-changed lib test integration_test
+        run: |
+          if ! dart format --output=none --set-exit-if-changed lib test integration_test; then
+            dart format lib test integration_test
+            git diff -- lib test integration_test
+            exit 1
+          fi
       - name: Analyze Flutter
         working-directory: mobile/flutter_app
         run: flutter analyze
