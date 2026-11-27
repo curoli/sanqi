@@ -353,3 +353,36 @@ hardware; a host test is not a substitute for that validation.
 Official references: [Flutter Android setup](https://docs.flutter.dev/platform-integration/android/setup),
 [Flutter iOS setup](https://docs.flutter.dev/platform-integration/ios/setup),
 [FRB integration](https://cjycode.com/flutter_rust_bridge/manual/integrate).
+
+## Capture Google Play screenshots
+
+Connect an Android phone over USB with USB debugging enabled, unlock it, and
+accept the debugging prompt. With Flutter and Android platform tools on your
+PATH, run this from the repository root:
+
+```sh
+mobile/flutter_app/tool/capture_play_store_screenshots.sh
+```
+
+The script builds and runs a debug screenshot entry point on the phone and saves
+56 portrait PNGs on the laptop under
+`mobile/flutter_app/build/play-store-screenshots/<timestamp>/`. Keep the phone
+unlocked until the run completes. To specify a fresh output directory and
+select a device explicitly, pass both arguments:
+
+```sh
+mobile/flutter_app/tool/capture_play_store_screenshots.sh ./play-screenshots DEVICE_SERIAL
+```
+
+Use `adb devices` to find the serial. Each Play Console locale folder (for
+example, `en-US`, `de-DE`, or `ja-JP`) contains:
+
+- `01-opening.png` — starting position in Linen, the default theme
+- `02-example-move.png` — a human turn in Lagoon, with Example move previewed
+- `03-computer-move.png` — a different game in Sakura, with the computer's last move marked
+- `04-game-over.png` — a completed game in Midnight
+
+The runner uses fixed Rust game records and a temporary settings store. It
+installs as `com.curoli.sanqi.dev`, so the Google Play installation and its
+data stay separate. The capture installs a screenshot build over a compatible
+existing debug build. Run your usual debug build again when you want to use it.
