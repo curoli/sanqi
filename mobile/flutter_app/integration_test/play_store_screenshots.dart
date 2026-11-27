@@ -93,85 +93,73 @@ class _ScreenshotStore extends GameStore {
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets(
-    'capture the Play Store screenshot set',
-    (tester) async {
-      await RustLib.init();
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
-      await binding.convertFlutterSurfaceToImage();
-      try {
-        for (final language in AppLanguage.values) {
-          for (final scene in _Scene.values) {
-            final game = await createGame();
-            try {
-              await tester.pumpWidget(
-                SanqiApp(
-                  createService: () async => RustGameService(game),
-                  store: _ScreenshotStore(language, scene),
-                ),
-              );
-              final board = find.byType(SanqiBoard);
-              // Rust bridge calls complete asynchronously on a physical device.
+  testWidgets('capture the Play Store screenshot set', (tester) async {
+    await RustLib.init();
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    await binding.convertFlutterSurfaceToImage();
+    try {
+      for (final language in AppLanguage.values) {
+        for (final scene in _Scene.values) {
+          final game = await createGame();
+          try {
+            await tester.pumpWidget(
+              SanqiApp(
+                createService: () async => RustGameService(game),
+                store: _ScreenshotStore(language, scene),
+              ),
+            );
+            final board = find.byType(SanqiBoard);
+            // Rust bridge calls complete asynchronously on a physical device.
+            for (var attempt = 0; attempt < 120; attempt++) {
+              await tester.pump(const Duration(milliseconds: 50));
+              if (board.evaluate().isNotEmpty &&
+                  find.byType(LinearProgressIndicator).evaluate().isEmpty) {
+                break;
+              }
+            }
+            await tester.pumpAndSettle();
+            final context = tester.element(board);
+            final strings = AppLocalizations.of(context)!;
+            expect(Localizations.localeOf(context).languageCode, language.code);
+            expect(AppSkin.of(context), scene.skin);
+            final view = tester.widget<SanqiBoard>(board).view;
+            expect(view.movetext, scene.record ?? '');
+            expect(view.computerTurn, isFalse);
+            if (scene == _Scene.example) {
+              await tester.tap(find.text(strings.exampleMove));
               for (var attempt = 0; attempt < 120; attempt++) {
                 await tester.pump(const Duration(milliseconds: 50));
-                if (board.evaluate().isNotEmpty &&
-                    find.byType(LinearProgressIndicator).evaluate().isEmpty) {
+                if (tester.widget<SanqiBoard>(board).view.inspectedMove !=
+                    null) {
                   break;
                 }
               }
-              await tester.pumpAndSettle();
-              final context = tester.element(board);
-              final strings = AppLocalizations.of(context)!;
-              expect(
-                Localizations.localeOf(context).languageCode,
-                language.code,
-              );
-              expect(AppSkin.of(context), scene.skin);
-              final view = tester.widget<SanqiBoard>(board).view;
-              expect(view.movetext, scene.record ?? '');
-              expect(view.computerTurn, isFalse);
-              if (scene == _Scene.example) {
-                await tester.tap(find.text(strings.exampleMove));
-                for (var attempt = 0; attempt < 120; attempt++) {
-                  await tester.pump(const Duration(milliseconds: 50));
-                  if (tester.widget<SanqiBoard>(board).view.inspectedMove !=
-                      null) {
-                    break;
-                  }
-                }
-                final preview = tester.widget<SanqiBoard>(board).view;
-                expect(preview.inspectedMove, isNotNull);
-                expect(preview.supports, isNotEmpty);
-              }
-              if (scene == _Scene.computer) {
-                expect(
-                  find.byKey(const Key('computer-move-from')),
-                  findsOneWidget,
-                );
-                expect(
-                  find.byKey(const Key('computer-move-to')),
-                  findsOneWidget,
-                );
-              }
-              if (scene == _Scene.finished) expect(view.winner, 'White');
-
-              await tester.pumpAndSettle();
-              await binding.takeScreenshot(
-                '${_playTag(language)}/${scene.filename}',
-              );
-            } finally {
-              await tester.pumpWidget(const SizedBox());
-              game.dispose();
+              final preview = tester.widget<SanqiBoard>(board).view;
+              expect(preview.inspectedMove, isNotNull);
+              expect(preview.supports, isNotEmpty);
             }
+            if (scene == _Scene.computer) {
+              expect(
+                find.byKey(const Key('computer-move-from')),
+                findsOneWidget,
+              );
+              expect(find.byKey(const Key('computer-move-to')), findsOneWidget);
+            }
+            if (scene == _Scene.finished) expect(view.winner, 'White');
+
+            await tester.pumpAndSettle();
+            await binding.takeScreenshot(
+              '${_playTag(language)}/${scene.filename}',
+            );
+          } finally {
+            await tester.pumpWidget(const SizedBox());
+            game.dispose();
           }
         }
-      } finally {
-        await SystemChrome.setPreferredOrientations([]);
-        RustLib.dispose();
       }
-    },
-    timeout: const Timeout(Duration(minutes: 15)),
-  );
+    } finally {
+      await SystemChrome.setPreferredOrientations([]);
+      RustLib.dispose();
+    }
+  }, timeout: const Timeout(Duration(minutes: 15)));
 }
