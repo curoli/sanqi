@@ -14,6 +14,9 @@ rounded launcher masks preserve all four fields. Android density-specific icons,
 iPhone/iPad/App Store icons, and native launch images are generated from these
 same sources. The operating system supplies the final app-icon corner mask.
 
+Upload `sanqi-google-play-icon.png` as the Google Play store icon. It is a
+512 × 512 sRGB PNG with 8 bits per RGBA channel and an opaque background.
+
 Regenerate from the repository root on Debian with Python fontTools, Inkscape,
 ImageMagick, and LXGW WenKai Medium version 1.530 from the
 [official release](https://github.com/lxgw/LxgwWenKai/releases/tag/v1.530):
