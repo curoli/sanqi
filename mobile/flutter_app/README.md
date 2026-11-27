@@ -366,8 +366,11 @@ mobile/flutter_app/tool/capture_play_store_screenshots.sh
 
 The script builds and runs a debug screenshot entry point on the phone and saves
 56 portrait PNGs on the laptop under
-`mobile/flutter_app/build/play-store-screenshots/<timestamp>/`. Keep the phone
-unlocked until the run completes. To specify a fresh output directory and
+`mobile/flutter_app/build/play-store-screenshots/<timestamp>/`. Unlock the phone before running the script. It keeps the screen
+awake while
+the phone is powered over USB and restores the previous stay-awake setting at
+exit, including if the capture fails. Leave the cable connected until the
+script exits. To specify a fresh output directory and
 select a device explicitly, pass both arguments:
 
 ```sh
